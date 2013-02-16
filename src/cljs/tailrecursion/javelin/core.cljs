@@ -73,9 +73,10 @@
   (-remove-watch [this key]
     (set! (.-watches this) (dissoc watches key))))
 
-(def done! #(set! (.-done %) true))
-(def cell? #(= (type %) Cell))
-(def self  #(input {::self %}))
+(def done!  #(set! (.-done %) true))
+(def cell?  #(= (type %) Cell))
+(def self   #(input {::self %}))
+(def input* #(if (cell? %) % (input %)))
 
 (defn input [value]
   (set-formula! (Cell. {} value (next-rank) value [] #{} false false nil {})))

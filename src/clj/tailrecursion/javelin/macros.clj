@@ -24,10 +24,11 @@
 (let [home      #(symbol "tailrecursion.javelin" %)
       keyw      #(keyword "tailrecursion.javelin.core" %)
       specials  #{'if 'def 'do 'loop* 'letfn* 'throw 'try* 'recur 'new 'set!
-                 'ns 'deftype* 'defrecord* '&}
+                  'ns 'deftype* 'defrecord* '&}
       to-list   #(into '() (reverse %))
       lift      (home "lift")
       input     (home "input")
+      input*    (home "input*")
       deref*    (home "deref*")
       selfkey   (keyw "self")
       special?  #(if (contains? specials %) (home (str % "*")))
@@ -114,6 +115,15 @@
     [form]
     (pr-str (macroexpand-all* &env form)))
 
+  (defmacro cfn
+    [bindings & body]
+    `(fn [& args#]
+       ((fn ~bindings ~@body) (map input* args#))))
+
+  (defmacro defcfn
+    [name bindings & body]
+    `(def ~name (cfn ~bindings ~@body)))
+
   (defmacro cell
     [form]
     (let [orig    {:formula (pr-str form)}
@@ -129,6 +139,9 @@
       (if q?
         expr
         `(let [~sym ~expr] (alter-meta! ~sym merge ~orig) ~sym)))))
+
+
+
 
 ;; mirroring ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
