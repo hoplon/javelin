@@ -27,7 +27,6 @@
 (def ns*          (no-supported "ns"))
 (def deftype**    (no-supported "deftype*"))
 (def defrecord**  (no-supported "defrecord*"))
-(def dot*         (no-supported "."))
 (def &*           (no-supported "&"))
 
 (defn new*
