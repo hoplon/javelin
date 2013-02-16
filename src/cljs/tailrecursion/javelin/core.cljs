@@ -25,7 +25,8 @@
 (defn sub-self [this xs]
   (map #(if (self? %) (if (= ::none @this) (input (::self @%)) this) %) xs))
 
-(defn to-cell [x] (if (cell? x) x (input x)))
+(defn sinks-seq [c]
+  (tree-seq cell? #(seq (.-sinks %)) c))
 
 (defn propagate! [cell]
   (loop [queue (priority-map cell (.-rank cell))]
@@ -49,17 +50,12 @@
     (if (> (.-rank source) (.-rank this))
       (doseq [dep (d/bf-seq identity #(.-sinks %) source)]
         (set! (.-rank dep) (next-rank)))))
-  (let [f*      (and (map? f) (::macro f))
-        compute #(apply (deref* (or f* f)) (map (if f* to-cell deref*)
-                                                (sub-self this %)))
+  (let [compute #(apply (deref* f) (map deref* (sub-self this %)))
         thunk   #(reset! this (compute (.-sources this)))]
     (if f (-remove-watch this ::propagate)
         (-add-watch this ::propagate (fn [_ cell _ _] (propagate! cell))))
     (set! (.-thunk this) (if f thunk #(deref this)))
-    (propagate! this)
-    (let [ret (if f* @this this)]
-      (if f* (set-formula! this))
-      ret)))
+    (doto this propagate!)))
 
 (deftype Cell [meta state rank prev sources sinks done always thunk watches]
   cljs.core/IMeta
@@ -80,17 +76,10 @@
 (def done! #(set! (.-done %) true))
 (def cell? #(= (type %) Cell))
 (def self  #(input {::self %}))
-(def macro #(hash-map ::macro %))
 
-(defn input
-  [value]
+(defn input [value]
   (set-formula! (Cell. {} value (next-rank) value [] #{} false false nil {})))
 
-(defn lift
-  [f]
+(defn lift [f]
   (fn [& sources]
     (set-formula! (input ::none) f sources)))
-
-(defn sinks-seq
-  [c]
-  (tree-seq cell? #(seq (.-sinks %)) c))
