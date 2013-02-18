@@ -63,10 +63,10 @@
 
   (defn do-let*
     [form]
-    (let [[_ bindings body] form
-          bindings          (into {} (mapv (partial apply vector)
-                                           (partition 2 bindings)))]
-      (do-lift (postwalk-replace bindings body))))
+    (let [[_ bindings & body] form
+          bindings            (into {} (mapv (partial apply vector)
+                                             (partition 2 bindings)))]
+      (do-lift `(do ~@(postwalk-replace bindings body)))))
 
   (defn do-self
     [form]
