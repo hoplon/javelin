@@ -77,15 +77,19 @@
     (reset! b (fn [x] (dec x)))
     (are= -1 @c))
 
-  (let [effect (atom nil)
+  (let [effect1 (atom nil)
+        effect2 (atom nil)
         a (cell 1)
         b (cell 1)
-        c (cell (let [x (+ a b)]
-                  (reset! effect x)
+        c (cell 1)
+        d (cell (let [x (+ a b)]
+                  (reset! effect1 x)
+                  (reset! effect2 c)
                   (* x 2)))]
-    (are= 4 @c, 2 @effect)
+    (are= 4 @d, 2 @effect1, 1 @effect2)
     (swap! a inc)
-    (are= 6 @c, 3 @effect)))
+    (swap! c inc)
+    (are= 6 @d, 3 @effect1, 2 @effect2)))
 
 (.log js/console "__exit__")
 
