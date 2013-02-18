@@ -61,7 +61,22 @@
     (are= 0 @a, [0 0 0] @b)
     (distinct! a)
     (swap! a identity)
-    (are= 0 @a, [0 0 0] @b)))
+    (are= 0 @a, [0 0 0] @b))
+
+  (let [a (cell ((comp inc (comp inc identity)) 123))]
+    (are= 125 @a))
+
+  (let [a (cell '[1 2 3])
+        b (cell (mapv (fn [x] (inc x)) a))]
+    (are= [2 3 4] @b))
+
+  (let [a (cell 0)
+        b (cell (fn [x] (inc x)))
+        c (cell (b a))]
+    (are= 1 @c)
+    (reset! b (fn [x] (dec x)))
+    (are= -1 @c))
+  )
 
 (.log js/console "__exit__")
 

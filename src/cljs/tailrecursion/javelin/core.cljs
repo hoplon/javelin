@@ -43,14 +43,14 @@
 (defn set-formula! [this & [f sources]]
   (doseq [source (filter cell? (.-sources this))]
     (set! (.-sinks source) (disj (.-sinks source) this)))
-  (set! (.-sources this) (vec sources))
-  (set! (.-always this) (some #(.-always %) (filter cell? sources)))
-  (doseq [source (filter cell? sources)]
+  (set! (.-sources this) (if f (conj (vec sources) f) (vec sources)))
+  (set! (.-always this) (some #(.-always %) (filter cell? (.-sources this))))
+  (doseq [source (filter cell? (.-sources this))]
     (set! (.-sinks source) (conj (.-sinks source) this))
     (if (> (.-rank source) (.-rank this))
       (doseq [dep (d/bf-seq identity #(.-sinks %) source)]
         (set! (.-rank dep) (next-rank)))))
-  (let [compute #(apply (deref* f) (map deref* (sub-self this %)))
+  (let [compute #(apply (deref* (peek %)) (map deref* (sub-self this (pop %))))
         thunk   #(reset! this (compute (.-sources this)))]
     (if f (-remove-watch this ::propagate)
         (-add-watch this ::propagate (fn [_ cell _ _] (propagate! cell))))

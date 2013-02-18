@@ -75,12 +75,12 @@
   (defn do-js*
     [[_ tmpl & args]]
     (let [bindings (mapv (fn [_] (gensym)) args)]
-      (do-lift `((fn ~bindings (~'js* ~tmpl ~@bindings)) ~@args))))
+      (do-lift `((fn* ~bindings (~'js* ~tmpl ~@bindings)) ~@args))))
 
   (defn do-dot
     [[_ obj meth & args]]
     (let [bindings (map (fn [_] (gensym)) args)]
-      (do-lift `((fn [obj# ~@bindings] (~'. obj# ~meth ~@bindings)) ~obj ~@args))))
+      (do-lift `((fn* [obj# ~@bindings] (~'. obj# ~meth ~@bindings)) ~obj ~@args))))
 
   (defn do-lift
     [form]
@@ -91,14 +91,14 @@
       (not (listy? form)) form
       (unquote? form)     (do-self form)
       (quoted? form)      (second form)
-      (func? form)        (list lift form)
+      (func? form)        (list input form)
       (let*? form)        (do-let* form)
       (js*? form)         (do-js* form)
       (dot? form)         (do-dot form)
       :else               (let [[op & args] form]
                             (if (= op 'apply)
-                              `(apply (~lift ~(first args)) ~@(map do-lift (rest args)))
-                              `((~lift ~(or (special? op) op)) ~@(map do-lift args))))))
+                              `(apply (~lift ~(do-lift (first args))) ~@(map do-lift (rest args)))
+                              `((~lift ~(do-lift (or (special? op) op))) ~@(map do-lift args))))))
 
   (defn macroexpand*
     [env form]
@@ -126,19 +126,11 @@
 
   (defmacro cell
     [form]
-    (let [orig    {:formula (pr-str form)}
-          form    (macroexpand-all* &env form)
-          q?      (quoted? form)
+    (let [form    (macroexpand-all* &env form)
           lifted  (do-lift form)
-          q?      (or q? (not (listy? lifted)))
-          f?      (lifted-f? lifted)
-          sym     (gensym)
-          expr    (cond q? (list input lifted)
-                        f? (list input (second lifted))
-                        :else lifted)]
-      (if q?
-        expr
-        `(let [~sym ~expr] (alter-meta! ~sym merge ~orig) ~sym)))))
+          q?      (or (quoted? form) (not (listy? lifted)))
+          expr    (if q? (list input lifted) lifted)]
+      expr)))
 
 
 
