@@ -35,6 +35,13 @@
   (doseq [c (core/sinks-seq x)] (set! (.-always c) false))
   x)
 
+(defn route*
+  [msec default]
+  (let [hash  #(.-hash (.-location js/window))
+        ret   (cell '(hash))]
+    (interval #(let [h (hash)] (reset! ret (if (empty? h) default h))) msec)
+    ret))
+
 (defn timer*
   [msec f init]
   (with-let [out (cell init)]
