@@ -71,6 +71,17 @@
     (are= [2 3 4] @b))
 
   (let [a (cell 0)
+        b (cell {:a a})]
+    (are= {:a 0} @b)
+    (swap! a inc)
+    (are= {:a 1} @b))
+
+  (let [a '{:n 0}]
+    (are= 0 (:n @a))
+    (swap! a update-in [:n] inc)
+    (are= 1 (:n @a)))
+
+  (let [a (cell 0)
         b (cell (fn [x] (inc x)))
         c (cell (b a))]
     (are= 1 @c)
