@@ -76,7 +76,7 @@
     (swap! a inc)
     (are= {:a 1} @b))
 
-  (let [a '{:n 0}]
+  (let [a (cell '{:n 0})]
     (are= 0 (:n @a))
     (swap! a update-in [:n] inc)
     (are= 1 (:n @a)))
