@@ -113,7 +113,16 @@
     (swap! c inc)
     (are= 6 @d
           3 @effect1
-          2 @effect2)))
+          2 @effect2))
+
+  (let [m (cell '{:some-kw [1 2 3]})
+        a (cell (seq (:some-kw m)))
+        b (cell (reduce + a))]
+    (are= 6 @b))
+
+  (let [m (cell '{:some-kw [1 2 3]})
+        a (cell {:sum (reduce + (:some-kw m))})]
+    (are= 6 (:sum @a))))
 
 (comment
   (.log js/console (pr-str (mx (cell (.toUpperCase a))))))
