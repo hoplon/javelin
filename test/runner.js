@@ -12,14 +12,7 @@ function info(msg, type) {
 
 page = new WebPage();
 
-page.onConsoleMessage = function(msg) {
-  if (msg == '__exit__') {
-    info('All tests passed.');
-    phantom.exit(0);
-  } else {
-    console.log(msg);
-  }
-}
+page.onConsoleMessage = info;
 
 page.onError = function(msg, trace) {
   var msgStack = ['ERROR: ' + msg];
@@ -31,6 +24,11 @@ page.onError = function(msg, trace) {
   }
   info(msgStack.join('\n'), 'error');
   phantom.exit(1);
+};
+
+page.onLoadFinished = function(status) {
+  info("All tests passed.");
+  phantom.exit(0);
 };
 
 page.open("test/test.html");

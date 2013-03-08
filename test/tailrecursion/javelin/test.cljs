@@ -15,21 +15,28 @@
   (let [a (cell 42)
         b (cell '(+ 1 2))
         c (cell (+ a 1))]
-    (are= 42 @a, 3 @b, 43 @c))
+    (are= 42 @a
+          3  @b
+          43 @c))
 
   (let [a (cell 0)
         b (cell (inc a))
         c (cell (+ 123 a b))]
-    (are= 0 @a, 1 @b, 124 @c)
+    (are= 0   @a
+          1   @b
+          124 @c)
     (swap! a inc)
-    (are= 1 @a, 2 @b, 126 @c))
+    (are= 1   @a
+          2   @b
+          126 @c))
 
   (let [a (cell 0)
         b (cell (conj ~[] a))]
     (are= 0 @a, [0] @b)
     (swap! a inc)
     (swap! a inc)
-    (are= 2 @a, [0 1 2] @b))
+    (are= 2       @a
+          [0 1 2] @b))
 
   (let [a (cell "123")
         b (cell (js/parseInt a))]
@@ -58,10 +65,12 @@
         b (cell (conj ~[] a))]
     (swap! a identity)
     (swap! a identity)
-    (are= 0 @a, [0 0 0] @b)
+    (are= 0       @a
+          [0 0 0] @b)
     (distinct! a)
     (swap! a identity)
-    (are= 0 @a, [0 0 0] @b))
+    (are= 0       @a
+          [0 0 0] @b))
 
   (let [a (cell ((comp inc (comp inc identity)) 123))]
     (are= 125 @a))
@@ -97,12 +106,14 @@
                   (reset! effect1 x)
                   (reset! effect2 c)
                   (* x 2)))]
-    (are= 4 @d, 2 @effect1, 1 @effect2)
+    (are= 4 @d
+          2 @effect1
+          1 @effect2)
     (swap! a inc)
     (swap! c inc)
-    (are= 6 @d, 3 @effect1, 2 @effect2)))
-
-(.log js/console "__exit__")
+    (are= 6 @d
+          3 @effect1
+          2 @effect2)))
 
 (comment
   (.log js/console (pr-str (mx (cell (.toUpperCase a))))))
