@@ -142,10 +142,16 @@
       (s/replace "-" "_")
       (str ".cljs")))
 
+(defn all-list-forms
+  [forms-seq]
+  (let [x (atom [])]
+    (postwalk #(do (if (list? %) (swap! x conj %)) %) forms-seq)
+    (seq @x)))
+
 (defn defs-in
   [def-or-defn sym]
   (let [ns-file (io/resource (nsym->path sym))]
-    (->> (forms-seq ns-file)
+    (->> (all-list-forms (forms-seq ns-file))
          (filter (comp (partial = def-or-defn) first))
          (mapv second))))
 
@@ -180,6 +186,7 @@
 
 (comment
 
+  (URI. foo)
   (def trans (partial apply mapv vector))
 
   (def mxpp #(do (clojure.pprint/pprint %) (println ";; macroexpands to...")
