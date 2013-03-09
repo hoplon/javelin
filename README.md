@@ -65,10 +65,13 @@ input cell. Otherwise, the new cell will be a formula cell.
 ```clojure
 (def a (cell 42))       ;; input cell containing the value 42
 (def b (cell '(+ 1 2))) ;; input cell containing the value 3
-(def c (cell (+ a 1)))  ;; formula cell containing the value a+1, updated when a changes
+(def c (cell '{:x 10})) ;; input cell containing the value {:x 10}
+
+(def d (cell {:x y}))   ;; formula cell containing the value (hash-map :x y), updated when y changes
+(def e (cell (+ a 1)))  ;; formula cell containing the value a+1, updated when a changes
 
 (reset! a 7)   ;; update the value contained by the input cell explicitly
-(swap! c inc)  ;; no! c is a formula cell; it updates itself!
+(swap! e inc)  ;; no! e is a formula cell; it updates itself!
 ```
 
 ### Formulas
