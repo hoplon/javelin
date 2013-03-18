@@ -33,7 +33,7 @@
     (when (seq queue)
       (let [next      (key (peek queue))
             value     ((.-thunk next))
-            continue? (or (.-always next) (not= value (.-prev next)))
+            continue? (not= value (.-prev next))
             reducer  #(assoc %1 %2 (.-rank %2))
             siblings  (pop queue)
             children  (.-sinks next)]
@@ -44,7 +44,6 @@
   (doseq [source (filter cell? (.-sources this))]
     (set! (.-sinks source) (disj (.-sinks source) this)))
   (set! (.-sources this) (if f (conj (vec sources) f) (vec sources)))
-  (set! (.-always this) (some #(.-always %) (filter cell? (.-sources this))))
   (doseq [source (filter cell? (.-sources this))]
     (set! (.-sinks source) (conj (.-sinks source) this))
     (if (> (.-rank source) (.-rank this))
@@ -57,7 +56,7 @@
     (set! (.-thunk this) (if f thunk #(deref this)))
     (doto this propagate!)))
 
-(deftype Cell [meta state rank prev sources sinks done always thunk watches]
+(deftype Cell [meta state rank prev sources sinks done thunk watches]
   cljs.core/IMeta
   (-meta [this] meta)
 
@@ -79,7 +78,7 @@
 (def input* #(if (cell? %) % (input %)))
 
 (defn input [value]
-  (set-formula! (Cell. {} value (next-rank) value [] #{} false false nil {})))
+  (set-formula! (Cell. {} value (next-rank) value [] #{} false nil {})))
 
 (defn lift [f]
   (fn [& sources]

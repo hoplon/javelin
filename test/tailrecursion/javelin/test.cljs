@@ -7,7 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns tailrecursion.javelin.test
-  (:require [tailrecursion.javelin :refer [all! distinct!]])
+  (:require tailrecursion.javelin)
   (:require-macros [tailrecursion.javelin.macros :refer [mx cell are=]]))
 
 (defn ^:export start []
@@ -60,17 +60,6 @@
         d (cell (* b c))]
     (swap! a inc)
     (are= 200 @d))
-
-  (let [a (all! (cell 0))
-        b (cell (conj ~[] a))]
-    (swap! a identity)
-    (swap! a identity)
-    (are= 0       @a
-          [0 0 0] @b)
-    (distinct! a)
-    (swap! a identity)
-    (are= 0       @a
-          [0 0 0] @b))
 
   (let [a (cell ((comp inc (comp inc identity)) 123))]
     (are= 125 @a))

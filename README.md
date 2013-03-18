@@ -92,34 +92,6 @@ to the value in the cell prior to updating, of course.
   )
 ```
 
-### Continuous vs. Discrete Propagation
-
-Normally, if the value contained by a cell does not change, nothing
-happens. For instance, `(swap! c identity)` has no effect on input
-cell `c`'s dependents, if any. This behavior, the default, is known as
-**continuous propagation**.
-
-The `all!` function can be used to mutate a cell and turn on
-**discrete propagation**. All updates will then trigger
-propagation. The `distinct!` function turns off discrete
-propagation. If a formula references a cell that is in discrete
-propagation mode, the dependent formula cell is also put in discrete
-mode.
-
-```clojure
-(def a (cell 0))
-(def b (cell (.log js/console a)))
-
-(all! a)      ;; turn on discrete propagation
-
-(reset! a 0)  ;; 0 is printed in the console
-(reset! a 0)  ;; 0 is printed in the console again
-
-(distinct! a) ;; turn off discrete propagation
-
-(reset! a 0)  ;; nothing happens
-```
-
 ## License
 
     Copyright (c) Alan Dipert and Micha Niskin. All rights

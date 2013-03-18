@@ -25,16 +25,6 @@
 (def timeout    #(.setTimeout js/window %1 %2))
 (def interval   #(.setInterval js/window %1 %2))
 
-(defn all! [x]
-  (set! (.-always x) true)
-  (doseq [c (core/sinks-seq x)] (set! (.-always c) true))
-  x)
-
-(defn distinct! [x]
-  (set! (.-always x) false)
-  (doseq [c (core/sinks-seq x)] (set! (.-always c) false))
-  x)
-
 (defn route*
   [msec default]
   (let [hash  #(.-hash (.-location js/window))
