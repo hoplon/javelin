@@ -7,7 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns tailrecursion.javelin.macros
-  (:require [clojure.walk    :refer [macroexpand-all postwalk-replace prewalk postwalk]]
+  (:require [clojure.walk    :refer [macroexpand-all prewalk]]
             [cljs.analyzer   :as a]
             [clojure.java.io :as io]
             [clojure.string  :as s]
@@ -62,7 +62,7 @@
     (do-lift (to-list `(set ~@form))))
 
   (defn do-let*
-    [[_ bindings & body]] 
+    [[_ bindings & body]]
     `(let* ~(mapv #(%1 %2) (cycle [identity do-lift]) bindings)
        ~@(map do-lift body)))
 
@@ -144,25 +144,27 @@
 
 (defn all-list-forms
   [forms-seq]
-  (let [x (atom [])]
-    (postwalk #(do (if (list? %) (swap! x conj %)) %) forms-seq)
-    (seq @x)))
+  (filter list? (tree-seq coll? seq forms-seq)))
 
-(defn defs-in
-  [def-or-defn sym]
+(defn ops-in
+  [op-sym sym]
   (let [ns-file (io/resource (nsym->path sym))]
-    (->> (all-list-forms (forms-seq ns-file))
-         (filter (comp (partial = def-or-defn) first))
-         (mapv second))))
+    (->>
+     (forms-seq ns-file)
+     list*
+     (tree-seq coll? seq)
+     (filter list?)
+     (filter (comp (partial = op-sym) first))
+     (mapv second))))
 
 (defn mirrored-defs
   [ns-sym]
-  (let [remote-defs (defs-in 'def ns-sym)]
+  (let [remote-defs (ops-in 'def ns-sym)]
     (map (fn [r] `(def ~r ~(symbol (str ns-sym) (str r)))) remote-defs)))
 
 (defn mirrored-defns
   [ns-sym]
-  (let [remote-defns (defs-in 'defn ns-sym)]
+  (let [remote-defns (ops-in 'defn ns-sym)]
     (map (fn [r] `(defn ~r [& args#]
                     (apply ~(symbol (str ns-sym) (str r)) args#)))
          remote-defns)))
