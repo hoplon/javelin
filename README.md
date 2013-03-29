@@ -33,13 +33,16 @@ subject to frequent change.
 [tailrecursion/javelin "1.0.0-SNAPSHOT"]
 ```
 
-### Demos
+### Demos and Examples
 
-For more usage examples, see the [Javelin
-Demos](https://github.com/tailrecursion/javelin-demos) repository.
-
-You may see some version of the demos running at
+For short usage examples, see the [Javelin
+Demos](https://github.com/tailrecursion/javelin-demos) repository.  You may see some version of these demos running at
 [http://tailrecursion.com/~alan/javelin-demos/](http://tailrecursion.com/~alan/javelin-demos/).
+
+Javelin is also used in two [TodoFRP](https://github.com/lynaghk/todoFRP) implementations:
+
+* [Javelin with Domina and Dommy](https://github.com/lynaghk/todoFRP/tree/master/todo/javelin)
+* [Javelin with Hlisp](https://github.com/lynaghk/todoFRP/tree/master/todo/hlisp-javelin)
 
 ## Overview
 
