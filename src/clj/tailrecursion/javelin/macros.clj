@@ -100,14 +100,16 @@
 
   (defn macroexpand*
     [env form]
-    (let [ex (a/macroexpand-1 env form)]
-      (if (identical? ex form)
-        form
-        (macroexpand* env ex))))
+    (if (seq? form)
+      (let [ex (a/macroexpand-1 env form)]
+        (if (identical? ex form)
+          form
+          (macroexpand* env ex)))
+      form))
 
   (defn macroexpand-all*
     [env form]
-    (prewalk (fn [x] (if (seq? x) (macroexpand* env x) x)) form))
+    (prewalk (partial macroexpand* env) form))
 
   (defmacro mx
     [form]

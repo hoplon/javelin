@@ -113,5 +113,10 @@
         a (cell {:sum (reduce + (:some-kw m))})]
     (are= 6 (:sum @a))))
 
+  (let [a (cell true)
+        b (cell false)
+        c (cell (not (or a b)))]
+    (are= false @c))
+
 (comment
   (.log js/console (pr-str (mx (cell (.toUpperCase a))))))
