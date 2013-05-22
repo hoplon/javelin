@@ -12,7 +12,15 @@ run_phantom() {
 }
 
 run_ff() {
-    xvfb-run -a firefox "test/test.html"
+    xvfb-run -a firefox -no-remote "test/test.html" \
+    | while read line; do
+        if [ "$line" = "Done." ]; then
+            kill -2 $(pgrep firefox)
+            echo "All tests passed (on firefox)."
+        else
+            echo "$line"
+        fi
+    done
 }
 
 install_ff_profile

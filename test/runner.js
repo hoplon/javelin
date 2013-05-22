@@ -27,7 +27,7 @@ page.onError = function(msg, trace) {
 };
 
 page.onLoadFinished = function(status) {
-  info("All tests passed.");
+  info("All tests passed (on phantomjs).");
   phantom.exit(0);
 };
 
