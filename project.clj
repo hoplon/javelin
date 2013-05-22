@@ -12,9 +12,5 @@
                {:source-paths ["src/clj" "src/cljs" "test"]
                 :compiler {:output-to "test/test.js"
                            :optimizations :advanced
-                           :warnings true
-                           ;; :optimizations :whitespace
-                           ;; :pretty-print true
-                           }
-                :jar false}}
-              :test-commands {"unit" ["phantomjs" "test/runner.js"]}})
+                           :warnings true}
+                :jar false}}})
