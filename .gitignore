@@ -13,3 +13,4 @@ pom.xml
 .lein-plugins
 .DS_Store
 /test/test.js
+/test/firefox-profile

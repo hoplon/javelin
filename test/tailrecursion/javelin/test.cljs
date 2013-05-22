@@ -132,4 +132,6 @@
      (let [a (cell true)
            b (cell false)
            c (cell (not (or a b)))]
-       (are= false @c)))))
+       (are= false @c))))
+
+  (println "Done."))
