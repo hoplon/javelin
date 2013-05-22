@@ -12,14 +12,14 @@
 
 (defn setup! []
   (set! cljs.core/*print-fn*
-        (if (.hasOwnProperty js/window "dump")
-          ;; firefox
-          #(.apply (.-dump js/window)
-                   js/window
-                   (apply array %&))
+        (if (undefined? (aget js/window "dump"))
           ;; phantomjs
           #(.apply (.-log js/console)
                    (.-console js/window)
+                   (apply array %&))
+          ;; firefox
+          #(.apply (aget js/window "dump")
+                   js/window
                    (apply array %&)))))
 
 (defn ^:export start []
