@@ -148,9 +148,13 @@
   [forms-seq]
   (filter list? (tree-seq coll? seq forms-seq)))
 
+(defn resource*
+  [path]
+  (or (io/resource path) (io/file "src/cljs" path)))
+
 (defn ops-in
   [op-sym sym]
-  (let [ns-file (io/resource (nsym->path sym))]
+  (let [ns-file (resource* (nsym->path sym))]
     (->>
      (forms-seq ns-file)
      list*
@@ -173,9 +177,9 @@
 
 (defmacro mirror
   "Mirrors all public defs and defns in the remote namespace
-  represented by ns-sym in whatever the current namespace is.  The
-  remote namespace must have been required in order for advanced
-  compilation to work."
+  represented by ns-sym in whatever the current namespace is.
+  The remote namespace must have been required in order for
+  advanced compilation to work."
   [ns-sym]
   `(do ~@(mirrored-defs  ns-sym)
        ~@(mirrored-defns ns-sym)))
