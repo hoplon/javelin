@@ -392,17 +392,9 @@
                (+ (+ (+ in) (+ in)) (+ (+ in) (+ in)))
                (+ (+ (+ in) (+ in)) (+ (+ in) (+ in)))))))))))
 
-       (println "perf 1")
-       (time (swap! in inc))
 
-       (println "perf 5")
-       (time (dotimes [_ 5] (swap! in inc)))
-
-       (println "perf 10")
-       (time (dotimes [_ 10] (swap! in inc)))
-
-       (println "perf 20")
-       (time (dotimes [_ 20] (swap! in inc)))
+       (dotimes [_ 10]
+         (time (dotimes [_ 10] (swap! in inc))))
 
        (println "total"))))
 
