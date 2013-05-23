@@ -11,7 +11,7 @@ run_ff() {
     xvfb-run -a firefox -profile test/firefox-profile -no-remote "test/test.html" \
     | while read line; do
         if [ "$line" = "Done." ]; then
-            ps -t $this_tty | grep firefox | cut -d' ' -f1 | xargs kill -s SIGINT
+            kill -n 2 $(ps -t $this_tty | grep firefox | awk '{print $1}')
             echo "All tests passed (on firefox)."
         else
             echo "$line"
