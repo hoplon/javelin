@@ -3,10 +3,12 @@
 set -e
 
 run_phantom() {
+    phantomjs --version
     phantomjs test/runner.js
 }
 
 run_ff() {
+    firefox -version
     this_tty=$(tty)
     xvfb-run -a firefox -profile test/firefox-profile -no-remote "test/test.html" \
     | while read line; do
