@@ -37,7 +37,7 @@ subject to frequent change.
 
 For short usage examples, see the [Javelin
 Demos](https://github.com/tailrecursion/javelin-demos) repository.  You may see some version of these demos running at
-[http://tailrecursion.com/~alan/javelin-demos/](http://tailrecursion.com/~alan/javelin-demos/).
+[https://dl.dropboxusercontent.com/u/12379861/javelin_demos/index.html](https://dl.dropboxusercontent.com/u/12379861/javelin_demos/index.html).
 
 Javelin is also used in two [TodoFRP](https://github.com/lynaghk/todoFRP) implementations:
 
