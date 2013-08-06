@@ -10,8 +10,7 @@
   (:require [clojure.walk    :refer [macroexpand-all prewalk]]
             [cljs.analyzer   :as a]
             [clojure.java.io :as io]
-            [clojure.string  :as s]
-            [cljs.compiler   :refer [forms-seq]]))
+            [clojure.string  :as s]))
 
 (defmacro with-let
   "Binds resource to binding and evaluates body.  Then, returns
@@ -145,18 +144,25 @@
       (str ".cljs")))
 
 (defn all-list-forms
-  [forms-seq]
-  (filter list? (tree-seq coll? seq forms-seq)))
+  [forms]
+  (filter list? (tree-seq coll? seq forms)))
 
 (defn resource*
   [path]
   (or (io/resource path) (io/file "src/cljs" path)))
 
+(defn read-file
+  [f]
+  (with-open [in (java.io.PushbackReader. (io/reader f))]
+    (->> (repeatedly #(read in false ::eof))
+         (take-while (partial not= ::eof))
+         doall)))
+
 (defn ops-in
   [op-sym sym]
   (let [ns-file (resource* (nsym->path sym))]
     (->>
-     (forms-seq ns-file)
+     (read-file ns-file)
      list*
      (tree-seq coll? seq)
      (filter list?)
