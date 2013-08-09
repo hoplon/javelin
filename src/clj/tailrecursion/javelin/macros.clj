@@ -38,6 +38,7 @@
       let*?     #(and (seq? %) (= 'let* (first %)))
       js*?      #(and (seq? %) (= 'js* (first %)))
       dot?      #(and (seq? %) (= '. (first %)))
+      set!?     #(and (seq? %) (= 'set! (first %)))
       lifted-f? #(and (seq? %)
                       (= lift (first %))
                       (= 'fn* (first (second %)))
@@ -79,6 +80,10 @@
     (let [bindings (map (fn [_] (gensym)) args)]
       (do-lift `((fn* [obj# ~@bindings] (~'. obj# ~meth ~@bindings)) ~obj ~@args))))
 
+  (defn do-set!
+    [[_ target val]]
+    (do-lift `((fn* [val#] (set! ~target val#)) ~val)))
+
   (defn do-lift
     [form]
     (cond
@@ -92,6 +97,7 @@
       (let*? form)        (do-let* form)
       (js*? form)         (do-js* form)
       (dot? form)         (do-dot form)
+      (set!? form)        (do-set! form)
       :else               (let [[op & args] form]
                             (if (= op 'apply)
                               `(apply (~lift ~(do-lift (first args))) ~@(map do-lift (rest args)))

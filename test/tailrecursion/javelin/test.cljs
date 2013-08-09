@@ -396,6 +396,13 @@
        (dotimes [_ 10]
          (time (dotimes [_ 10] (swap! in inc))))
 
-       (println "total"))))
+       (println "total"))
+
+     (let [o (js-obj)
+           a (cell 0)]
+       (cell (set! (.-foo o) (inc a)))
+       (are= (.-foo o) 1)
+       (swap! a inc)
+       (are= (.-foo o) 2))))
 
   (println "Done."))

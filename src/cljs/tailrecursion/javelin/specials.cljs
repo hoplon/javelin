@@ -23,7 +23,6 @@
 (def throw*       #(if (string? %) (js/Error. %) %))
 (def try**        (no-supported "try*"))
 (def recur*       (no-supported "recur"))
-(def set!*        (no-supported "set!"))
 (def ns*          (no-supported "ns"))
 (def deftype**    (no-supported "deftype*"))
 (def defrecord**  (no-supported "defrecord*"))
