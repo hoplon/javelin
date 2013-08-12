@@ -14,13 +14,15 @@
   (set! cljs.core/*print-fn*
         (if (undefined? (aget js/window "dump"))
           ;; phantomjs
-          #(.apply (.-log js/console)
-                   (.-console js/window)
-                   (apply array %&))
+          (fn [& args]
+            (.apply (.-log js/console)
+                    (.-console js/window)
+                    (apply array args)))
           ;; firefox
-          #(.apply (aget js/window "dump")
-                   js/window
-                   (apply array %&)))))
+          (fn [& args]
+            (.apply (aget js/window "dump")
+                    js/window
+                    (apply array args))))))
 
 (defn ^:export start []
 

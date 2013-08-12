@@ -22,8 +22,7 @@
 
 (let [home      #(symbol "tailrecursion.javelin" %)
       keyw      #(keyword "tailrecursion.javelin.core" %)
-      specials  #{'if 'def 'do 'loop* 'letfn* 'throw 'try* 'recur 'new 'set!
-                  'ns 'deftype* 'defrecord* '&}
+      specials  #{'if 'def 'do 'loop* 'letfn* 'throw 'try* 'recur 'new 'ns 'deftype* 'defrecord* '&}
       to-list   #(into '() (reverse %))
       lift      (home "lift")
       input     (home "input")
