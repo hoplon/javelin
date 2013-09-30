@@ -30,7 +30,7 @@ subject to frequent change.
 ### Dependency [![Build Status](https://travis-ci.org/tailrecursion/javelin.png?branch=master)](https://travis-ci.org/tailrecursion/javelin)
 
 ```clojure
-[tailrecursion/javelin "1.0.0-SNAPSHOT"]
+[tailrecursion/javelin "2.0.0-SNAPSHOT"]
 ```
 
 ### Demos and Examples

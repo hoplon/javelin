@@ -56,7 +56,7 @@
     (set! (.-thunk this) (if f thunk #(deref this)))
     (doto this propagate!)))
 
-(deftype Cell [meta state rank prev sources sinks done thunk watches]
+(deftype Cell [meta state rank prev sources sinks thunk watches]
   cljs.core/IMeta
   (-meta [this] meta)
 
@@ -72,13 +72,12 @@
   (-remove-watch [this key]
     (set! (.-watches this) (dissoc watches key))))
 
-(def done!  #(set! (.-done %) true))
 (def cell?  #(= (type %) Cell))
 (def self   #(input {::self %}))
 (def input* #(if (cell? %) % (input %)))
 
 (defn input [value]
-  (set-formula! (Cell. {} value (next-rank) value [] #{} false nil {})))
+  (set-formula! (Cell. {} value (next-rank) value [] #{} nil {})))
 
 (defn lift [f]
   (fn [& sources]
