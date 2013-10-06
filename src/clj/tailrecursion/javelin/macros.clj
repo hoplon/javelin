@@ -116,17 +116,9 @@
     (prewalk (partial macroexpand* env) form))
 
   (defmacro mx
+    "This is useful for debugging macros in ClojureScript."
     [form]
     (pr-str (macroexpand-all* &env form)))
-
-  (defmacro cfn
-    [bindings & body]
-    `(fn [& args#]
-       ((fn ~bindings ~@body) (map input* args#))))
-
-  (defmacro defcfn
-    [name bindings & body]
-    `(def ~name (cfn ~bindings ~@body)))
 
   (defmacro cell
     [form]
@@ -135,9 +127,6 @@
           q?      (or (quoted? form) (not (listy? lifted)))
           expr    (if q? (list input lifted) lifted)]
       expr)))
-
-
-
 
 ;; mirroring ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
