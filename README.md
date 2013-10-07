@@ -1,8 +1,8 @@
-# Javelin
-
 <img src="https://raw.github.com/alandipert/javelin/master/img/javelin.png?login=micha&token=b172f1b97acb55c16867dc106e30c646"
 alt="tailrecursion/javelin logo" title="tailrecursion/javelin logo"
 align="right" width="152"/>
+
+# Javelin
 
 Spreadsheet-like Functional Reactive Programming (FRP) in
 ClojureScript.  This library is usable but under construction and
@@ -60,39 +60,85 @@ expressions that may contain references to cells.
 recomputed by Javelin whenever the values in the cells referenced in
 the formula expression are changed.
 
-Both kinds of cell are created with the Javelin `cell` macro. It
-expects a single argument. If the argument is a number, string,
-keyword, anonymous function, or quoted expression the cell will be an
-input cell. Otherwise, the new cell will be a formula cell.
+Both kinds of cell are created with the Javelin `cell` macro, which
+expects a single argument. If the argument is an atomic form (i.e.
+symbol, keyword, number, string, character, etc.) anonymous function,
+quoted expression, or is syntax-unquoted the cell will be an input
+cell. Otherwise, the new cell will be a formula cell.
 
 ```clojure
-(def a (cell 42))       ;; input cell containing the value 42
-(def b (cell '(+ 1 2))) ;; input cell containing the value 3
-(def c (cell '{:x 10})) ;; input cell containing the value {:x 10}
+;; input cells
+(def a (cell 42))       ;; cell containing the number 42
+(def b (cell '(+ 1 2))) ;; cell containing the list (+ 1 2)
+(def c (cell ~(+ 1 2))) ;; cell containing the number 3
+(def d (cell ~{:x @a})) ;; cell containing the map {:x 42}
 
-(def d (cell {:x y}))   ;; formula cell containing the value (hash-map :x y), updated when y changes
-(def e (cell (+ a 1)))  ;; formula cell containing the value a+1, updated when a changes
+;; formula cells
+(def e (cell {:x a}))   ;; cell with value {:x a}, updated when a changes
+(def f (cell (+ a 1)))  ;; cell with value (+ a 1), updated when a changes
+(def g (cell (+ a ~@a)  ;; cell with value (+ a 42), updated when a changes
 
-(reset! a 7)   ;; update the value contained by the input cell explicitly
-(swap! e inc)  ;; no! e is a formula cell; it updates itself!
+;; anonymous cell
+(cell (.log js/console a)) ;; value of a is printed whenever it's updated
+
+;; directly update values contained in cells
+(reset! a 7)   ;; ok, because a is an input cell
+(swap! f inc)  ;; no! f is a formula cell, it updates itself!
 ```
 
-### Formulas
+### Cell Macro Internals
 
-Formula cells may refer to themselves with the `~value` idiom, where
-`value` is the initial value to use (the cell has no "self" value
-before it has evaluated itself the first time). Self references refer
-to the value in the cell prior to updating, of course.
+The `cell` macro creates cells using the underlying `input` and `lift`
+functions. The former returns an input cell with the given initial
+value. The latter "lifts" a given function, returning a function that,
+when applied to arguments (which may be cells) returns a cell with the
+given function as the formula.
 
 ```clojure
-(let [a (cell 0)             ;; input cell
-      b (cell (conj ~[] a))] ;; formula cell w/ self reference, ~[]
-  (cell (.log js/console (pr-str b)))
-  ;; [0] is printed first
-  (swap! a inc)
-  (swap! a inc)
-  ;; then [0 1] and [0 1 2] are printed
-  )
+(def x (input 7))       ;; input cell with initial value 7
+(def y ((lift +) x 1))  ;; formula cell with value (+ x 1), updated when x changes
+```
+
+To create a formula cell, the `cell` macro fully macroexpands the
+given expression and then walks it, recursively lifting all forms in
+function position. However, there are several special cases and
+exceptions:
+
+* **Special forms** are replaced with equivalent function
+  implementations.
+* **Collection literals** are replaced with their sexp equivalents
+  and then walked.
+* **Anonymous function bodies** are not walked.
+* **Quoted expressions** are not walked.
+* **The unquote form** causes its argument to be evaluated in place
+  and not walked.
+* **The unquote-splicing form** is interpreted as the composition
+  of `unquote` and `deref`.
+
+### Special Forms In Formulas
+
+The spreadsheet evaluation model is a push-based system, very
+different from the usual, pull-based Lisp evaluation model. In Lisp,
+forms are evaluated only as needed to produce a value. This model
+supports special forms and macros, which decide when to evaluate their
+own arguments. In the Javelin evaluation model this is impossible
+because formula cells are re-computed _reactively_ based on the values
+of the argument cells (cells the formula cell depends on), which must
+therefore be computed first.
+
+This causes the behavior of "short-circuiting" expressions like `and`
+and `if` to be strange. If the short-circuiting behavior is required
+then the expression must be wrapped in an anonymous function:
+
+```clojure
+(def x (cell 1))
+(def y (cell 1))
+
+;; This cell prints both "even" and "odd"
+(cell (if (even? (+ x y)) (.log js/console "even") (.log js/console "odd")))
+
+;; This cell only prints "even" or "odd"
+(cell (#(if (even? (+ %1 %2)) (.log js/console "even") (.log js/console "odd")) x y))
 ```
 
 ## License
