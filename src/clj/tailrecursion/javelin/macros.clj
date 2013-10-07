@@ -28,10 +28,10 @@
       input     (home "input")
       input*    (home "input*")
       deref*    (home "deref*")
-      selfkey   (keyw "self")
       special?  #(if (contains? specials %) (home (str % "*")))
       unquote?  #(and (seq? %) (= 'clojure.core/unquote (first %)))
-      quoted?   #(and (seq? %) (= 'quote (first %)))
+      unsplice? #(and (seq? %) (= 'clojure.core/unquote-splicing (first %)))
+      quote?    #(and (seq? %) (= 'quote (first %)))
       input?    #(and (seq? %) (= input (first %)))
       func?     #(and (seq? %) (= 'fn* (first %)))
       let*?     #(and (seq? %) (= 'let* (first %)))
@@ -65,10 +65,6 @@
     `(let* ~(mapv #(%1 %2) (cycle [identity do-lift]) bindings)
        ~@(map do-lift body)))
 
-  (defn do-self
-    [form]
-    `(~input ~{selfkey `(~deref* ~(do-lift (second form)))}))
-
   (defn do-js*
     [[_ tmpl & args]]
     (let [bindings (mapv (fn [_] (gensym)) args)]
@@ -90,8 +86,9 @@
       (vector? form)      (do-vector form)
       (set? form)         (do-set form)
       (not (listy? form)) form
-      (unquote? form)     (do-self form)
-      (quoted? form)      (second form)
+      (quote? form)       form
+      (unquote? form)     (second form)
+      (unsplice? form)    (list deref (second form))
       (func? form)        (list input form)
       (let*? form)        (do-let* form)
       (js*? form)         (do-js* form)
@@ -124,9 +121,8 @@
     [form]
     (let [form    (macroexpand-all* &env form)
           lifted  (do-lift form)
-          q?      (or (quoted? form) (not (listy? lifted)))
-          expr    (if q? (list input lifted) lifted)]
-      expr)))
+          q?      (or (quote? form) (unquote? form) (unsplice? form) (not (listy? lifted)))] 
+      (if q? (list input lifted) lifted))))
 
 ;; mirroring ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
