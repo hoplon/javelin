@@ -16,7 +16,6 @@
 (def  last-rank     (atom 0))
 (defn next-rank [ ] (swap! last-rank inc))
 (defn deref*    [x] (if (cell? x) @x x))
-(defn sinks-seq [c] (tree-seq cell? #(seq (.-sinks %)) c))
 
 (defn propagate! [cell]
   (loop [queue (priority-map cell (.-rank cell))]

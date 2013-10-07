@@ -4,22 +4,23 @@ align="right" width="152"/>
 
 # Javelin
 
-Spreadsheet-like Functional Reactive Programming (FRP) in
-ClojureScript.  This library is usable but under construction and
-subject to frequent change.
+Spreadsheet-like Functional Reactive Programming (FRP) in ClojureScript.
+
+_This library is usable but under construction and subject to frequent
+change._
 
 ### Example
 
 ```clojure
 (ns your-ns
   (:require tailrecursion.javelin) ;; necessary if compiling in advanced mode
-  (:require-macros [tailrecursion.javelin.macros :refer [cell]]))
+  (:require-macros [tailrecursion.javelin.macros :refer [cell cell=]]))
 
 (defn start []
-  (let [a (cell 0)            ;; value cell of 0.
-        b (cell (inc a))      ;; formula cell of a+1.
-        c (cell (+ 123 a b))] ;; formula cell of a+b+123.
-    (cell (.log js/console c))
+  (let [a (cell 0)              ;; input cell with initial value of 0.
+        b (cell= (inc a))       ;; formula cell of a+1.
+        c (cell= (+ 123 a b))]  ;; formula cell of a+b+123.
+    (cell= (.log js/console c)) ;; anonymous formula cell for side effects.
     ;; c's initial value, 124, is printed.
     (swap! a inc)
     ;; a was incremented, and its new value propagated (consistently)
@@ -27,7 +28,7 @@ subject to frequent change.
     ))
 ```
 
-### Dependency [![Build Status](https://travis-ci.org/tailrecursion/javelin.png?branch=master)](https://travis-ci.org/tailrecursion/javelin)
+### Dependency [![Build Status][1]][2]
 
 ```clojure
 [tailrecursion/javelin "2.0.0-SNAPSHOT"]
@@ -35,14 +36,13 @@ subject to frequent change.
 
 ### Demos and Examples
 
-For short usage examples, see the [Javelin
-Demos](https://github.com/tailrecursion/javelin-demos) repository.  You may see some version of these demos running at
-[https://dl.dropboxusercontent.com/u/12379861/javelin_demos/index.html](https://dl.dropboxusercontent.com/u/12379861/javelin_demos/index.html).
+For short usage examples, see the [Javelin Demos][3] repository. You may see
+some version of these demos running [here][4].
 
-Javelin is also used in two [TodoFRP](https://github.com/lynaghk/todoFRP) implementations:
+Javelin is also used in two [TodoFRP][5] implementations:
 
-* [Javelin with Domina and Dommy](https://github.com/lynaghk/todoFRP/tree/master/todo/javelin)
-* [Javelin with Hlisp](https://github.com/lynaghk/todoFRP/tree/master/todo/hlisp-javelin)
+* [Javelin with Domina and Dommy][6]
+* [Javelin with Hlisp][7]
 
 ## Overview
 
@@ -60,46 +60,41 @@ expressions that may contain references to cells.
 recomputed by Javelin whenever the values in the cells referenced in
 the formula expression are changed.
 
-Both kinds of cell are created with the Javelin `cell` macro, which
-expects a single argument. If the argument is an atomic form (i.e.
-symbol, keyword, number, string, character, etc.) anonymous function,
-quoted expression, or is syntax-unquoted the cell will be an input
-cell. Otherwise, the new cell will be a formula cell.
+The `cell` macro creates input cells, and the `cell=` macro creates
+formula cells.
 
 ```clojure
-;; input cells
-(def a (cell 42))       ;; cell containing the number 42
-(def b (cell '(+ 1 2))) ;; cell containing the list (+ 1 2)
-(def c (cell ~(+ 1 2))) ;; cell containing the number 3
-(def d (cell ~{:x @a})) ;; cell containing the map {:x 42}
+(def a (cell 42))               ;; cell containing the number 42
+(def b (cell '(+ 1 2)))         ;; cell containing the list (+ 1 2)
+(def c (cell (+ 1 2)))          ;; cell containing the number 3
+(def d (cell {:x @a}))          ;; cell containing the map {:x 42}
 
-;; formula cells
-(def e (cell {:x a}))   ;; cell with value {:x a}, updated when a changes
-(def f (cell (+ a 1)))  ;; cell with value (+ a 1), updated when a changes
-(def g (cell (+ a ~@a)  ;; cell with value (+ a 42), updated when a changes
+(def e (cell= {:x a}))          ;; cell with formula {:x a}, updated when a changes
+(def f (cell= (+ a 1)))         ;; cell with formula (+ a 1), updated when a changes
+(def g (cell= (+ a ~(inc @a)))) ;; cell with formula (+ a 43), updated when a changes
 
-;; anonymous cell
-(cell (.log js/console a)) ;; value of a is printed whenever it's updated
+(cell= (.log js/console a))     ;; value of a is printed whenever it's updated
 
-;; directly update values contained in cells
-(reset! a 7)   ;; ok, because a is an input cell
-(swap! f inc)  ;; no! f is a formula cell, it updates itself!
+(reset! a 7)                    ;; ok, because a is an input cell
+(swap! f inc)                   ;; no! f is a formula cell, it updates itself!
 ```
 
 ### Cell Macro Internals
 
-The `cell` macro creates cells using the underlying `input` and `lift`
-functions. The former returns an input cell with the given initial
-value. The latter "lifts" a given function, returning a function that,
-when applied to arguments (which may be cells) returns a cell with the
-given function as the formula.
+The `cell` and `cell=` macros create cells using the underlying
+`input` and `lift` functions. The former returns an input cell with
+the given initial value. The latter "lifts" a given function,
+returning a function that, when applied to arguments (which may be
+cells) returns a cell with the given function as the formula
+&mdash; this cell's value is recomputed whenever any of the
+argument cells change.
 
 ```clojure
 (def x (input 7))       ;; input cell with initial value 7
-(def y ((lift +) x 1))  ;; formula cell with value (+ x 1), updated when x changes
+(def y ((lift +) x 1))  ;; equivalent to (def y (cell= (+ x 1)))
 ```
 
-To create a formula cell, the `cell` macro fully macroexpands the
+To create a formula cell, the `cell=` macro fully macroexpands the
 given expression and then walks it, recursively lifting all forms in
 function position. However, there are several special cases and
 exceptions:
@@ -135,10 +130,10 @@ then the expression must be wrapped in an anonymous function:
 (def y (cell 1))
 
 ;; This cell prints both "even" and "odd"
-(cell (if (even? (+ x y)) (.log js/console "even") (.log js/console "odd")))
+(cell= (if (even? (+ x y)) (.log js/console "even") (.log js/console "odd")))
 
 ;; This cell only prints "even" or "odd"
-(cell (#(if (even? (+ %1 %2)) (.log js/console "even") (.log js/console "odd")) x y))
+(cell= (#(if (even? (+ %1 %2)) (.log js/console "even") (.log js/console "odd")) x y))
 ```
 
 ## License
@@ -151,3 +146,11 @@ then the expression must be wrapped in an anonymous function:
     distribution. By using this software in any fashion, you are
     agreeing to be bound by the terms of this license. You must not
     remove this notice, or any other, from this software.
+
+[1]: https://travis-ci.org/tailrecursion/javelin.png?branch=master
+[2]: https://travis-ci.org/tailrecursion/javelin
+[3]: https://github.com/tailrecursion/javelin-demos
+[4]: https://dl.dropboxusercontent.com/u/12379861/javelin_demos/index.html
+[5]: https://github.com/lynaghk/todoFRP
+[6]: https://github.com/lynaghk/todoFRP/tree/master/todo/javelin
+[7]: https://github.com/lynaghk/todoFRP/tree/master/todo/hlisp-javelin

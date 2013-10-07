@@ -118,11 +118,14 @@
     (pr-str (macroexpand-all* &env form)))
 
   (defmacro cell
+    "Create an input cell using form for initial value."
     [form]
-    (let [form    (macroexpand-all* &env form)
-          lifted  (do-lift form)
-          q?      (or (quote? form) (unquote? form) (unsplice? form) (not (listy? lifted)))] 
-      (if q? (list input lifted) lifted))))
+    (list input form))
+
+  (defmacro cell=
+    "Create formula cell using form as the formula expression."
+    [form]
+    (do-lift (macroexpand-all* &env form))))
 
 ;; mirroring ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -187,34 +190,3 @@
      `(assert (= ~a ~b)))
   ([a b c & more]
      `(do (are= ~a ~b) (are= ~c ~@more))))
-
-(comment
-
-  (URI. foo)
-  (def trans (partial apply mapv vector))
-
-  (def mxpp #(do (clojure.pprint/pprint %) (println ";; macroexpands to...")
-               (clojure.pprint/pprint (clojure.walk/macroexpand-all %))))
-
-  (let [m (apply sorted-map (mapcat identity (vec {3 :c 1 :a 2 :b})))]
-    (interleave (keys m) (vals m))
-    )
-  (vec #{1 2 3})
-  (list* :a [:b :c])
-  (clojure.pprint/pprint (into #{} (keys clojure.lang.Compiler/specials)))
-  (macroexpand-all '(foo ~(b a) a))
-  (mxpp '(cell (case foo "hello" bar "world" other :not-found)))
-  (mxpp '(cell (condp = foo "hello" bar "world" other :not-found)))
-  (mxpp '(cell (if (= a 0) (cell a) (cell b))))
-  (mxpp '(cell 0))
-  (mxpp '(cell '(+ a 5)))
-  (mxpp '(cell ''a))
-  (mxpp '(cell {foo [a b 7]}))
-  (mxpp '(cell #{foo [a b 7]}))
-  (mxpp '(cell (+ a ~0)))
-  (mxpp '(cell (+ a ~(+ b c))))
-  (mxpp '(cell #(+ %1 %2)))
-  (mxpp '(cell (#(+ %1 %2) a b)))
-  (mxpp '(cell (if-not (pred? a) b c)))
-
-  )
