@@ -30,19 +30,21 @@ change._
 
 ### Dependency [![Build Status][1]][2]
 
+Artifacts are published on [Clojars][3].
+
 ```clojure
 [tailrecursion/javelin "2.0.0-SNAPSHOT"]
 ```
 
 ### Demos and Examples
 
-For short usage examples, see the [Javelin Demos][3] repository. You may see
-some version of these demos running [here][4].
+For short usage examples, see the [Javelin Demos][4] repository. You may see
+some version of these demos running [here][5].
 
-Javelin is also used in two [TodoFRP][5] implementations:
+Javelin is also used in two [TodoFRP][6] implementations:
 
-* [Javelin with Domina and Dommy][6]
-* [Javelin with Hlisp][7]
+* [Javelin with Domina and Dommy][7]
+* [Javelin with Hlisp][8]
 
 ## Overview
 
@@ -173,8 +175,9 @@ using these forms must also be wrapped in anonymous functions.
 
 [1]: https://travis-ci.org/tailrecursion/javelin.png?branch=master
 [2]: https://travis-ci.org/tailrecursion/javelin
-[3]: https://github.com/tailrecursion/javelin-demos
-[4]: https://dl.dropboxusercontent.com/u/12379861/javelin_demos/index.html
-[5]: https://github.com/lynaghk/todoFRP
-[6]: https://github.com/lynaghk/todoFRP/tree/master/todo/javelin
-[7]: https://github.com/lynaghk/todoFRP/tree/master/todo/hlisp-javelin
+[3]: http://clojars.org/tailrecursion/javelin
+[4]: https://github.com/tailrecursion/javelin-demos
+[5]: https://dl.dropboxusercontent.com/u/12379861/javelin_demos/index.html
+[6]: https://github.com/lynaghk/todoFRP
+[7]: https://github.com/lynaghk/todoFRP/tree/master/todo/javelin
+[8]: https://github.com/lynaghk/todoFRP/tree/master/todo/hlisp-javelin
