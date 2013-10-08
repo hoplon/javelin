@@ -53,13 +53,13 @@ Clojure atoms: they contain values, they can be dereferenced with
 the `swap!` and `reset!` core functions. Formulas are ClojureScript
 expressions that may contain references to cells.
 
-### Input cells
+There are two kinds of cells: **input cells** and **formula cells**.
 
+**Input cells**
 * contain values that are updated explicitly using `reset!` or `swap!`.
 * are created by the `cell` macro.
 
-### Formula Cells
-
+**Formula Cells**
 * contain values that are recomputed automatically whenever the
   values in the cells referenced in the formula expression
   change.
