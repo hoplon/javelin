@@ -76,7 +76,8 @@ expressions that may contain references to cells.
 (def e (cell= {:x a}))          ;; cell with formula {:x a}, updated when a changes
 (def f (cell= (+ a 1)))         ;; cell with formula (+ a 1), updated when a changes
 (def g (cell= (+ a ~(inc @a)))) ;; cell with formula (+ a 43), updated when a changes
-(def h (cell= [e f g]))         ;; cell with formula [e f g], updated when e, f, and/or g change
+(def h (cell= [e f g]))         ;; cell with formula [e f g], updated when e, f,
+                                ;; and/or g change
 
 [@e @f @g]                      ;;=> [{:x 42} 43 85]
 (reset! a 7)                    ;;=> 7
