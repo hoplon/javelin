@@ -67,6 +67,8 @@ There are two kinds of cells: **input cells** and **formula cells**.
   via `swap!` or `reset!` results in an error.
 * are created by the `cell=` macro.
 
+Some examples of cells:
+
 ```clojure
 (def a (cell 42))               ;; cell containing the number 42
 (def b (cell '(+ 1 2)))         ;; cell containing the list (+ 1 2)
