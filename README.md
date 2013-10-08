@@ -101,8 +101,8 @@ exceptions:
 
 * **Special forms** are replaced with equivalent function
   implementations.
-* But some special forms **can not be lifted**: `def`, `loop\*`, `letfn\*`,
-  `try\*`, `recur`, `ns`, `deftype\*`, `defrecord\*`, and `&`.
+* But some special forms **can not be lifted**: `def`, `loop*`, `letfn*`,
+  `try*`, `recur`, `ns`, `deftype*`, `defrecord*`, and `&`.
 * **Collection literals** are replaced with their sexp equivalents
   and then walked.
 * **Anonymous function bodies** are not walked.
@@ -125,17 +125,28 @@ therefore be computed first.
 
 This causes the behavior of "short-circuiting" expressions like `and`
 and `if` to be strange. If the short-circuiting behavior is required
-then the expression must be wrapped in an anonymous function:
+then the expression must be wrapped in an anonymous function.
+
+Also, some forms (like `for` or `doseq`, for example) macroexpand to
+expressions based on unsupported special forms like `loop*`. Expressions
+using these forms must also be wrapped in anonymous functions.
 
 ```clojure
 (def x (cell 1))
 (def y (cell 1))
+(def z (cell [1 2 3]))
 
-;; This cell prints both "even" and "odd"
+;; This cell prints both "even" and "odd".
 (cell= (if (even? (+ x y)) (.log js/console "even") (.log js/console "odd")))
 
-;; This cell only prints "even" or "odd"
+;; This cell only prints "even" or "odd".
 (cell= (#(if (even? (+ %1 %2)) (.log js/console "even") (.log js/console "odd")) x y))
+
+;; This throws a js error because loop* is not supported.
+(cell= (doseq [i z] (.log js/console i)))
+
+;; This works as intended because the cell= macro doesn't walk the fn.
+(cell= (#(doseq [i %] (.log js/console i)) z))
 ```
 
 ## License
