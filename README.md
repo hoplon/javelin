@@ -148,9 +148,10 @@ This causes the behavior of "short-circuiting" expressions like `and`
 and `if` to be strange. If the short-circuiting behavior is required
 then the expression must be wrapped in an anonymous function.
 
-Also, some forms (like `for` or `doseq`, for example) macroexpand to
-expressions based on unsupported special forms like `loop*`. Expressions
-using these forms must also be wrapped in anonymous functions.
+Also, some macros (like `for` or `doseq`, for example) expand to
+expressions including unsupported special forms like `loop*`.
+Expressions using these forms must also be wrapped in anonymous
+functions.
 
 ```clojure
 (def x (cell 1))
