@@ -101,9 +101,9 @@ exceptions:
 
 * **Special forms** are replaced with equivalent function
   implementations.
-* **Some special forms can not be lifted** and are unsupported:
-  `def`, `loop*`, `letfn*`, `try*`, `recur`, `ns`, `deftype*`,
-  `defrecord*`, and `&`.
+* **Some special forms can not be lifted** and are not allowed in
+  formula expressions: `def`, `loop*`, `letfn*`, `try*`, `recur`,
+  `ns`, `deftype*`, `defrecord*`, and `&`.
 * **Collection literals** are replaced with their sexp equivalents
   and then walked.
 * **Anonymous function bodies** are not walked.
