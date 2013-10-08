@@ -2,6 +2,10 @@
 
 ## 2.0.0-SNAPSHOT
 
+*Tue Oct  8 19:28:37 EDT 2013*
+
+* Add `set-cell!` and `set-cell!=` macros.
+
 *Sun Oct  6 16:32:01 EDT 2013*
 
 * Throw exception when `swap!` or `reset!` is applied to a formula cell.
