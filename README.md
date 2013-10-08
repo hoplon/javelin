@@ -116,12 +116,12 @@ exceptions:
 
 The spreadsheet evaluation model is a push-based system, very
 different from the usual, pull-based Lisp evaluation model. In Lisp,
-forms are evaluated only as needed to produce a value. This model
-supports special forms and macros, which decide when to evaluate their
-own arguments. In the Javelin evaluation model this is impossible
-because formula cells are re-computed _reactively_ based on the values
-of the argument cells (cells the formula cell depends on), which must
-therefore be computed first.
+forms are evaluated depth first, and only as needed to produce a
+value. This model supports special forms and macros, which decide when
+to evaluate their own arguments. In the Javelin evaluation model this
+is impossible because formula cells are re-computed _reactively_ based
+on the values of the argument cells (cells the formula cell depends
+on), which must therefore be computed first.
 
 This causes the behavior of "short-circuiting" expressions like `and`
 and `if` to be strange. If the short-circuiting behavior is required
