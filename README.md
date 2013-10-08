@@ -34,7 +34,9 @@ Artifacts are published on [Clojars][3].
 
 ```clojure
 [tailrecursion/javelin "2.0.0-SNAPSHOT"]
+```
 
+```xml
 <dependency>
   <groupId>tailrecursion</groupId>
   <artifactId>javelin</artifactId>
