@@ -99,6 +99,33 @@ Some examples of cells:
 (swap! f inc)                   ;;=> ERROR: f is a formula cell, it updates itself!
 ```
 
+### Javelin Cell API
+
+Requiring the namespace and macros:
+
+```clojure
+(ns my-ns
+  (:require tailrecursion.javelin)
+  (:require-macros
+    [tailrecursion.javelin.macros :refer [cell cell= set-cell! set-cell!=]))
+```
+
+Cell macros:
+
+```clojure
+(cell expr)
+;; Create new input cell with initial value expr.
+
+(cell= expr)
+;; Create new fomula cell with formula expr.
+
+(set-cell! c expr)
+;; Convert c to input cell (if necessary) with initial value expr.
+
+(set-cell!= c expr)
+;; Convert c to formula cell (if necessary) with formula expr.
+```
+
 ### Cell Macro Internals
 
 The `cell` and `cell=` macros create cells using the underlying
@@ -144,14 +171,21 @@ is impossible because formula cells are re-computed _reactively_ based
 on the values of the argument cells (cells the formula cell depends
 on), which must therefore be computed first.
 
-This causes the behavior of "short-circuiting" expressions like `and`
-and `if` to be strange. If the short-circuiting behavior is required
-then the expression must be wrapped in an anonymous function.
+Consequences of this include:
+* "Short-circuiting" expressions (like `and` and `if`, for example)
+  don't work that way when used in a formula&mdash;all clauses are
+  always evaluated.
+* Macros that expand to expressions containing unsupported special
+  forms (like `doseq` and `for`, for example, which expand to
+  expressions containing the unsupported form `loop*`) can't be
+  used in formulas.
 
-Also, some macros (like `for` or `doseq`, for example) expand to
-expressions including unsupported special forms like `loop*`.
-Expressions using these forms must also be wrapped in anonymous
-functions.
+In these cases the solution is to wrap the expression in an anonymous
+function to protect it from being lifted when the `cell=` macro walks
+the code. The `cell=` macro will not descend into anonymous function
+bodies.
+
+For example:
 
 ```clojure
 (def x (cell 1))
@@ -161,7 +195,7 @@ functions.
 ;; This cell prints both "even" and "odd".
 (cell= (if (even? (+ x y)) (.log js/console "even") (.log js/console "odd")))
 
-;; This cell only prints "even" or "odd".
+;; This cell prints only "even" or "odd".
 (cell= (#(if (even? (+ %1 %2)) (.log js/console "even") (.log js/console "odd")) x y))
 
 ;; This throws a js error because loop* is not supported.
@@ -169,6 +203,25 @@ functions.
 
 ;; This works as intended because the cell= macro doesn't walk the fn.
 (cell= (#(doseq [i %] (.log js/console i)) z))
+```
+
+### Cell Type Internals
+
+The `Cell` type internals can be used to achieve more advanced goals.
+
+```clojure
+;; Get the previous value of a cell.
+(.-prev my-cell)
+
+;; Get a list of cells a cell depends on.
+(.-sources my-cell)
+
+;; Get a list of cells that depend on a cell.
+(.-sinks my-cell)
+
+;; Get a cell's "thunk", a function of no arguments that recomputes
+;; and sets the cell's value.
+(.-thunk my-cell)
 ```
 
 ## License

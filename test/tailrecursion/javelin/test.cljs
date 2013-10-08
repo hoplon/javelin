@@ -8,7 +8,7 @@
 
 (ns tailrecursion.javelin.test
   (:require tailrecursion.javelin)
-  (:require-macros [tailrecursion.javelin.macros :refer [mx cell cell= are=]]))
+  (:require-macros [tailrecursion.javelin.macros :refer [cell cell= set-cell! set-cell!= mx are=]]))
 
 (defn setup! []
   (set! cljs.core/*print-fn*
@@ -53,7 +53,23 @@
        (swap! a inc)
        (are= 1   @a
              2   @b
-             126 @c))
+             126 @c)
+       (set-cell!= b (dec a))
+       (are= 1   @a
+             0   @b
+             124 @c)
+       (swap! a inc)
+       (are= 2   @a
+             1   @b
+             126 @c)
+       (set-cell! b 10)
+       (are= 2   @a
+             10  @b
+             135 @c)
+       (swap! b inc)
+       (are= 2   @a
+             11  @b
+             136 @c))
 
      (let [a (cell "123")
            b (cell= (js/parseInt a))]

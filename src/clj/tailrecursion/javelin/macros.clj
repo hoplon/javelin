@@ -18,16 +18,17 @@
   [[binding resource] & body]
   `(let [~binding ~resource] ~@body ~binding))
 
-(create-ns 'tailrecursion.javelin.core)
+(create-ns 'tailrecursion.javelin)
 
 (let [home      #(symbol "tailrecursion.javelin" %)
-      keyw      #(keyword "tailrecursion.javelin.core" %)
+      keyw      #(keyword "tailrecursion.javelin" %)
       specials  #{'if 'def 'do 'loop* 'letfn* 'throw 'try* 'recur 'new 'ns 'deftype* 'defrecord* '&}
       to-list   #(into '() (reverse %))
       lift      (home "lift")
       input     (home "input")
       input*    (home "input*")
       deref*    (home "deref*")
+      set-frm!  (home "set-formula!")
       special?  #(if (contains? specials %) (home (str % "*")))
       unquote?  #(and (seq? %) (= 'clojure.core/unquote (first %)))
       unsplice? #(and (seq? %) (= 'clojure.core/unquote-splicing (first %)))
@@ -116,6 +117,14 @@
     "This is useful for debugging macros in ClojureScript."
     [form]
     (pr-str (macroexpand-all* &env form)))
+
+  (defmacro set-cell!
+    [c value]
+    `(do (set! (.-state ~c) ~value) (~set-frm! ~c)))
+
+  (defmacro set-cell!=
+    [c form]
+    (list set-frm! c 'identity [(do-lift (macroexpand-all* &env form))]))
 
   (defmacro cell
     "Create an input cell using form for initial value."
