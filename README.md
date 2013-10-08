@@ -73,13 +73,9 @@ formula cells.
 (def f (cell= (+ a 1)))         ;; cell with formula (+ a 1), updated when a changes
 (def g (cell= (+ a ~(inc @a)))) ;; cell with formula (+ a 43), updated when a changes
 
-(cell= (.log js/console a))     ;; value of a is printed whenever a changes
-
-(reset! a 7)                    ;; a now contains 7 and 7 is printed to the console
-
-[@e @f @g]                      ;; [{:x 7} 8 50]
-
-(swap! f inc)                   ;; no! f is a formula cell, it updates itself!
+(reset! a 7)                    ;;=> 7
+[@e @f @g]                      ;;=> [{:x 7} 8 50]
+(swap! f inc)                   ;;=> ERROR: f is a formula cell, it updates itself!
 ```
 
 ### Cell Macro Internals
