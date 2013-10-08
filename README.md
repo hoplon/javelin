@@ -57,6 +57,7 @@ There are two kinds of cells: **input cells** and **formula cells**.
 
 **Input cells**
 * contain values that are updated explicitly using `reset!` or `swap!`.
+* implement `IWatchable` so `add-watch` and `remove-watch` can be used.
 * are created by the `cell` macro.
 
 **Formula Cells**
@@ -65,6 +66,7 @@ There are two kinds of cells: **input cells** and **formula cells**.
   change.
 * are read-only&mdash;attempts to update a formula cell directly
   via `swap!` or `reset!` results in an error.
+* do not implement `IWatchable`&mdash;use anonymous cells instead.
 * are created by the `cell=` macro.
 
 Some examples of cells:
