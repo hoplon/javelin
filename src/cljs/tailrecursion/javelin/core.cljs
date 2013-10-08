@@ -7,26 +7,15 @@
 ;; You must not remove this notice, or any other, from this software.
 
 (ns tailrecursion.javelin.core
-  (:require-macros
-    [tailrecursion.javelin.macros :refer [with-let]])
   (:require
-   [tailrecursion.priority-map  :refer [priority-map]]
-   [alandipert.desiderata    :as    d]))
-
-(let [rank (atom 0)]
-  (defn next-rank [] (swap! rank inc)))
+   [alandipert.desiderata :as d]
+   [tailrecursion.priority-map :refer [priority-map]]))
 
 (declare Cell cell? input)
 
-(defn deref* [x] (if (cell? x) @x x))
-
-(defn self? [x] (and (cell? x) (map? @x) (contains? @x ::self)))
-
-(defn sub-self [this xs]
-  (map #(if (self? %) (if (= ::none @this) (input (::self @%)) this) %) xs))
-
-(defn sinks-seq [c]
-  (tree-seq cell? #(seq (.-sinks %)) c))
+(def  last-rank     (atom 0))
+(defn next-rank [ ] (swap! last-rank inc))
+(defn deref*    [x] (if (cell? x) @x x))
 
 (defn propagate! [cell]
   (loop [queue (priority-map cell (.-rank cell))]
@@ -34,7 +23,7 @@
       (let [next      (key (peek queue))
             value     ((.-thunk next))
             continue? (not= value (.-prev next))
-            reducer  #(assoc %1 %2 (.-rank %2))
+            reducer   #(assoc %1 %2 (.-rank %2))
             siblings  (pop queue)
             children  (.-sinks next)]
         (if continue? (set! (.-prev next) value))
@@ -49,10 +38,13 @@
     (if (> (.-rank source) (.-rank this))
       (doseq [dep (d/bf-seq identity #(.-sinks %) source)]
         (set! (.-rank dep) (next-rank)))))
-  (let [compute #(apply (deref* (peek %)) (map deref* (sub-self this (pop %))))
-        thunk   #(reset! this (compute (.-sources this)))]
-    (if f (-remove-watch this ::propagate)
-        (-add-watch this ::propagate (fn [_ cell _ _] (propagate! cell))))
+  (let [compute   #(apply (deref* (peek %)) (map deref* (pop %)))
+        thunk     #(set! (.-state this) (compute (.-sources this)))
+        err-mesg  "formula cell can't be updated via swap! or reset!"
+        watch-err (fn [_ _ _ _] (throw (js/Error. err-mesg)))
+        watch-ok  (fn [_ cell _ _] (propagate! cell))]
+    (-remove-watch this ::propagate)
+    (-add-watch this ::propagate (if f watch-err watch-ok))
     (set! (.-thunk this) (if f thunk #(deref this)))
     (doto this propagate!)))
 
@@ -72,13 +64,7 @@
   (-remove-watch [this key]
     (set! (.-watches this) (dissoc watches key))))
 
-(def cell?  #(= (type %) Cell))
-(def self   #(input {::self %}))
-(def input* #(if (cell? %) % (input %)))
-
-(defn input [value]
-  (set-formula! (Cell. {} value (next-rank) value [] #{} nil {})))
-
-(defn lift [f]
-  (fn [& sources]
-    (set-formula! (input ::none) f sources)))
+(defn cell?  [c] (= (type c) Cell))
+(defn input* [x] (if (cell? x) x (input x)))
+(defn input  [x] (set-formula! (Cell. {} x (next-rank) x [] #{} nil {})))
+(defn lift   [f] (fn [& sources] (set-formula! (input ::none) f sources)))

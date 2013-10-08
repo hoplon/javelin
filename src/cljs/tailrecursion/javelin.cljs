@@ -13,28 +13,5 @@
    [tailrecursion.javelin.core :as core]
    tailrecursion.javelin.specials))
 
-;; internal ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (mirror tailrecursion.javelin.core)
-
 (mirror tailrecursion.javelin.specials)
-
-;; public ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(def log        #(js/console.log %1 (clj->js %2)))
-(def timeout    #(.setTimeout js/window %1 %2))
-(def interval   #(.setInterval js/window %1 %2))
-
-(defn route*
-  [msec default]
-  (let [hash  #(.-hash (.-location js/window))
-        ret   (cell '(hash))]
-    (interval #(let [h (hash)] (reset! ret (if (empty? h) default h))) msec)
-    ret))
-
-(defn timer*
-  [msec f init]
-  (with-let [out (cell init)]
-    ((fn rec []
-       (timeout #(do (if-not (neg? @msec) (swap! out f)) (rec))
-                (if (neg? @msec) 0 @msec))))))
