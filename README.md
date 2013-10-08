@@ -55,15 +55,13 @@ expressions that may contain references to cells.
 
 ### Input Cells and Formula Cells
 
-**Input cells** contain values that are updated explicitly using
-`reset!` or `swap!`. **Formula cells** contain values that are
-recomputed by Javelin whenever the values in the cells referenced in
-the formula expression are changed. Note that **formula cells are
-read-only**&mdash;attempts to update a formula cell directly via
-`swap!` or `reset!` will cause an error.
-
-The `cell` macro creates input cells, and the `cell=` macro creates
-formula cells.
+* **Input cells** contain values that are updated explicitly using
+  `reset!` or `swap!`. Input cells are created by the `cell` macro.
+* **Formula cells** contain values that are recomputed automatically
+  whenever the values in the cells referenced in the formula expression
+  are changed. Formula cells are read-only&mdash;attempts to update a
+  formula cell directly via `swap!` or `reset!` will cause an error.
+  Formula cells are created by the `cell=` macro.
 
 ```clojure
 (def a (cell 42))               ;; cell containing the number 42
