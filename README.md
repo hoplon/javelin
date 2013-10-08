@@ -101,8 +101,8 @@ exceptions:
 
 * **Special forms** are replaced with equivalent function
   implementations.
-* But some special forms **can not be lifted**: `def`, `loop*`, `letfn*`,
-  `try*`, `recur`, `ns`, `deftype*`, `defrecord*`, and `&`.
+* But some special forms **can not be lifted**: `def`, `loop\*`, `letfn\*`,
+  `try\*`, `recur`, `ns`, `deftype\*`, `defrecord\*`, and `&`.
 * **Collection literals** are replaced with their sexp equivalents
   and then walked.
 * **Anonymous function bodies** are not walked.
@@ -112,7 +112,7 @@ exceptions:
 * **The unquote-splicing form** is interpreted as the composition
   of `unquote` and `deref`.
 
-### Special Forms In Formulas
+### Issues With Special Forms
 
 The spreadsheet evaluation model is a push-based system, very
 different from the usual, pull-based Lisp evaluation model. In Lisp,
