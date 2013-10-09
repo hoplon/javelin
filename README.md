@@ -99,6 +99,11 @@ Some examples of cells:
 (swap! f inc)                   ;;=> ERROR: f is a formula cell, it updates itself!
 ```
 
+Note the use of `~` in the definition of `g`&mdash;the expression
+`(inc @a)` is evaluated and the resulting value is used when creating
+the formula, rather than being recomputed each time the cell updates.
+See the [Cell Macro Internals][9] section for more info.
+
 ### Javelin Cell API
 
 Requiring the namespace and macros:
@@ -251,3 +256,4 @@ The `Cell` type internals can be used to achieve more advanced goals.
 [6]: https://github.com/lynaghk/todoFRP
 [7]: https://github.com/lynaghk/todoFRP/tree/master/todo/javelin
 [8]: https://github.com/lynaghk/todoFRP/tree/master/todo/hlisp-javelin
+[9]: https://github.com/tailrecursion/javelin#cell-macro-internals
