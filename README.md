@@ -108,7 +108,7 @@ Requiring the namespace and macros:
   (:require tailrecursion.javelin)
   (:require-macros
     [tailrecursion.javelin.macros
-     :refer [cell cell= set-cell! set-cell!= destroy-cell!]]))
+     :refer [cell? cell cell= set-cell! set-cell!= destroy-cell!]]))
 ```
 
 Cell macros:
