@@ -68,7 +68,7 @@ that may contain references to other cells.
 * are created by the `cell` macro.
 
 **Formula Cells**
-* contain values that are recomputed according to a formula.
+* contain values that are recomputed _reactively_ according to a formula.
 * are read-only&mdash;attempts to update a formula cell directly
   via `swap!` or `reset!` results in an error.
 * do not implement `IWatchable`&mdash;use anonymous cells instead.
