@@ -29,6 +29,7 @@
       input*    (home "input*")
       deref*    (home "deref*")
       set-frm!  (home "set-formula!")
+      destroy!  (home "destroy!")
       special?  #(if (contains? specials %) (home (str % "*")))
       unquote?  #(and (seq? %) (= 'clojure.core/unquote (first %)))
       unsplice? #(and (seq? %) (= 'clojure.core/unquote-splicing (first %)))
@@ -113,28 +114,36 @@
     [env form]
     (prewalk (partial macroexpand* env) form))
 
+  (defn mark-live
+    [form]
+    `(let [c# ~form] (set! (.-live c#) true) c#))
+
   (defmacro mx
     "This is useful for debugging macros in ClojureScript."
     [form]
     (pr-str (macroexpand-all* &env form)))
 
   (defmacro set-cell!
-    [c value]
-    `(do (set! (.-state ~c) ~value) (~set-frm! ~c)))
+    [c form]
+    `(do (set! (.-state ~c) ~form) (~set-frm! ~c)))
 
   (defmacro set-cell!=
     [c form]
-    (list set-frm! c 'identity [(do-lift (macroexpand-all* &env form))]))
+    `(~set-frm! ~c identity [~(do-lift (macroexpand-all* &env form))]))
+
+  (defmacro destroy-cell!
+    [c]
+    `(~destroy! ~c))
 
   (defmacro cell
     "Create an input cell using form for initial value."
     [form]
-    (list input form))
+    (mark-live `(~input ~form)))
 
   (defmacro cell=
     "Create formula cell using form as the formula expression."
     [form]
-    (do-lift (macroexpand-all* &env form))))
+    (mark-live (do-lift (macroexpand-all* &env form)))))
 
 ;; mirroring ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

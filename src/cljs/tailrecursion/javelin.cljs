@@ -13,7 +13,7 @@
 
 ;; specials ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn no-supported
+(defn not-supported
   [spec-form]
   #(throw (js/Error. (str spec-form " is not supported in cell formulas"))))
 
@@ -24,15 +24,15 @@
 (def do*         (fn [& body] (last body)))
 (def throw*      #(if (string? %) (js/Error. %) %))
 
-(def def*        (no-supported "def"))
-(def loop**      (no-supported "loop*"))
-(def letfn**     (no-supported "letfn*"))
-(def try**       (no-supported "try*"))
-(def recur*      (no-supported "recur"))
-(def ns*         (no-supported "ns"))
-(def deftype**   (no-supported "deftype*"))
-(def defrecord** (no-supported "defrecord*"))
-(def &*          (no-supported "&"))
+(def def*        (not-supported "def"))
+(def loop**      (not-supported "loop*"))
+(def letfn**     (not-supported "letfn*"))
+(def try**       (not-supported "try*"))
+(def recur*      (not-supported "recur"))
+(def ns*         (not-supported "ns"))
+(def deftype**   (not-supported "deftype*"))
+(def defrecord** (not-supported "defrecord*"))
+(def &*          (not-supported "&"))
 
 (defn new*
   ([class] (new class))
@@ -45,7 +45,7 @@
   ([class a b c d e f g] (new class a b c d e f g))
   ([class a b c d e f g h] (new class a b c d e f g h))
   ([class a b c d e f g h i] (new class a b c d e f g h i))
-  ([class a b c d e f g h i & more] (no-supported "new w/more than 10 args")))
+  ([class a b c d e f g h i & more] (not-supported "new w/more than 10 args")))
 
 ;; javelin ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -67,9 +67,17 @@
         (if continue? (set! (.-prev next) value))
         (recur (if continue? (reduce reducer siblings children) siblings))))))
 
+(defn destroy! [this & {:keys [sinks?]}]
+  (if (or sinks? (not (seq (.-sinks this))))
+    (let [srcs (.-sources this)]
+      (set! (.-sources this) [])
+      (doseq [src (sort-by #(.-rank %) > (filter cell? srcs))]
+        (set! (.-sinks src) (disj (.-sinks src) this))
+        (when-not (or (.-live src) (seq (.-sinks src))) (destroy! src))))
+    (throw (js/Error. "can't destroy cell that's referenced by other cells"))))
+
 (defn set-formula! [this & [f sources]]
-  (doseq [source (filter cell? (.-sources this))]
-    (set! (.-sinks source) (disj (.-sinks source) this)))
+  (destroy! this :sinks? true)
   (set! (.-sources this) (if f (conj (vec sources) f) (vec sources)))
   (doseq [source (filter cell? (.-sources this))]
     (set! (.-sinks source) (conj (.-sinks source) this))
@@ -86,7 +94,7 @@
     (set! (.-thunk this) (if f thunk #(deref this)))
     (doto this propagate!)))
 
-(deftype Cell [meta state rank prev sources sinks thunk watches]
+(deftype Cell [meta state rank prev sources sinks thunk watches live]
   cljs.core/IMeta
   (-meta [this] meta)
 
@@ -104,5 +112,5 @@
 
 (defn cell?  [c] (= (type c) Cell))
 (defn input* [x] (if (cell? x) x (input x)))
-(defn input  [x] (set-formula! (Cell. {} x (next-rank) x [] #{} nil {})))
+(defn input  [x] (set-formula! (Cell. {} x (next-rank) x [] #{} nil {} false)))
 (defn lift   [f] (fn [& sources] (set-formula! (input ::none) f sources)))

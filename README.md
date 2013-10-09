@@ -107,7 +107,8 @@ Requiring the namespace and macros:
 (ns my-ns
   (:require tailrecursion.javelin)
   (:require-macros
-    [tailrecursion.javelin.macros :refer [cell cell= set-cell! set-cell!=]))
+    [tailrecursion.javelin.macros
+     :refer [cell cell= set-cell! set-cell!= destroy-cell!]]))
 ```
 
 Cell macros:
@@ -124,6 +125,10 @@ Cell macros:
 
 (set-cell!= c expr)
 ;; Convert c to formula cell (if necessary) with formula expr.
+
+(destroy-cell! c)
+;; Removes c from the cell graph so it can be GC'd. It's an error
+;; to destroy a cell if other cells refer to it in their formulas.
 ```
 
 ### Cell Macro Internals

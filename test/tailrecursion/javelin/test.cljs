@@ -44,8 +44,9 @@
                (catch js/Error e :exception-thrown))]
        (are= a :exception-thrown)) 
 
-     (let [a (cell 0)
-           b (cell= (inc a))
+     (let [x (atom [])
+           a (cell 0)
+           b (cell= (do (swap! x conj a) (inc a)))
            c (cell= (+ 123 a b))]
        (are= 0   @a
              1   @b
@@ -69,7 +70,8 @@
        (swap! b inc)
        (are= 2   @a
              11  @b
-             136 @c))
+             136 @c)
+       (are= [0 1] @x))
 
      (let [a (cell "123")
            b (cell= (js/parseInt a))]
