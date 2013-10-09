@@ -187,7 +187,9 @@ on), which must therefore be computed first.
 Consequences of this include:
 * "Short-circuiting" expressions (like `and` and `if`, for example)
   don't work that way when used in a formula&mdash;all clauses are
-  always evaluated.
+  always evaluated. The cell's value will be correct (i.e. the cell
+  will contain the value of the correct clause) but side effects in
+  all clauses will be performed on every update.
 * Macros that expand to expressions containing unsupported special
   forms (like `doseq` and `for`, for example, which expand to
   expressions containing the unsupported form `loop*`) can't be
