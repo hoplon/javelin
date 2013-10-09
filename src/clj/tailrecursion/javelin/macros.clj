@@ -24,6 +24,7 @@
       keyw      #(keyword "tailrecursion.javelin" %)
       specials  #{'if 'def 'do 'loop* 'letfn* 'throw 'try* 'recur 'new 'ns 'deftype* 'defrecord* '&}
       to-list   #(into '() (reverse %))
+      cell?*    (home "cell?")
       lift      (home "lift")
       input     (home "input")
       input*    (home "input*")
@@ -122,6 +123,10 @@
     "This is useful for debugging macros in ClojureScript."
     [form]
     (pr-str (macroexpand-all* &env form)))
+
+  (defmacro cell?
+    [c]
+    `(~cell?* ~c))
 
   (defmacro set-cell!
     [c form]

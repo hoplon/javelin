@@ -114,6 +114,9 @@ Requiring the namespace and macros:
 Cell macros:
 
 ```clojure
+(cell? c)
+;; Returns true if c is a Cell, false otherwise.
+
 (cell expr)
 ;; Create new input cell with initial value expr.
 

@@ -8,7 +8,9 @@
 
 (ns tailrecursion.javelin.test
   (:require tailrecursion.javelin)
-  (:require-macros [tailrecursion.javelin.macros :refer [cell cell= set-cell! set-cell!= mx are=]]))
+  (:require-macros
+    [tailrecursion.javelin.macros
+     :refer [cell? cell cell= set-cell! set-cell!= mx are=]]))
 
 (defn setup! []
   (set! cljs.core/*print-fn*
@@ -33,6 +35,10 @@
      (let [a (cell 42)
            b (cell (+ 1 2))
            c (cell= (+ a 1))]
+       (are= true   (cell? a)
+             true   (cell? b)
+             true   (cell? c)
+             false  (cell? (atom 0)))
        (are= 42 @a
              3  @b
              43 @c))
