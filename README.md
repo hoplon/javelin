@@ -159,16 +159,16 @@ expression are fully expanded. The resulting form is then walked
 recursively and all forms in function position are lifted, subject
 to the following special cases and exceptions:
 
-* **Special forms** `if`, `do`, and `throw` are replaced during the
-  code-walking phase with equivalent reactive implementations.
+* **Special forms** `if`, `do`, `new`, and `throw` are replaced during
+  the code-walking phase with equivalent reactive implementations.
 * **Special forms** `def`, `loop*`, `letfn*`, `try*`, `recur`, `ns`,
   `deftype*`, `defrecord*`, and `&` are not supported and cause a
   runtime exception to be thrown.
 * **Collection literals** are replaced with their sexp equivalents
   and then walked.
-* **Anonymous function bodies** are not walked.
-* **Quoted expressions** are not walked.
-* **The unquote form** causes its argument to be evaluated in place
+* **Anonymous function bodies** are not walked.  * **Quoted
+  expressions** are not walked.  * **The unquote form** causes its
+  argument to be evaluated in place
   and not walked.
 * **The unquote-splicing form** is interpreted as the composition
   of `unquote` and `deref`.
