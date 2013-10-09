@@ -166,9 +166,9 @@ to the following special cases and exceptions:
   runtime exception to be thrown.
 * **Collection literals** are replaced with their sexp equivalents
   and then walked.
-* **Anonymous function bodies** are not walked.  * **Quoted
-  expressions** are not walked.  * **The unquote form** causes its
-  argument to be evaluated in place
+* **Anonymous function bodies** are not walked.
+* **Quoted expressions** are not walked.
+* **The unquote form** causes its argument to be evaluated in place
   and not walked.
 * **The unquote-splicing form** is interpreted as the composition
   of `unquote` and `deref`.
