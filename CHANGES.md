@@ -4,7 +4,7 @@
 
 *Tue Oct  8 19:28:37 EDT 2013*
 
-* Add `set-cell!` and `set-cell!=` macros.
+* Add `cell?`, `set-cell!`, `set-cell!=`, and `destroy-cell!` macros.
 
 *Sun Oct  6 16:32:01 EDT 2013*
 
