@@ -154,10 +154,10 @@ argument cells change.
 (def y ((lift +) x 1))  ;; similar to (def y (cell= (+ x 1)))
 ```
 
-To create a formula cell, the `cell=` macro fully expands all macros
-in the given expression and walks it, recursively lifting all forms in
-function position. However, there are several special cases and
-exceptions:
+To create a formula cell: first, all macros in the given formula
+expression are fully expanded. The resulting form is then walked
+recursively and all forms in function position are lifted, subject
+to the following special cases and exceptions:
 
 * **Special forms** `if`, `do`, and `throw` are replaced during the
   code-walking phase with equivalent reactive implementations.
