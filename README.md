@@ -154,8 +154,8 @@ argument cells change.
 (def y ((lift +) x 1))  ;; similar to (def y (cell= (+ x 1)))
 ```
 
-To create a formula cell, the `cell=` macro fully macroexpands the
-given expression and then walks it, recursively lifting all forms in
+To create a formula cell, the `cell=` macro fully expands all macros
+in the given expression and walks it, recursively lifting all forms in
 function position. However, there are several special cases and
 exceptions:
 
