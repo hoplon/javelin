@@ -95,6 +95,10 @@
     (doto this propagate!)))
 
 (deftype Cell [meta state rank prev sources sinks thunk watches live]
+  cljs.core/IPrintWithWriter
+  (-pr-writer [this writer opts]
+    (write-all writer "#<Cell: " (pr-str state) ">"))
+
   cljs.core/IMeta
   (-meta [this] meta)
 
@@ -103,8 +107,7 @@
 
   cljs.core/IWatchable
   (-notify-watches [this oldval newval]
-    (doseq [[key f] watches]
-      (f key this oldval newval)))
+    (doseq [[key f] watches] (f key this oldval newval)))
   (-add-watch [this key f]
     (set! (.-watches this) (assoc watches key f)))
   (-remove-watch [this key]

@@ -35,6 +35,7 @@
      (let [a (cell 42)
            b (cell (+ 1 2))
            c (cell= (+ a 1))]
+       (are= "#<Cell: 42>" (pr-str a))
        (are= true   (cell? a)
              true   (cell? b)
              true   (cell? c)
