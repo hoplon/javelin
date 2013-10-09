@@ -99,7 +99,7 @@ Some examples of cells:
 (swap! f inc)                   ;;=> ERROR: f is a formula cell, it updates itself!
 ```
 
-Note the use of `~` in the definition of `g`&mdash;the expression
+Note the use of `~` in the definition of `g`. The expression
 `(inc @a)` is evaluated and the resulting value is used when creating
 the formula, rather than being recomputed each time the cell updates.
 See the [Cell Macro Internals][9] section for more info.
