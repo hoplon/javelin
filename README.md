@@ -93,9 +93,9 @@ Some examples of cells:
 (def h (cell= [e f g]))         ;; cell with formula [e f g], updated when e, f,
                                 ;; and/or g change
 
-[@e @f @g]                      ;;=> [{:x 42} 43 85]
+@h                              ;;=> [{:x 42} 43 85]
 (reset! a 7)                    ;;=> 7
-[@e @f @g]                      ;;=> [{:x 7} 8 50]
+@h                              ;;=> [{:x 7} 8 50]
 (swap! f inc)                   ;;=> ERROR: f is a formula cell, it updates itself!
 ```
 
