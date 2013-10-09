@@ -145,8 +145,8 @@ cells) returns a cell with the given function as the formula
 argument cells change.
 
 ```clojure
-(def x (input 7))       ;; equivalent to (def x (cell 7))
-(def y ((lift +) x 1))  ;; equivalent to (def y (cell= (+ x 1)))
+(def x (input 7))       ;; similar to (def x (cell 7))
+(def y ((lift +) x 1))  ;; similar to (def y (cell= (+ x 1)))
 ```
 
 To create a formula cell, the `cell=` macro fully macroexpands the
