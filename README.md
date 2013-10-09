@@ -154,11 +154,11 @@ given expression and then walks it, recursively lifting all forms in
 function position. However, there are several special cases and
 exceptions:
 
-* **Special forms** are replaced with equivalent function
-  implementations.
-* **Special forms** that are not allowed in formula expressions:
-  `def`, `loop*`, `letfn*`, `try*`, `recur`, `ns`, `deftype*`,
-  `defrecord*`, and `&`.
+* **Special forms** `if`, `do`, and `throw` are replaced during the
+  code-walking phase with equivalent reactive implementations.
+* **Special forms** `def`, `loop*`, `letfn*`, `try*`, `recur`, `ns`,
+  `deftype*`, `defrecord*`, and `&` are not supported and cause a
+  runtime exception to be thrown.
 * **Collection literals** are replaced with their sexp equivalents
   and then walked.
 * **Anonymous function bodies** are not walked.
