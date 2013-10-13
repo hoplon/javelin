@@ -104,7 +104,7 @@
   cljs.core/IDeref
   (-deref [this] (.-state this))
 
-  cljs.core/IWatchable
+  cljs.core/IWatchable ;; internal use only
   (-notify-watches [this oldval newval]
     (doseq [[key f] watches] (f key this oldval newval)))
   (-add-watch [this key f]
