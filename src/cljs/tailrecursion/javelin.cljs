@@ -13,12 +13,12 @@
 
 ;; specials ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(def do*    #(last %&))
+(def throw* #(if (string? %) (js/Error. %) %))
+
 (defn if* 
   ([pred consequent] (if pred consequent))
   ([pred consequent alternative] (if pred consequent alternative)))
-
-(def do*          (fn [& body] (last body)))
-(def throw*       #(if (string? %) (js/Error. %) %))
 
 (defn new*
   ([class] (new class))
