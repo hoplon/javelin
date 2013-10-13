@@ -97,7 +97,7 @@ Some examples of cells:
 Note the use of `~` in the definition of `g`. The expression
 `(inc @a)` is evaluated and the resulting value is used when creating
 the formula, rather than being recomputed each time the cell updates.
-See the [Cell Macro Internals][9] section for more info.
+See the [Formulas][9] section for more info.
 
 ### Javelin Cell API
 
@@ -134,7 +134,7 @@ Cell macros:
 ;; to destroy a cell if other cells refer to it in their formulas.
 ```
 
-### Cell Macro Internals
+### Formulas
 
 The `cell` and `cell=` macros create cells using the underlying
 `input` and `lift` functions. The former returns an input cell with
@@ -253,4 +253,4 @@ The `Cell` type internals can be used to achieve more advanced goals.
 [6]: https://github.com/lynaghk/todoFRP
 [7]: https://github.com/lynaghk/todoFRP/tree/master/todo/javelin
 [8]: https://github.com/lynaghk/todoFRP/tree/master/todo/hlisp-javelin
-[9]: https://github.com/tailrecursion/javelin#cell-macro-internals
+[9]: https://github.com/tailrecursion/javelin#formulas
