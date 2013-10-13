@@ -132,6 +132,7 @@ to the following special cases and exceptions:
   and not walked.
 * **The unquote-splicing form** is interpreted as the composition
   of `unquote` and `deref`.
+* **Circular references** result in an infinite loop and stack overflow.
 
 #### Special Forms In Formulas
 
