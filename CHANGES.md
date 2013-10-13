@@ -2,6 +2,11 @@
 
 ## 2.0.0-SNAPSHOT
 
+*Sun Oct 13 18:24:15 EDT 2013*
+
+* Remove `mx` macro.
+* Add `macroexpand-all` macro.
+
 *Tue Oct  8 19:28:37 EDT 2013*
 
 * Add `cell?`, `set-cell!`, `set-cell!=`, and `destroy-cell!` macros.

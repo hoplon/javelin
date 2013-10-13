@@ -7,16 +7,37 @@
 ;; You must not remove this notice, or any other, from this software.
 
 (ns tailrecursion.javelin.macros
-  (:require [clojure.walk    :refer [macroexpand-all prewalk]]
+  (:require [clojure.walk    :refer [prewalk]]
             [cljs.analyzer   :as a]
             [clojure.java.io :as io]
             [clojure.string  :as s]))
+
+;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmacro with-let
   "Binds resource to binding and evaluates body.  Then, returns
   resource.  It's a cross between doto and with-open."
   [[binding resource] & body]
   `(let [~binding ~resource] ~@body ~binding))
+
+(defn macroexpand*
+  [env form]
+  (if (seq? form)
+    (let [ex (a/macroexpand-1 env form)]
+      (if (identical? ex form)
+        form
+        (macroexpand* env ex)))
+    form))
+
+(defn macroexpand-all*
+  [env form]
+  (prewalk (partial macroexpand* env) form))
+
+(defmacro macroexpand-all
+  [form]
+  (macroexpand-all* &env form))
+
+;; javelin cells ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (create-ns 'tailrecursion.javelin)
 
@@ -102,27 +123,9 @@
                               `(apply (~lift ~(do-lift (first args))) ~@(map do-lift (rest args)))
                               `((~lift ~(do-lift (or (special? op) op))) ~@(map do-lift args))))))
 
-  (defn macroexpand*
-    [env form]
-    (if (seq? form)
-      (let [ex (a/macroexpand-1 env form)]
-        (if (identical? ex form)
-          form
-          (macroexpand* env ex)))
-      form))
-
-  (defn macroexpand-all*
-    [env form]
-    (prewalk (partial macroexpand* env) form))
-
   (defn mark-live
     [form]
     `(let [c# ~form] (set! (.-live c#) true) c#))
-
-  (defmacro mx
-    "This is useful for debugging macros in ClojureScript."
-    [form]
-    (pr-str (macroexpand-all* &env form)))
 
   (defmacro cell?
     [c]

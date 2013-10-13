@@ -10,7 +10,7 @@
   (:require tailrecursion.javelin)
   (:require-macros
     [tailrecursion.javelin.macros
-     :refer [cell? cell cell= set-cell! set-cell!= mx are=]]))
+     :refer [cell? cell cell= set-cell! set-cell!= are=]]))
 
 (defn setup! []
   (set! cljs.core/*print-fn*
