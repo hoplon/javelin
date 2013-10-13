@@ -105,7 +105,7 @@ The `cell` and `cell=` macros create cells using the underlying
 `input` and `lift` functions. The former returns an input cell with
 the given initial value. The latter "lifts" a given function,
 returning a function that, when applied to arguments (which may be
-cells) returns a cell with the given function as the formula&mdash;the
+cells), returns a cell with the given function as the formula&mdash;the
 cell's value is recomputed automatically whenever any of the argument
 cells change.
 
