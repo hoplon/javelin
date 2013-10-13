@@ -118,7 +118,8 @@ recursively and all forms in function position are lifted, subject
 to the following special cases and exceptions:
 
 * **Special forms** `if`, `do`, `new`, and `throw` are replaced during
-  the code-walking phase with equivalent reactive implementations.
+  the code-walking phase with equivalent reactive implementations. (The
+  `new` form takes a maximum of 10 arguments.)
 * **Collection literals** are replaced with their sexp equivalents
   and then walked.
 * **Anonymous function bodies** are not walked.
