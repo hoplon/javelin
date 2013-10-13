@@ -106,7 +106,7 @@ The `cell` and `cell=` macros create cells using the underlying
 the given initial value. The latter "lifts" a given function,
 returning a function that, when applied to arguments (which may be
 cells) returns a cell with the given function as the formula
-&mdash; this cell's value is recomputed whenever any of the
+&mdash; the cell's value is recomputed whenever any of the
 argument cells change.
 
 ```clojure
