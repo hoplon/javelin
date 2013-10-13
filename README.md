@@ -97,42 +97,7 @@ Some examples of cells:
 Note the use of `~` in the definition of `g`. The expression
 `(inc @a)` is evaluated and the resulting value is used when creating
 the formula, rather than being recomputed each time the cell updates.
-See the [Formulas][9] section for more info.
-
-### Javelin Cell API
-
-Requiring the namespace and macros:
-
-```clojure
-(ns my-ns
-  (:require tailrecursion.javelin)
-  (:require-macros
-    [tailrecursion.javelin.macros
-     :refer [cell? cell cell= set-cell! set-cell!= destroy-cell!]]))
-```
-
-Cell macros:
-
-```clojure
-(cell? c)
-;; Returns true if c is a Cell, false otherwise.
-
-(cell expr)
-;; Create new input cell with initial value expr.
-
-(cell= expr)
-;; Create new fomula cell with formula expr.
-
-(set-cell! c expr)
-;; Convert c to input cell (if necessary) with initial value expr.
-
-(set-cell!= c expr)
-;; Convert c to formula cell (if necessary) with formula expr.
-
-(destroy-cell! c)
-;; Removes c from the cell graph so it can be GC'd. It's an error
-;; to destroy a cell if other cells refer to it in their formulas.
-```
+See the [Formulas][9] section below.
 
 ### Formulas
 
@@ -168,7 +133,7 @@ to the following special cases and exceptions:
 * **The unquote-splicing form** is interpreted as the composition
   of `unquote` and `deref`.
 
-### Issues With Special Forms
+#### Special Forms In Formulas
 
 The spreadsheet evaluation model is a push-based system, very
 different from the usual, pull-based Lisp evaluation model. In Lisp,
@@ -213,6 +178,41 @@ For example:
 
 ;; This works as intended because the cell= macro doesn't walk the fn.
 (cell= (#(doseq [i %] (.log js/console i)) z))
+```
+
+### Javelin Cell API
+
+Requiring the namespace and macros:
+
+```clojure
+(ns my-ns
+  (:require tailrecursion.javelin)
+  (:require-macros
+    [tailrecursion.javelin.macros
+     :refer [cell? cell cell= set-cell! set-cell!= destroy-cell!]]))
+```
+
+Cell macros:
+
+```clojure
+(cell? c)
+;; Returns true if c is a Cell, false otherwise.
+
+(cell expr)
+;; Create new input cell with initial value expr.
+
+(cell= expr)
+;; Create new fomula cell with formula expr.
+
+(set-cell! c expr)
+;; Convert c to input cell (if necessary) with initial value expr.
+
+(set-cell!= c expr)
+;; Convert c to formula cell (if necessary) with formula expr.
+
+(destroy-cell! c)
+;; Removes c from the cell graph so it can be GC'd. It's an error
+;; to destroy a cell if other cells refer to it in their formulas.
 ```
 
 ### Cell Type Internals
