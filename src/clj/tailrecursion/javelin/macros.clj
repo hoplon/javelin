@@ -41,7 +41,8 @@
 
 (create-ns 'tailrecursion.javelin)
 
-(def ^:dynamic *env* nil)
+(def ^:dynamic *env*  nil)
+(def ^:dynamic *form* nil)
 
 (let [home      #(symbol "tailrecursion.javelin" %)
       keyw      #(keyword "tailrecursion.javelin" %)
@@ -123,9 +124,9 @@
       (js*? form)         (do-js* form)
       (dot? form)         (do-dot form)
       (set!? form)        (do-set! form)
-      :else               (let [[op & args] form]
-                            (when (unsupp? op)
-                              (throw (Exception. (str op " not supported in formula"))))
+      :else               (let [[op & args] form
+                                msg #(format "%s not supported in formula %s" %1 %2)]
+                            (when (unsupp? op) (throw (Exception. (msg op *form*))))
                             (if (= op 'apply)
                               `(apply (~lift ~(do-lift (first args))) ~@(map do-lift (rest args)))
                               `((~lift ~(do-lift (or (special? op) op))) ~@(map do-lift args))))))
@@ -144,7 +145,7 @@
 
   (defmacro set-cell!=
     [c form]
-    (binding [*env* &env]
+    (binding [*env* &env, *form* form]
       `(~set-frm! ~c identity [~(do-lift (macroexpand-all* *env* form))])))
 
   (defmacro destroy-cell!
@@ -159,7 +160,7 @@
   (defmacro cell=
     "Create formula cell using form as the formula expression."
     [form]
-    (binding [*env* &env]
+    (binding [*env* &env, *form* form]
       (mark-live (do-lift (macroexpand-all* &env form))))))
 
 ;; mirroring ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

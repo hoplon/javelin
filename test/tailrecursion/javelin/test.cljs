@@ -49,6 +49,7 @@
                      b (cell= (inc a))]
                  (reset! b 1337))
                (catch js/Error e :exception-thrown))]
+       (cell= (doseq [x [a]] (prn x)))
        (are= a :exception-thrown)) 
 
      (let [x (atom [])
