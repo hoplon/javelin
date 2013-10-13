@@ -89,7 +89,6 @@
         err-mesg  "formula cell can't be updated via swap! or reset!"
         watch-err (fn [_ _ _ _] (throw (js/Error. err-mesg)))
         watch-ok  (fn [_ cell _ _] (propagate! cell))]
-    (-remove-watch this ::propagate)
     (-add-watch this ::propagate (if f watch-err watch-ok))
     (set! (.-thunk this) (if f thunk #(deref this)))
     (doto this propagate!)))
