@@ -6,6 +6,7 @@
 
 * Remove `mx` macro.
 * Add `macroexpand-all` macro.
+* Unsupported special forms in formulas now cause compile-time exception.
 
 *Tue Oct  8 19:28:37 EDT 2013*
 

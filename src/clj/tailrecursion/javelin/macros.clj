@@ -41,9 +41,12 @@
 
 (create-ns 'tailrecursion.javelin)
 
+(def ^:dynamic *env* nil)
+
 (let [home      #(symbol "tailrecursion.javelin" %)
       keyw      #(keyword "tailrecursion.javelin" %)
-      specials  #{'if 'def 'do 'loop* 'letfn* 'throw 'try* 'recur 'new 'ns 'deftype* 'defrecord* '&}
+      specials  #{'if 'do 'throw 'new}
+      unsupp    #{'def 'loop* 'letfn* 'try* 'recur 'ns 'deftype* 'defrecord* '&} 
       to-list   #(into '() (reverse %))
       cell?*    (home "cell?")
       lift      (home "lift")
@@ -52,7 +55,8 @@
       deref*    (home "deref*")
       set-frm!  (home "set-formula!")
       destroy!  (home "destroy!")
-      special?  #(if (contains? specials %) (home (str % "*")))
+      special?  #(when (contains? specials %) (home (str % "*")))
+      unsupp?   #(and (contains? unsupp %) (not (contains? *env* %)))
       unquote?  #(and (seq? %) (= 'clojure.core/unquote (first %)))
       unsplice? #(and (seq? %) (= 'clojure.core/unquote-splicing (first %)))
       quote?    #(and (seq? %) (= 'quote (first %)))
@@ -119,6 +123,8 @@
       (dot? form)         (do-dot form)
       (set!? form)        (do-set! form)
       :else               (let [[op & args] form]
+                            (when (unsupp? op)
+                              (throw (Exception. (str op " not supported in formula"))))
                             (if (= op 'apply)
                               `(apply (~lift ~(do-lift (first args))) ~@(map do-lift (rest args)))
                               `((~lift ~(do-lift (or (special? op) op))) ~@(map do-lift args))))))
@@ -137,7 +143,8 @@
 
   (defmacro set-cell!=
     [c form]
-    `(~set-frm! ~c identity [~(do-lift (macroexpand-all* &env form))]))
+    (binding [*env* &env]
+      `(~set-frm! ~c identity [~(do-lift (macroexpand-all* *env* form))])))
 
   (defmacro destroy-cell!
     [c]
@@ -151,7 +158,8 @@
   (defmacro cell=
     "Create formula cell using form as the formula expression."
     [form]
-    (mark-live (do-lift (macroexpand-all* &env form)))))
+    (binding [*env* &env]
+      (mark-live (do-lift (macroexpand-all* &env form))))))
 
 ;; mirroring ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

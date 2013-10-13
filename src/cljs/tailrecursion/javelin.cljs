@@ -13,26 +13,12 @@
 
 ;; specials ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn not-supported
-  [spec-form]
-  #(throw (js/Error. (str spec-form " is not supported in cell formulas"))))
-
 (defn if* 
   ([pred consequent] (if pred consequent))
   ([pred consequent alternative] (if pred consequent alternative)))
 
-(def do*         (fn [& body] (last body)))
-(def throw*      #(if (string? %) (js/Error. %) %))
-
-(def def*        (not-supported "def"))
-(def loop**      (not-supported "loop*"))
-(def letfn**     (not-supported "letfn*"))
-(def try**       (not-supported "try*"))
-(def recur*      (not-supported "recur"))
-(def ns*         (not-supported "ns"))
-(def deftype**   (not-supported "deftype*"))
-(def defrecord** (not-supported "defrecord*"))
-(def &*          (not-supported "&"))
+(def do*          (fn [& body] (last body)))
+(def throw*       #(if (string? %) (js/Error. %) %))
 
 (defn new*
   ([class] (new class))
@@ -45,7 +31,8 @@
   ([class a b c d e f g] (new class a b c d e f g))
   ([class a b c d e f g h] (new class a b c d e f g h))
   ([class a b c d e f g h i] (new class a b c d e f g h i))
-  ([class a b c d e f g h i & more] (not-supported "new w/more than 10 args")))
+  ([class a b c d e f g h i & more]
+    (throw (js/Error. ("new w/more than 10 args not supported in formula")))))
 
 ;; javelin ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -128,11 +128,13 @@ to the following special cases and exceptions:
 * **The unquote-splicing form** is interpreted as the composition
   of `unquote` and `deref`.
 
-Some things don't make sense in formulas and cause runtime errors:
+Some things don't make sense in formulas and cause errors:
 
 * **Special forms** `def`, `loop*`, `letfn*`, `try*`, `recur`, `ns`,
-  `deftype*`, `defrecord*`, and `&` are not supported.
-* **Circular references** result in infinite loops.
+  `deftype*`, `defrecord*`, and `&` are not supported and cause
+  compile-time exceptions.
+* **Circular references** cause infinite loops and stack overflow 
+  errors.
 
 #### Special Forms In Formulas
 
