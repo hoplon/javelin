@@ -123,7 +123,7 @@ to the following special cases and exceptions:
   the code-walking phase with equivalent reactive implementations.
 * **Special forms** `def`, `loop*`, `letfn*`, `try*`, `recur`, `ns`,
   `deftype*`, `defrecord*`, and `&` are not supported and cause a
-  runtime exception to be thrown.
+  runtime error.
 * **Collection literals** are replaced with their sexp equivalents
   and then walked.
 * **Anonymous function bodies** are not walked.
@@ -132,7 +132,7 @@ to the following special cases and exceptions:
   and not walked.
 * **The unquote-splicing form** is interpreted as the composition
   of `unquote` and `deref`.
-* **Circular references** result in an infinite loop and stack overflow.
+* **Circular references** cause a runtime error (stack overflow).
 
 #### Special Forms In Formulas
 
