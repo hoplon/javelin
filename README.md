@@ -130,7 +130,7 @@ to the following special cases and exceptions:
 * **The unquote-splicing form** is interpreted as the composition
   of `unquote` and `deref`.
 
-Some things don't make sense in a formula and result in runtime errors:
+Some things don't make sense in a formula and cause runtime errors:
 
 * **Special forms** `def`, `loop*`, `letfn*`, `try*`, `recur`, `ns`,
   `deftype*`, `defrecord*`, and `&` are not supported.
