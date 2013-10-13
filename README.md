@@ -118,7 +118,7 @@ recursively and all forms in function position are lifted, subject
 to the following special cases and exceptions:
 
 * **Special forms** `if`, `do`, `new`, and `throw` are replaced
-  with equivalent reactive implementations.
+  with reactive implementations.
 * **Collection literals** are replaced with their sexp equivalents
   and then walked.
 * **Anonymous function bodies** are not walked.
