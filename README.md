@@ -133,7 +133,7 @@ Some things don't make sense in formulas and cause errors:
 * **Special forms** `def`, `loop*`, `letfn*`, `try*`, `recur`, `ns`,
   `deftype*`, `defrecord*`, and `&` are not supported and cause
   compile-time exceptions.
-* **Circular references** cause infinite loops and stack overflow 
+* **Circular dependencies** cause infinite loops and stack overflow 
   errors.
 
 #### Special Forms In Formulas
