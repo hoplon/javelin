@@ -121,9 +121,6 @@ to the following special cases and exceptions:
 
 * **Special forms** `if`, `do`, `new`, and `throw` are replaced during
   the code-walking phase with equivalent reactive implementations.
-* **Special forms** `def`, `loop*`, `letfn*`, `try*`, `recur`, `ns`,
-  `deftype*`, `defrecord*`, and `&` are not supported and cause a
-  runtime error.
 * **Collection literals** are replaced with their sexp equivalents
   and then walked.
 * **Anonymous function bodies** are not walked.
@@ -132,6 +129,13 @@ to the following special cases and exceptions:
   and not walked.
 * **The unquote-splicing form** is interpreted as the composition
   of `unquote` and `deref`.
+
+Some things don't make sense in a push-based evaluation model, for
+example:
+
+* **Special forms** `def`, `loop*`, `letfn*`, `try*`, `recur`, `ns`,
+  `deftype*`, `defrecord*`, and `&` are not supported and cause a
+  runtime error.
 * **Circular references** cause a runtime error (stack overflow).
 
 #### Special Forms In Formulas
