@@ -7,6 +7,8 @@
 * Remove `mx` macro.
 * Add `macroexpand-all` macro.
 * Unsupported special forms in formulas now cause compile-time exception.
+* Fix issue where local bindings were interpreted as special forms with the
+  same name.
 
 *Tue Oct  8 19:28:37 EDT 2013*
 
