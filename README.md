@@ -141,7 +141,7 @@ different from the usual, pull-based Lisp evaluation model. In Lisp,
 forms are evaluated depth first, and only as needed to produce a
 value. This model supports special forms and macros, which decide when
 to evaluate their own arguments. In the Javelin evaluation model this
-is impossible because formula cells are re-computed _reactively_ based
+is impossible because formula cells are recomputed _reactively_ based
 on the values of the argument cells (cells the formula cell depends
 on), which must therefore be computed first.
 
