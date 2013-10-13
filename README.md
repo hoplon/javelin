@@ -130,13 +130,12 @@ to the following special cases and exceptions:
 * **The unquote-splicing form** is interpreted as the composition
   of `unquote` and `deref`.
 
-Some things don't make sense in a push-based evaluation model, for
-example:
+Some things don't make sense in a push-based evaluation model and
+result in runtime errors:
 
 * **Special forms** `def`, `loop*`, `letfn*`, `try*`, `recur`, `ns`,
-  `deftype*`, `defrecord*`, and `&` are not supported and cause a
-  runtime error.
-* **Circular references** cause a runtime error (stack overflow).
+  `deftype*`, `defrecord*`, and `&` are not supported.
+* **Circular references** result in infinite loops.
 
 #### Special Forms In Formulas
 
