@@ -124,7 +124,7 @@ Some things don't make sense in formulas and cause errors:
 * **Circular dependencies** cause infinite loops and stack overflow 
   errors.
 
-#### Special Forms In Formulas
+### Lisp vs. Spreadsheet Evaluation
 
 The spreadsheet evaluation model is a push-based system, very
 different from the usual, pull-based Lisp evaluation model. In Lisp,
