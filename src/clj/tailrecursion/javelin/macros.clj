@@ -50,6 +50,7 @@
       unsupp    #{'def 'loop* 'letfn* 'try* 'recur 'ns 'deftype* 'defrecord* '&} 
       to-list   #(into '() (reverse %))
       cell?*    (home "cell?")
+      input?*   (home "input?")
       lift      (home "lift")
       input     (home "input")
       input*    (home "input*")
@@ -62,7 +63,6 @@
       unquote?  #(and (seq? %) (= 'clojure.core/unquote (first %)))
       unsplice? #(and (seq? %) (= 'clojure.core/unquote-splicing (first %)))
       quote?    #(and (seq? %) (= 'quote (first %)))
-      input?    #(and (seq? %) (= input (first %)))
       func?     #(and (seq? %) (= 'fn* (first %)))
       let*?     #(and (seq? %) (= 'let* (first %)))
       js*?      #(and (seq? %) (= 'js* (first %)))
@@ -139,9 +139,9 @@
     [form]
     `(let [c# ~form] (set! (.-live c#) true) c#))
 
-  (defmacro cell?
-    [c]
-    `(~cell?* ~c))
+  (defmacro cell?         [c] `(~cell?* ~c))
+  (defmacro input?        [c] `(~input?* ~c))
+  (defmacro destroy-cell! [c] `(~destroy! ~c))
 
   (defmacro set-cell!
     [c form]
@@ -152,17 +152,11 @@
     (binding [*env* &env, *form* form]
       `(~set-frm! ~c identity [~(do-lift (macroexpand-all* *env* form))])))
 
-  (defmacro destroy-cell!
-    [c]
-    `(~destroy! ~c))
-
   (defmacro cell
-    "Create an input cell using form for initial value."
     [form]
     (mark-live `(~input ~form)))
 
   (defmacro cell=
-    "Create formula cell using form as the formula expression."
     [form]
     (binding [*env* &env, *form* form]
       (mark-live (do-lift (macroexpand-all* &env form))))))

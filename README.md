@@ -192,14 +192,17 @@ Requiring the namespace and macros:
   (:require tailrecursion.javelin)
   (:require-macros
     [tailrecursion.javelin.macros
-     :refer [cell? cell cell= set-cell! set-cell!= destroy-cell!]]))
+     :refer [cell? input? cell cell= set-cell! set-cell!= destroy-cell!]]))
 ```
 
 Cell macros:
 
 ```clojure
 (cell? c)
-;; Returns true if c is a Cell, false otherwise.
+;; Returns c if c is a Cell, nil otherwise.
+
+(input? c)
+;; Returns c if c is an input cell, nil otherwise.
 
 (cell expr)
 ;; Create new input cell with initial value expr.

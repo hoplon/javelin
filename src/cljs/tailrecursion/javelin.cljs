@@ -77,10 +77,11 @@
         watch-err (fn [_ _ _ _] (throw (js/Error. err-mesg)))
         watch-ok  (fn [_ cell _ _] (propagate! cell))]
     (-add-watch this ::propagate (if f watch-err watch-ok))
+    (set! (.-input? this) (if f false true))
     (set! (.-thunk this) (if f thunk #(deref this)))
     (doto this propagate!)))
 
-(deftype Cell [meta state rank prev sources sinks thunk watches live]
+(deftype Cell [meta state rank prev sources sinks thunk watches live input?]
   cljs.core/IPrintWithWriter
   (-pr-writer [this writer opts]
     (write-all writer "#<Cell: " (pr-str state) ">"))
@@ -99,7 +100,8 @@
   (-remove-watch [this key]
     (set! (.-watches this) (dissoc watches key))))
 
-(defn cell?  [c] (= (type c) Cell))
+(defn cell?  [c] (when (= (type c) Cell) c))
+(defn input? [c] (when (and (cell? c) (.-input? c)) c))
 (defn input* [x] (if (cell? x) x (input x)))
-(defn input  [x] (set-formula! (Cell. {} x (next-rank) x [] #{} nil {} false)))
+(defn input  [x] (set-formula! (Cell. {} x (next-rank) x [] #{} nil {} false nil)))
 (defn lift   [f] (fn [& sources] (set-formula! (input ::none) f sources)))
