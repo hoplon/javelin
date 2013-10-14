@@ -106,7 +106,7 @@ are fully expanded. Then the resulting expression is walked recursively
 according to the following rules:
 
 * **Special forms** `if`, `do`, `new`, and `throw` are replaced
-  with reactive implementations.
+  with reactive equivalents.
 * **Collection literals** are replaced with their sexp equivalents
   and then walked.
 * **Anonymous function bodies** and **quoted expressions** are not
