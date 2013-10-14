@@ -44,7 +44,7 @@ Artifacts are published on [Clojars][3].
 </dependency>
 ```
 
-### Demos and Examples
+### Demos
 
 For short usage examples, see the [Javelin Demos][4] repository. You may see
 some version of these demos running [here][5].
