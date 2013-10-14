@@ -101,26 +101,12 @@ See the [Formulas][9] section below.
 
 ### Formulas
 
-The `cell` and `cell=` macros create cells using the underlying
-`input` and `lift` functions. The former returns an input cell with
-the given initial value. The latter "lifts" a given function,
-returning a function that, when applied to arguments (which may be
-cells), returns a cell with the given function as the formula&mdash;the
-cell's value is recomputed automatically whenever any of the argument
-cells change.
-
-```clojure
-(def x (input 7))       ;; similar to (def x (cell 7))
-(def y ((lift +) x 1))  ;; similar to (def y (cell= (+ x 1)))
-```
-
-To create a formula cell: first, all macros in the given formula
-expression are fully expanded. The resulting form is then walked
-recursively and all forms in function position are lifted, subject
-to the following special cases and exceptions:
+To create a formula cell all macros in the given formula expression
+are fully expanded. Then the resulting expression is walked recursively
+according to the following rules:
 
 * **Special forms** `if`, `do`, `new`, and `throw` are replaced
-  with reactive implementations.
+  with reactive implementations when in function position.
 * **Collection literals** are replaced with their sexp equivalents
   and then walked.
 * **Anonymous function bodies** and **quoted expressions** are not
