@@ -126,7 +126,7 @@ Some things don't make sense in formulas and cause errors:
 
 ### Lisp vs. Spreadsheet Evaluation
 
-The spreadsheet evaluation model is a push-based system, very
+The spreadsheet evaluation model is a push-based system&mdash;very
 different from the usual, pull-based Lisp evaluation model. In Lisp,
 forms are evaluated depth first, and only as needed to produce a
 value. This model supports special forms and macros, which decide when
