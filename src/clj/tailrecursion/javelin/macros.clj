@@ -124,12 +124,16 @@
       (js*? form)         (do-js* form)
       (dot? form)         (do-dot form)
       (set!? form)        (do-set! form)
-      :else               (let [[op & args] form
-                                msg #(format "%s not supported in formula %s" %1 %2)]
-                            (when (unsupp? op) (throw (Exception. (msg op *form*))))
-                            (if (= op 'apply)
-                              `(apply (~lift ~(do-lift (first args))) ~@(map do-lift (rest args)))
-                              `((~lift ~(do-lift (or (special? op) op))) ~@(map do-lift args))))))
+      :else
+      (let [[op & args] form
+            msg1 #(format "can't create formula %s" %)
+            msg2 #(format "formula expands to expr containing unsupported %s special form" %)]
+        (try
+          (when (unsupp? op) (throw (Exception. (msg2 op))))
+          (if (= op 'apply)
+            `(apply (~lift ~(do-lift (first args))) ~@(map do-lift (rest args)))
+            `((~lift ~(do-lift (or (special? op) op))) ~@(map do-lift args)))
+          (catch Throwable e (throw (Exception. (msg1 *form*) e)))))))
 
   (defn mark-live
     [form]
