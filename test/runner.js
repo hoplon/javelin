@@ -1,12 +1,15 @@
+
 function info(msg, type) {
-  var red, green, reset;
-  red   = '\u001b[31m';
-  green = '\u001b[32m';
-  reset = '\u001b[0m';
+  var system, red, green, reset;
+  system  = require('system');
+  red     = '\u001b[31m';
+  green   = '\u001b[32m';
+  reset   = '\u001b[0m';
+  if (! msg.length) return;
   if(type == 'error') {
-    console.error(red + msg + reset);
+    system.stdout.write(red + msg + reset + "\n");
   } else {
-    console.log(green + msg + reset);
+    system.stdout.write(green + msg + reset + "\n");
   }
 }
 
