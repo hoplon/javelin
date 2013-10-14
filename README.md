@@ -46,11 +46,6 @@ Artifacts are published on [Clojars][3].
 
 ### Demos
 
-For short usage examples, see the [Javelin Demos][4] repository. You may see
-some version of these demos running [here][5].
-
-Javelin is also used in two [TodoFRP][6] implementations:
-
 * [Javelin with Domina and Dommy][7]
 * [Javelin with Hlisp][8]
 
