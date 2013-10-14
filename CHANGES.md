@@ -11,6 +11,8 @@
   same name.
 * The `cell?` function returns the cell or nil instead of boolean.
 * Add `input?` macro.
+* Watches can be added to input and formula cells. IWatchable is now fully
+  supported again by all Cells.
 
 *Tue Oct  8 19:28:37 EDT 2013*
 

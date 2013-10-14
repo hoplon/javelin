@@ -58,11 +58,12 @@ Javelin is also used in two [TodoFRP][6] implementations:
 
 Javelin provides a spreadsheet-like computing environment consisting
 of **cells**, **values**, and **formulas**. Cells are similar to
-Clojure atoms: they contain values and they can be dereferenced with
-`deref` or the `@` reader macro. Formulas are ClojureScript expressions
-that may contain references to other cells.
+Clojure atoms: they contain values, they can be dereferenced with
+`deref` or the `@` reader macro, and they implement the `IWatchable`
+interface so `add-watch` and `remove-watch` can be used. Formulas are
+ClojureScript expressions that may contain references to other cells.
 
-##### Input cells
+##### Input Cells
 
 * contain values that are updated explicitly using `reset!` or `swap!`.
 * are created by the `cell` macro.

@@ -72,11 +72,13 @@
       (doseq [dep (d/bf-seq identity #(.-sinks %) source)]
         (set! (.-rank dep) (next-rank)))))
   (let [compute   #(apply (deref* (peek %)) (map deref* (pop %)))
-        thunk     #(set! (.-state this) (compute (.-sources this)))
+        thunk     #(let [x (.-state this), y (compute (.-sources this))]
+                     (doseq [[k f] (dissoc (.-watches this) ::cell)] (f k this x y))
+                     (set! (.-state this) y))
         err-mesg  "formula cell can't be updated via swap! or reset!"
         watch-err (fn [_ _ _ _] (throw (js/Error. err-mesg)))
         watch-ok  (fn [_ c _ _] (propagate! c))]
-    (-add-watch this ::propagate (if f watch-err watch-ok))
+    (-add-watch this ::cell (if f watch-err watch-ok))
     (set! (.-input? this) (if f false true))
     (set! (.-thunk this) (if f thunk #(deref this)))
     (doto this propagate!)))
@@ -92,7 +94,7 @@
   cljs.core/IDeref
   (-deref [this] (.-state this))
 
-  cljs.core/IWatchable ;; internal use only
+  cljs.core/IWatchable
   (-notify-watches [this oldval newval]
     (doseq [[key f] watches] (f key this oldval newval)))
   (-add-watch [this key f]

@@ -56,6 +56,23 @@
        (are= a :exception-thrown)) 
 
      (let [x (atom [])
+           y (atom [])
+           a (cell 0)
+           b (cell= (inc a))]
+       (add-watch a ::a (fn [_ _ p v] (swap! x conj [p v])))
+       (add-watch b ::b (fn [_ _ p v] (swap! y conj [p v])))
+       (swap! a inc)
+       (are= [[0 1]] @x
+             [[1 2]] @y)
+       (swap! a inc)
+       (are= [[0 1] [1 2]] @x
+             [[1 2] [2 3]] @y)
+       (remove-watch b ::b)
+       (swap! a inc)
+       (are= [[0 1] [1 2] [2 3]] @x
+             [[1 2] [2 3]]       @y))
+
+     (let [x (atom [])
            a (cell 0)
            b (cell= (do (swap! x conj a) (inc a)))
            c (cell= (+ 123 a b))]
