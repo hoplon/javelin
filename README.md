@@ -124,6 +124,44 @@ Some things don't make sense in formulas and cause errors:
 * **Circular dependencies** cause infinite loops and stack overflow 
   errors.
 
+### Javelin Cell API
+
+Requiring the namespace and macros:
+
+```clojure
+(ns my-ns
+  (:require tailrecursion.javelin)
+  (:require-macros
+    [tailrecursion.javelin.macros
+     :refer [cell? input? cell cell= set-cell! set-cell!= destroy-cell!]]))
+```
+
+Cell macros:
+
+```clojure
+(cell? c)
+;; Returns c if c is a Cell, nil otherwise.
+
+(input? c)
+;; Returns c if c is an input cell, nil otherwise.
+
+(cell expr)
+;; Create new input cell with initial value expr.
+
+(cell= expr)
+;; Create new fomula cell with formula expr.
+
+(set-cell! c expr)
+;; Convert c to input cell (if necessary) with initial value expr.
+
+(set-cell!= c expr)
+;; Convert c to formula cell (if necessary) with formula expr.
+
+(destroy-cell! c)
+;; Removes c from the cell graph so it can be GC'd. It's an error
+;; to destroy a cell if other cells refer to it in their formulas.
+```
+
 ### Lisp vs. Spreadsheet Evaluation
 
 The spreadsheet evaluation model is a push-based system&mdash;very
@@ -169,44 +207,6 @@ For example:
 
 ;; This works as intended because the cell= macro doesn't walk the fn.
 (cell= (#(doseq [i %] (.log js/console i)) z))
-```
-
-### Javelin Cell API
-
-Requiring the namespace and macros:
-
-```clojure
-(ns my-ns
-  (:require tailrecursion.javelin)
-  (:require-macros
-    [tailrecursion.javelin.macros
-     :refer [cell? input? cell cell= set-cell! set-cell!= destroy-cell!]]))
-```
-
-Cell macros:
-
-```clojure
-(cell? c)
-;; Returns c if c is a Cell, nil otherwise.
-
-(input? c)
-;; Returns c if c is an input cell, nil otherwise.
-
-(cell expr)
-;; Create new input cell with initial value expr.
-
-(cell= expr)
-;; Create new fomula cell with formula expr.
-
-(set-cell! c expr)
-;; Convert c to input cell (if necessary) with initial value expr.
-
-(set-cell!= c expr)
-;; Convert c to formula cell (if necessary) with formula expr.
-
-(destroy-cell! c)
-;; Removes c from the cell graph so it can be GC'd. It's an error
-;; to destroy a cell if other cells refer to it in their formulas.
 ```
 
 ## License
