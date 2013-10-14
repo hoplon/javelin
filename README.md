@@ -100,7 +100,7 @@ Note the use of `~` in the definition of `g`. The expression
 the formula, rather than being recomputed each time the cell updates.
 See the [Formulas][9] section below.
 
-### Formulas
+## Formulas
 
 To create a formula cell all macros in the given formula expression
 are fully expanded. Then the resulting expression is walked recursively
@@ -125,7 +125,7 @@ Some things don't make sense in formulas and cause errors:
 * **Circular dependencies** cause infinite loops and stack overflow 
   errors.
 
-### Javelin Cell API
+## Javelin API
 
 Requiring the namespace and macros:
 
@@ -163,7 +163,7 @@ Cell macros:
 ;; to destroy a cell if other cells refer to it in their formulas.
 ```
 
-### Lisp vs. Spreadsheet Evaluation
+## Lisp vs. Spreadsheet Evaluation
 
 The spreadsheet evaluation model is a push-based system&mdash;very
 different from the usual, pull-based Lisp evaluation model. In Lisp,
