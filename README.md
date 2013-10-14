@@ -221,25 +221,6 @@ Cell macros:
 ;; to destroy a cell if other cells refer to it in their formulas.
 ```
 
-### Cell Type Internals
-
-The `Cell` type internals can be used to achieve more advanced goals.
-
-```clojure
-;; Get the previous value of a cell.
-(.-prev my-cell)
-
-;; Get a list of cells a cell depends on.
-(.-sources my-cell)
-
-;; Get a list of cells that depend on a cell.
-(.-sinks my-cell)
-
-;; Get a cell's "thunk", a function of no arguments that recomputes
-;; and sets the cell's value.
-(.-thunk my-cell)
-```
-
 ## License
 
     Copyright (c) Alan Dipert and Micha Niskin. All rights

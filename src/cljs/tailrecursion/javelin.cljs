@@ -75,7 +75,7 @@
         thunk     #(set! (.-state this) (compute (.-sources this)))
         err-mesg  "formula cell can't be updated via swap! or reset!"
         watch-err (fn [_ _ _ _] (throw (js/Error. err-mesg)))
-        watch-ok  (fn [_ cell _ _] (propagate! cell))]
+        watch-ok  (fn [_ c _ _] (propagate! c))]
     (-add-watch this ::propagate (if f watch-err watch-ok))
     (set! (.-input? this) (if f false true))
     (set! (.-thunk this) (if f thunk #(deref this)))
