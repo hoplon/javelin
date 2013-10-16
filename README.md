@@ -33,14 +33,14 @@ change._
 Artifacts are published on [Clojars][3].
 
 ```clojure
-[tailrecursion/javelin "2.0.0-SNAPSHOT"]
+[tailrecursion/javelin "2.0.0"]
 ```
 
 ```xml
 <dependency>
   <groupId>tailrecursion</groupId>
   <artifactId>javelin</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>2.0.0</version>
 </dependency>
 ```
 

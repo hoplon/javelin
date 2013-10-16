@@ -1,5 +1,9 @@
 # javelin
 
+## 2.0.0
+
+*Wed Oct 16 12:23:32 EDT 2013*
+
 ## 2.0.0-SNAPSHOT
 
 *Wed Oct 16 11:12:01 EDT 2013*
