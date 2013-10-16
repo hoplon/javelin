@@ -36,7 +36,7 @@
 
 ;; javelin ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(declare Cell cell? input)
+(declare Cell cell? cell)
 
 (def  last-rank     (atom 0))
 (defn next-rank [ ] (swap! last-rank inc))
@@ -54,17 +54,14 @@
         (if continue? (set! (.-prev next) value))
         (recur (if continue? (reduce reducer siblings children) siblings))))))
 
-(defn destroy! [this & {:keys [sinks?]}]
-  (if (or sinks? (not (seq (.-sinks this))))
-    (let [srcs (.-sources this)]
-      (set! (.-sources this) [])
-      (doseq [src (sort-by #(.-rank %) > (filter cell? srcs))]
-        (set! (.-sinks src) (disj (.-sinks src) this))
-        (when-not (or (.-live src) (seq (.-sinks src))) (destroy! src))))
-    (throw (js/Error. "can't destroy cell that's referenced by other cells"))))
+(defn destroy-cell! [this]
+  (let [srcs (.-sources this)]
+    (set! (.-sources this) [])
+    (doseq [src (filter cell? srcs)]
+      (set! (.-sinks src) (disj (.-sinks src) this)))))
 
 (defn set-formula! [this & [f sources]]
-  (destroy! this :sinks? true)
+  (destroy-cell! this)
   (set! (.-sources this) (if f (conj (vec sources) f) (vec sources)))
   (doseq [source (filter cell? (.-sources this))]
     (set! (.-sinks source) (conj (.-sinks source) this))
@@ -83,7 +80,7 @@
     (set! (.-thunk this) (if f thunk #(deref this)))
     (doto this propagate!)))
 
-(deftype Cell [meta state rank prev sources sinks thunk watches live input?]
+(deftype Cell [meta state rank prev sources sinks thunk watches input?]
   cljs.core/IPrintWithWriter
   (-pr-writer [this writer opts]
     (write-all writer "#<Cell: " (pr-str state) ">"))
@@ -102,8 +99,9 @@
   (-remove-watch [this key]
     (set! (.-watches this) (dissoc watches key))))
 
-(defn cell?  [c] (when (= (type c) Cell) c))
-(defn input? [c] (when (and (cell? c) (.-input? c)) c))
-(defn input* [x] (if (cell? x) x (input x)))
-(defn input  [x] (set-formula! (Cell. {} x (next-rank) x [] #{} nil {} false nil)))
-(defn lift   [f] (fn [& sources] (set-formula! (input ::none) f sources)))
+(defn lift      [f]   (fn [& sources] (set-formula! (cell ::none) f sources)))
+
+(defn cell      [x]   (set-formula! (Cell. {} x (next-rank) x [] #{} nil {} nil)))
+(defn cell?     [c]   (when (= (type c) Cell) c))
+(defn input?    [c]   (when (and (cell? c) (.-input? c)) c))
+(defn set-cell! [c x] (set! (.-state c) x) (set-formula! c))
