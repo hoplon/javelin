@@ -13,8 +13,8 @@ change._
 
 ```clojure
 (ns your-ns
-  (:require tailrecursion.javelin) ;; necessary if compiling in advanced mode
-  (:require-macros [tailrecursion.javelin.macros :refer [cell cell=]]))
+  (:require [tailrecursion.javelin :refer [cell]])
+  (:require-macros [tailrecursion.javelin :refer [cell=]]))
 
 (defn start []
   (let [a (cell 0)              ;; input cell with initial value of 0.
@@ -52,42 +52,45 @@ Artifacts are published on [Clojars][3].
 ## Overview
 
 Javelin provides a spreadsheet-like computing environment consisting
-of **cells**, **values**, and **formulas**. Cells are similar to
-Clojure atoms: they contain values, they can be dereferenced with
-`deref` or the `@` reader macro, and they implement the `IWatchable`
-interface. Formulas are ClojureScript expressions that may contain
-references to other cells.
+of **cells**, **values**, and **formulas**. The `Cell` reference type
+is the FRP equivalent of the Clojure atom. Formulas are ClojureScript
+expressions that may contain references to other cells.
+
+##### All Cells
+
+* contain values.
+* implement the `IWatchable` interface.
+* are dereferenced with `deref` or the `@` reader macro. 
 
 ##### Input Cells
 
-* contain values that are updated explicitly using `reset!` or `swap!`.
-* are created by the `cell` macro.
+* are created by the `cell` function or `defc` macro.
+* are updated explicitly using `swap!` or `reset!`.
 
 ##### Formula Cells
 
-* contain values that are recomputed _reactively_ according to a formula.
-* are read-only&mdash;attempts to update a formula cell directly
-  via `swap!` or `reset!` results in an error.
-* are created by the `cell=` macro.
+* are created by the `cell=` or `defc=` macros.
+* are updated _reactively_ according to a formula.
+* are read-only&mdash;updating a formula cell via `swap!` or `reset!`
+  is an error.
 
 Some examples of cells:
 
 ```clojure
-(def a (cell 42))               ;; cell containing the number 42
-(def b (cell '(+ 1 2)))         ;; cell containing the list (+ 1 2)
-(def c (cell (+ 1 2)))          ;; cell containing the number 3
-(def d (cell {:x @a}))          ;; cell containing the map {:x 42}
+(defc a 42)               ;; cell containing the number 42
+(defc b '(+ 1 2))         ;; cell containing the list (+ 1 2)
+(defc c (+ 1 2))          ;; cell containing the number 3
+(defc d {:x @a})          ;; cell containing the map {:x 42}
 
-(def e (cell= {:x a}))          ;; cell with formula {:x a}, updated when a changes
-(def f (cell= (+ a 1)))         ;; cell with formula (+ a 1), updated when a changes
-(def g (cell= (+ a ~(inc @a)))) ;; cell with formula (+ a 43), updated when a changes
-(def h (cell= [e f g]))         ;; cell with formula [e f g], updated when e, f,
-                                ;; and/or g change
+(defc= e {:x a})          ;; cell with formula {:x a}, updated when a changes
+(defc= f (+ a 1))         ;; cell with formula (+ a 1), updated when a changes
+(defc= g (+ a ~(inc @a))) ;; cell with formula (+ a 43), updated when a changes
+(defc= h [e f g])         ;; cell with formula [e f g], updated when e, f, or g change
 
-@h                              ;;=> [{:x 42} 43 85]
-(reset! a 7)                    ;;=> 7
-@h                              ;;=> [{:x 7} 8 50]
-(swap! f inc)                   ;;=> ERROR: f is a formula cell, it updates itself!
+@h                        ;;=> [{:x 42} 43 85]
+(reset! a 7)              ;;=> 7
+@h                        ;;=> [{:x 7} 8 50]
+(swap! f inc)             ;;=> ERROR: f is a formula cell, it updates itself!
 ```
 
 Note the use of `~` in the definition of `g`. The expression
@@ -95,30 +98,42 @@ Note the use of `~` in the definition of `g`. The expression
 the formula, rather than being recomputed each time the cell updates.
 See the [Formulas][9] section below.
 
+Cells can be microbeasts...
+
+```clojure
+(defc test-results
+  {:scores [74 51 97 88 89 91 72 77 69 72 45 63]
+   :proctor "Mr. Smith"
+   :subject "Organic Chemistry"
+   :sequence "CHM2049"})
+
+(defc= test-results-with-mean
+  (let [scores (:scores test-results)
+        mean   (/ (reduce + scores) (count scores))
+        grade  (cond (<= 90 mean) :A
+                     (<= 80 mean) :B
+                     (<= 70 mean) :C
+                     (<= 60 mean) :D
+                     :else        :F)]
+    (assoc test-results :mean mean :grade grade)))
+```
+
 ## Formulas
 
 To create a formula cell all macros in the given formula expression
 are fully expanded. Then the resulting expression is walked recursively
 according to the following rules:
 
-* **Special forms** `if`, `do`, `new`, and `throw` are replaced
-  with reactive equivalents.
-* **Collection literals** are replaced with their sexp equivalents
-  and then walked.
-* **Anonymous function bodies** and **quoted expressions** are not
-  walked.
 * **The unquote form** causes its argument to be evaluated in place
   and not walked.
 * **The unquote-splicing form** is interpreted as the composition
-  of `unquote` and `deref`.
+  of `unquote` as above and `deref`.
 
 Some things don't make sense in formulas and cause errors:
 
-* **Special forms** `def`, `loop*`, `letfn*`, `try*`, `recur`, `ns`,
-  `deftype*`, `defrecord*`, and `&` are not supported and cause
-  compile-time exceptions.
-* **Circular dependencies** cause infinite loops and stack overflow 
-  errors.
+* **Unsupported forms** `def`, `ns`, `deftype*`, and `defrecord*`.
+* **Circular dependencies** between cells result in infinite loops at
+  runtime.
 
 ## Javelin API
 
@@ -126,13 +141,13 @@ Requiring the namespace and macros:
 
 ```clojure
 (ns my-ns
-  (:require tailrecursion.javelin)
+  (:require
+    [tailrecursion.javelin :refer [cell? input? cell set-cell! destroy-cell!]])
   (:require-macros
-    [tailrecursion.javelin.macros
-     :refer [cell? input? cell cell= set-cell! set-cell!= destroy-cell!]]))
+    [tailrecursion.javelin :refer [cell= defc defc= set-cell!=]]))
 ```
 
-Cell macros:
+API functions and macros:
 
 ```clojure
 (cell? c)
@@ -147,6 +162,14 @@ Cell macros:
 (cell= expr)
 ;; Create new fomula cell with formula expr.
 
+(defc symbol expr)
+(defc symbol doc-string expr)
+;; Creates a new input cell and binds it to a var with the name symbol.
+
+(defc= symbol expr)
+(defc= symbol doc-string expr)
+;; Creates a new formula cell and binds it to a var with the name symbol.
+
 (set-cell! c expr)
 ;; Convert c to input cell (if necessary) with initial value expr.
 
@@ -154,55 +177,7 @@ Cell macros:
 ;; Convert c to formula cell (if necessary) with formula expr.
 
 (destroy-cell! c)
-;; Removes c from the cell graph so it can be GC'd. It's an error
-;; to destroy a cell if other cells refer to it in their formulas.
-```
-
-## Lisp vs. Spreadsheet Evaluation
-
-The spreadsheet evaluation model is a push-based system&mdash;very
-different from the usual, pull-based Lisp evaluation model. In Lisp,
-forms are evaluated depth first, and only as needed to produce a
-value. This model supports special forms and macros, which decide when
-to evaluate their own arguments. In the Javelin evaluation model this
-is impossible because formula cells are recomputed _reactively_ based
-on the values of the argument cells (cells the formula cell depends
-on), which must therefore be computed first.
-
-Consequences of this include:
-* "Short-circuiting" expressions (like `and` and `if`, for example)
-  don't work that way when used in a formula&mdash;all clauses are
-  always evaluated. The cell's value will be correct (i.e. the cell
-  will contain the value of the correct clause) but side effects in
-  all clauses will be performed on every update.
-* Macros that expand to expressions containing unsupported special
-  forms (like `doseq` and `for`, for example, which expand to
-  expressions containing the unsupported `loop*` form) can't be
-  used in formulas.
-
-In these cases the solution is to wrap the expression in an anonymous
-function to protect it from being lifted when the `cell=` macro walks
-the code. The `cell=` macro will not descend into anonymous function
-bodies.
-
-For example:
-
-```clojure
-(def x (cell 1))
-(def y (cell 1))
-(def z (cell [1 2 3]))
-
-;; This cell prints both "even" and "odd".
-(cell= (if (even? (+ x y)) (.log js/console "even") (.log js/console "odd")))
-
-;; This cell prints only "even" or "odd".
-(cell= (#(if (even? (+ %1 %2)) (.log js/console "even") (.log js/console "odd")) x y))
-
-;; This throws a js error because loop* is not supported.
-(cell= (doseq [i z] (.log js/console i)))
-
-;; This works as intended because the cell= macro doesn't walk the fn.
-(cell= (#(doseq [i %] (.log js/console i)) z))
+;; Disconnects c from the propagation graph so it can be GC'd.
 ```
 
 ## License

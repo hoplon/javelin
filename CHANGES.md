@@ -2,6 +2,18 @@
 
 ## 2.0.0-SNAPSHOT
 
+*Wed Oct 16 11:12:01 EDT 2013*
+
+* Use hoisting instead of lifting when constructing formulas.
+* Unsupported special forms are now down to just `ns`, `def`, `deftype*`,
+  and `defrecord*`.
+* It is no longer an error to destroy a cell that other cells reference
+  in their formulas.
+
+*Mon Oct 14 14:08:09 EDT 2013*
+
+* Add `defc` and `defc=` macros.
+
 *Sun Oct 13 18:24:15 EDT 2013*
 
 * Remove `mx` macro.
@@ -13,6 +25,9 @@
 * Add `input?` macro.
 * Watches can be added to input and formula cells. IWatchable is now fully
   supported again by all Cells.
+* Move `tailrecursion.javelin.macros` namespace to `tailrecursion.javelin`.
+* Remove `cell?`, `input?`, `cell`, `set-cell!`, and `destroy-cell!`
+  macros&mdash;use the functions with corresponding names instead.
 
 *Tue Oct  8 19:28:37 EDT 2013*
 
