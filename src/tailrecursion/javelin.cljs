@@ -9,6 +9,8 @@
 (ns tailrecursion.javelin
   (:require [tailrecursion.priority-map :refer [priority-map]]))
 
+;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn bf-seq
   "Like tree-seq but traversal is breadth-first instead of depth-first."
   [branch? children root]
@@ -18,29 +20,6 @@
                (cons node (walk (into (pop queue)
                                       (if (branch? node) (children node))))))))]
     (walk (conj cljs.core.PersistentQueue.EMPTY root))))
-
-;; specials ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(def do*    #(last %&))
-(def throw* #(if (string? %) (js/Error. %) %))
-
-(defn if* 
-  ([pred consequent] (if pred consequent))
-  ([pred consequent alternative] (if pred consequent alternative)))
-
-(defn new*
-  ([class] (new class))
-  ([class a] (new class a))
-  ([class a b] (new class a b))
-  ([class a b c] (new class a b c))
-  ([class a b c d] (new class a b c d))
-  ([class a b c d e] (new class a b c d e))
-  ([class a b c d e f] (new class a b c d e f))
-  ([class a b c d e f g] (new class a b c d e f g))
-  ([class a b c d e f g h] (new class a b c d e f g h))
-  ([class a b c d e f g h i] (new class a b c d e f g h i))
-  ([class a b c d e f g h i & more]
-    (throw (js/Error. ("new w/more than 10 args not supported in formula")))))
 
 ;; javelin ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
