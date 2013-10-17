@@ -13,7 +13,7 @@
     [tailrecursion.javelin :refer [cell? input? cell set-cell! destroy-cell!]])
   (:require-macros
     [cemerick.cljs.test :refer [deftest testing run-tests is]]
-    [tailrecursion.javelin :refer [cell= defc defc= set-cell!= mx]]))
+    [tailrecursion.javelin :refer [cell= defc defc= set-cell!= mx mx2 mx3]]))
 
 ;;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -35,10 +35,9 @@
 ;(defn ^:export start []
 ;  (setup!)
 ;  (defc a 42.3)
-;  (mx (fn asdf [x] (if (even? x) (+ x (asdf (/ x 2))) (+ x a))))
-;  (mx (cell= (fn asdf [x] (if (even? x) (+ x (asdf (/ x 2))) (+ x a)))))
-;  
-;  )
+;  (mx2 #(+ % a))
+;  (mx2 (fn [x] (+ x a)))
+;  ) 
 
 (defn ^:export start []
   (setup!)
@@ -286,7 +285,9 @@
           c (cell 10)
           d (cell= (letfn [(f1 [x] (* a (f2 x)))
                            (f2 [x] (* b x))]
-                     [(f1 c) (f2 c)]))]
+                     [(f1 c) (f2 c)]))
+          
+          ]
       (is (= @d [60 30]))
       (swap! a * 2)
       (is (= @d [120 30]))))
@@ -312,6 +313,15 @@
       (is (= @c "even"))
       (is (= @u ["odd" "even"]))))
   (testing
+    "anon fn via #() reader macro"
+    (let [a (cell 10)
+          b (cell 20)
+          c (cell= #(+ a %))
+          d (cell= (c b))]
+      (is (= @d 30))
+      (swap! a / 2)
+      (is (= @d 25))))
+  (testing
     "anon fn with name binds name locally"
     (let [a (cell 10)
           b (cell 20)
@@ -320,6 +330,25 @@
       (is (= @d 45))
       (swap! a / 2)
       (is (= @d 40))))
+  (testing
+    "anon fn with destructuring arglist works correctly"
+    (let [a (cell 10)
+          b (cell 20)
+          c (cell= (fn asdf [& args] (mapv inc args)))
+          d (cell= (c a b))]
+      (is (= @d [11 21]))
+      (swap! a / 2)
+      (is (= @d [6 21]))))
+  (testing
+    "anon fn with destructuring arglist works correctly part 2"
+    (let [a (cell 10)
+          b (cell 20)
+          c (cell= (fn asdf [x & {:keys [y z] :or {y 0 z 0}}]
+                     (mapv inc [x y z])))
+          d (cell= (c a :y b))]
+      (is (= @d [11 21 1]))
+      (swap! a / 2)
+      (is (= @d [6 21 1]))))
   (testing
     "case works correctly"
     (let [a (cell 1)

@@ -13,6 +13,8 @@
             [clojure.java.io :as io]
             [clojure.string  :as s]))
 
+(declare walk)
+
 ;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmacro with-let
@@ -44,6 +46,11 @@
      ~(with-out-str
         (p/write (macroexpand-all* &env form) :dispatch p/code-dispatch))))
 
+(defmacro mx2 [form]
+  `(println
+     ~(with-out-str
+        (p/write (macroexpand-all* &env form)))))
+
 ;; javelin cells ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def ^:dynamic *env*    nil)
@@ -61,6 +68,7 @@
                      (= clojure.lang.Cons (type %)))
       special?  #(contains? special %)
       unsupp?*  #(contains? '#{def ns deftype* defrecord*} %)
+      core?     #(contains? #{"clojure.core" "cljs.core"} (namespace %))
       empty?*   #(= 0 (count %))
       dot?      #(= '. (first %))
       binding1? #(contains? '#{let* loop*} (first %))
@@ -71,14 +79,12 @@
       unwrap2?  #(= 'clojure.core/unquote-splicing (first %))
       err1      #(format "formula expansion contains unsupported %s form" %)]
 
-  (declare walk)
-
   (defn unsupp? [x local]
     (let [op (first x)]
       (and (not (*env* op)) (not (local op)) (unsupp?* op))))
 
   (defn walk-sym [x local]
-    (if-not (and (not (local x)) (or (*env* x) (not (special? x))))
+    (if-not (and (not (local x)) (not (core? x)) (or (*env* x) (not (special? x))))
       x
       (let [h (@*hoist* x)]
         (when-not h (swap! *hoist* conj (with-meta x {::h (gensym)})))
@@ -106,9 +112,10 @@
   (defn walk-bind3 [[sym & arities] local]
     (let [fname   (when (symbol? (first arities)) [(first arities)])
           arities (if fname (rest arities) arities)
+          arities (if (vector? (first arities)) [arities] arities)
           local   (if fname (conj local (first fname)) local)]
       (let [mkarity (fn [[bindings & body]]
-                      (let [local (reduce conj local bindings)]
+                      (let [local (into local (remove #(= '& %) bindings))]
                         (to-list `([~@bindings] ~@(map #(walk % local) body)))))
             arities (map mkarity arities)]
         (to-list `(~sym ~@fname ~@arities)))))

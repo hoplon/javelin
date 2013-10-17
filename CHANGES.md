@@ -1,5 +1,11 @@
 # javelin
 
+## 2.0.1
+
+*Thu Oct 17 02:31:41 EDT 2013*
+
+* Bugfix: issue with arg destructuring in anon fns in formulas
+
 ## 2.0.0
 
 *Wed Oct 16 12:23:32 EDT 2013*
