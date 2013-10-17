@@ -13,7 +13,7 @@
     [tailrecursion.javelin :refer [cell? input? cell set-cell! destroy-cell!]])
   (:require-macros
     [cemerick.cljs.test :refer [deftest testing run-tests is]]
-    [tailrecursion.javelin :refer [cell= defc defc= set-cell!= mx mx2 mx3]]))
+    [tailrecursion.javelin :refer [cell= defc defc= set-cell!= mx mx2]]))
 
 ;;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -41,7 +41,7 @@
 
 (defn ^:export start []
   (setup!)
-  (run-tests*)
+  (time (run-tests*)) 
   (println "\nDone."))
 
 ;;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
