@@ -1,5 +1,11 @@
 # javelin
 
+## 2.0.2
+
+*Thu Oct 17 15:12:29 EDT 2013*
+
+* Update dependencies to versions compatible with new CLJS version.
+
 ## 2.0.1
 
 *Thu Oct 17 02:31:41 EDT 2013*

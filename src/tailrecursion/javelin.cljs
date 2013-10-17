@@ -7,9 +7,17 @@
 ;; You must not remove this notice, or any other, from this software.
 
 (ns tailrecursion.javelin
-  (:require
-   [alandipert.desiderata :as d]
-   [tailrecursion.priority-map :refer [priority-map]]))
+  (:require [tailrecursion.priority-map :refer [priority-map]]))
+
+(defn bf-seq
+  "Like tree-seq but traversal is breadth-first instead of depth-first."
+  [branch? children root]
+  (letfn [(walk [queue]
+            (when-let [node (peek queue)]
+              (lazy-seq
+               (cons node (walk (into (pop queue)
+                                      (if (branch? node) (children node))))))))]
+    (walk (conj cljs.core.PersistentQueue.EMPTY root))))
 
 ;; specials ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -66,7 +74,7 @@
   (doseq [source (filter cell? (.-sources this))]
     (set! (.-sinks source) (conj (.-sinks source) this))
     (if (> (.-rank source) (.-rank this))
-      (doseq [dep (d/bf-seq identity #(.-sinks %) source)]
+      (doseq [dep (bf-seq identity #(.-sinks %) source)]
         (set! (.-rank dep) (next-rank)))))
   (let [compute   #(apply (deref* (peek %)) (map deref* (pop %)))
         thunk     #(let [x (.-state this), y (compute (.-sources this))]
