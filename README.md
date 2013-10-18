@@ -4,7 +4,7 @@ align="right" width="152"/>
 
 # Javelin
 
-Spreadsheet-like Functional Reactive Programming (FRP) in ClojureScript.
+Spreadsheet-like dataflow programming in ClojureScript.
 
 _This library is usable but under construction and subject to frequent
 change._
@@ -52,9 +52,8 @@ Artifacts are published on [Clojars][3].
 ## Overview
 
 Javelin provides a spreadsheet-like computing environment consisting
-of **cells**, **values**, and **formulas**. The `Cell` reference type
-is the FRP equivalent of the Clojure atom. Formulas are ClojureScript
-expressions that may contain references to other cells.
+of **input cells** and **formula cells** and introduces the `Cell`
+reference type to represent both.
 
 ##### All Cells
 
@@ -120,9 +119,8 @@ Cells can be microbeasts...
 
 ## Formulas
 
-To create a formula cell all macros in the given formula expression
-are fully expanded. Then the resulting expression is walked recursively
-according to the following rules:
+All macros in formula expressions are fully expanded. The resulting
+expression is then interpreted according to the following rules:
 
 * **The unquote form** causes its argument to be evaluated in place
   and not walked.
