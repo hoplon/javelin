@@ -59,10 +59,8 @@
         thunk     #(let [x (.-state this), y (compute (.-sources this))]
                      (doseq [[k f] (dissoc (.-watches this) ::cell)] (f k this x y))
                      (set! (.-state this) y))
-        err-mesg  "formula cell can't be updated via swap! or reset!"
-        watch-err (fn [_ _ _ _] (throw (js/Error. err-mesg)))
-        watch-ok  (fn [_ c _ _] (propagate! c))]
-    (-add-watch this ::cell (if f watch-err watch-ok))
+        err-mesg  "formula cell can't be updated via swap! or reset!"]
+    (-add-watch this ::cell (if f #(throw (js/Error. err-mesg)) #(propagate! %2)))
     (set! (.-input? this) (if f false true))
     (set! (.-thunk this) (if f thunk #(deref this)))
     (doto this propagate!)))

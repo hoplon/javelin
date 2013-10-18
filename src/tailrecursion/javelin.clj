@@ -83,8 +83,11 @@
     (let [op (first x)]
       (and (not (*env* op)) (not (local op)) (unsupp?* op))))
 
+  (defn hoist? [x local]
+    (and (not (or (local x) (core? x))) (or (*env* x) (not (special? x))))) 
+
   (defn walk-sym [x local]
-    (if-not (and (not (local x)) (not (core? x)) (or (*env* x) (not (special? x))))
+    (if-not (hoist? x local)
       x
       (let [h (@*hoist* x)]
         (when-not h (swap! *hoist* conj (with-meta x {::h (gensym)})))
