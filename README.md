@@ -171,7 +171,7 @@ API functions and macros:
 ;; Creates a new formula cell and binds it to a var with the name symbol.
 
 (set-cell! c expr)
-;; Convert c to input cell (if necessary) with initial value expr.
+;; Convert c to input cell (if necessary) with value expr.
 
 (set-cell!= c expr)
 ;; Convert c to formula cell (if necessary) with formula expr.
