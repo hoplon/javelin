@@ -185,7 +185,13 @@
       (swap! a inc)
       (is (= @c '(200 100)))
       (swap! b inc)
-      (is (= @c '(201 100)))))
+      (is (= @c '(201 100))))
+    (let [a (cell 100)
+          b (cell 200)
+          c (cell= (when (odd? b) (reset! ~a (* b 2))))]
+      (is (= @a 100))
+      (swap! b inc)
+      (is (= @a 402))))
   (testing
     "unquote-splicing (~@) in formulas is equiv to ~(deref expr)"
     (let [a (cell 100)
