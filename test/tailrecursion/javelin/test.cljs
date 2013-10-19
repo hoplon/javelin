@@ -350,6 +350,15 @@
       (swap! a / 2)
       (is (= @d [6 21 1]))))
   (testing
+    "unquoted anon fn is not walked"
+    (let [a (cell 10)
+          b (cell 20)
+          c (cell 30)
+          d (cell= (mapv ~#(cell? a) [b c]))]
+      (is (= @d [a a]))
+      (swap! b inc)
+      (is (= @d [a a]))))
+  (testing
     "case works correctly"
     (let [a (cell 1)
           b (cell= (case a 1 :1 2 :2 :oops))]
