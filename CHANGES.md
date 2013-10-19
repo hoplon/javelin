@@ -1,5 +1,11 @@
 # javelin
 
+## 2.0.3
+
+*Sat Oct 19 18:24:43 EDT 2013*
+
+* Bugfix: issue with syntax-unquoted references to cells in formulas
+
 ## 2.0.2
 
 *Thu Oct 17 15:12:29 EDT 2013*

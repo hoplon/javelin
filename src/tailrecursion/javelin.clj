@@ -58,6 +58,7 @@
 (def ^:dynamic *pass*   nil)
 
 (let [to-list   #(into '() (reverse %))
+      Cell'     (symbol "tailrecursion.javelin" "Cell")
       cell'     (symbol "tailrecursion.javelin" "cell")
       lift'     (symbol "tailrecursion.javelin" "lift")
       set-frm'  (symbol "tailrecursion.javelin" "set-formula!")
@@ -124,7 +125,7 @@
         (to-list `(~sym ~@fname ~@arities)))))
 
   (defn walk-passthru [x local]
-    (with-let [s (gensym)] (swap! *pass* assoc s x)))
+    (with-let [s (gensym)] (swap! *pass* assoc s (list cell' x))))
 
   (defn walk-dot [[sym obj meth & more] local]
     (let [obj       (walk obj local)

@@ -191,7 +191,7 @@
           c (cell= (when (odd? b) (reset! ~a (* b 2))))]
       (is (= @a 100))
       (swap! b inc)
-      (is (= @a 402))))
+      (is (= @a 402)))) 
   (testing
     "unquote-splicing (~@) in formulas is equiv to ~(deref expr)"
     (let [a (cell 100)
