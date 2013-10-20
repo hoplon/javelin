@@ -140,9 +140,9 @@ Requiring the namespace and macros:
 ```clojure
 (ns my-ns
   (:require
-    [tailrecursion.javelin :refer [cell? input? cell set-cell! destroy-cell!]])
+    [tailrecursion.javelin :refer [cell? input? cell set-cell! alts! destroy-cell!]])
   (:require-macros
-    [tailrecursion.javelin :refer [cell= defc defc= set-cell!= alts!]]))
+    [tailrecursion.javelin :refer [cell= defc defc= set-cell!=]]))
 ```
 
 API functions and macros:

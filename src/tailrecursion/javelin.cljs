@@ -90,3 +90,12 @@
 (defn cell?     [c]   (when (= (type c) Cell) c))
 (defn input?    [c]   (when (and (cell? c) (.-input? c)) c))
 (defn set-cell! [c x] (set! (.-state c) x) (set-formula! c))
+
+(defn alts! [& cells]
+  (let [olds (atom (repeat (count cells) ::none)) 
+        diff (fn [x y]
+                (-> (->> y (map #(vector (not= %1 %2) %2) x))
+                  (->> (filter first) (map second) distinct)))
+        proc (fn [& cs]
+                (let [news (diff (deref olds) cs)] (reset! olds cs) news))]
+    (apply (lift proc) cells))) 
