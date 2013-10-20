@@ -1,5 +1,11 @@
 # javelin
 
+## 2.1.1
+
+*Sun Oct 20 16:25:35 EDT 2013*
+
+* rollback unquote fix in 2.0.3
+
 ## 2.1.0
 
 *Sun Oct 20 14:22:48 EDT 2013*

@@ -125,7 +125,7 @@
         (to-list `(~sym ~@fname ~@arities)))))
 
   (defn walk-passthru [x local]
-    (with-let [s (gensym)] (swap! *pass* assoc s (list cell' x))))
+    (with-let [s (gensym)] (swap! *pass* assoc s x)))
 
   (defn walk-dot [[sym obj meth & more] local]
     (let [obj       (walk obj local)

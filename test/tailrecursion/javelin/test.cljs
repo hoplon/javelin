@@ -187,7 +187,14 @@
       (swap! a inc)
       (is (= @c '(102 301)))
       (swap! b inc)
-      (is (= @c '(302)))))
+      (is (= @c '(302))))
+    (let [a (cell 100)
+          b (cell= (dec a))
+          c (cell= (inc a))
+          d (cell= (first ~(alts! b c)))]
+      (is (= @d 99))
+      (swap! a inc)
+      (is (= @d 100))))
   (testing
     "quoted expressions in formulas are not walked"
     (let [a (cell 100)
@@ -207,7 +214,7 @@
       (is (= @c '(201 100))))
     (let [a (cell 100)
           b (cell 200)
-          c (cell= (when (odd? b) (reset! ~a (* b 2))))]
+          c (cell= (when (odd? b) (reset! ~(cell a) (* b 2))))]
       (is (= @a 100))
       (swap! b inc)
       (is (= @a 402)))) 
