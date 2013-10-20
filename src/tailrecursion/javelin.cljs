@@ -92,10 +92,8 @@
 (defn set-cell! [c x] (set! (.-state c) x) (set-formula! c))
 
 (defn alts! [& cells]
-  (let [olds (atom (repeat (count cells) ::none)) 
-        diff (fn [x y]
-                (-> (->> y (map #(vector (not= %1 %2) %2) x))
-                  (->> (filter first) (map second) distinct)))
-        proc (fn [& cs]
-                (let [news (diff (deref olds) cs)] (reset! olds cs) news))]
+  (let [olds    (atom (repeat (count cells) ::none)) 
+        tag-neq #(vector (not= %1 %2) %2)
+        diff    #(->> %2 (map tag-neq %1) (filter first) (map second) distinct)
+        proc    #(let [news (diff (deref olds) %&)] (reset! olds %&) news)]
     (apply (lift proc) cells))) 
