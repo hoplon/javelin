@@ -13,8 +13,8 @@
               {:test
                {:source-paths ["src" "test"]
                 :compiler {:output-to "test/test.js"
-                           ;:optimizations :advanced
-                           :optimizations :whitespace
-                           :pretty-print true
+                           :optimizations :advanced
+                           ;:optimizations :whitespace
+                           ;:pretty-print true
                            :warnings true}
                 :jar false}}})
