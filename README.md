@@ -178,7 +178,7 @@ API functions and macros:
 ;; Disconnects c from the propagation graph so it can be GC'd.
 
 (alts! cs*)
-;; Creates a cell whose value is a list of changed values in the cells cs.
+;; Creates a formula cell whose value is a list of changed values in the cells cs.
 ```
 
 ## License
