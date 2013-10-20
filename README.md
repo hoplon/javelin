@@ -33,14 +33,14 @@ change._
 Artifacts are published on [Clojars][3].
 
 ```clojure
-[tailrecursion/javelin "2.0.3"]
+[tailrecursion/javelin "2.1.0"]
 ```
 
 ```xml
 <dependency>
   <groupId>tailrecursion</groupId>
   <artifactId>javelin</artifactId>
-  <version>2.0.3</version>
+  <version>2.1.0</version>
 </dependency>
 ```
 
@@ -142,7 +142,7 @@ Requiring the namespace and macros:
   (:require
     [tailrecursion.javelin :refer [cell? input? cell set-cell! destroy-cell!]])
   (:require-macros
-    [tailrecursion.javelin :refer [cell= defc defc= set-cell!=]]))
+    [tailrecursion.javelin :refer [cell= defc defc= set-cell!= alts!]]))
 ```
 
 API functions and macros:
@@ -160,13 +160,13 @@ API functions and macros:
 (cell= expr)
 ;; Create new fomula cell with formula expr.
 
-(defc symbol expr)
-(defc symbol doc-string expr)
-;; Creates a new input cell and binds it to a var with the name symbol.
+(defc symbol doc-string? expr)
+;; Creates a new input cell and binds it to a var with the name symbol and
+;; the docstring doc-string if provided.
 
-(defc= symbol expr)
-(defc= symbol doc-string expr)
-;; Creates a new formula cell and binds it to a var with the name symbol.
+(defc= symbol doc-string? expr)
+;; Creates a new formula cell and binds it to a var with the name symbol and
+;; the docstring doc-string if provided.
 
 (set-cell! c expr)
 ;; Convert c to input cell (if necessary) with value expr.
@@ -176,6 +176,9 @@ API functions and macros:
 
 (destroy-cell! c)
 ;; Disconnects c from the propagation graph so it can be GC'd.
+
+(alts! cs*)
+;; Creates a cell whose value is a list of changed values in the cells cs.
 ```
 
 ## License

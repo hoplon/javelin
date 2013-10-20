@@ -1,5 +1,11 @@
 # javelin
 
+## 2.1.0
+
+*Sun Oct 20 14:22:48 EDT 2013*
+
+* Feature: add `alts!` macro
+
 ## 2.0.3
 
 *Sat Oct 19 18:24:43 EDT 2013*

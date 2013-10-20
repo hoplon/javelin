@@ -175,7 +175,17 @@
   (defmacro defc      ([sym expr]     `(def ~sym (~cell' ~expr)))
                       ([sym doc expr] `(def ~sym ~doc (~cell' ~expr))))
   (defmacro defc=     ([sym expr]     `(def ~sym (cell= ~expr)))
-                      ([sym doc expr] `(def ~sym ~doc (cell= ~expr)))))
+                      ([sym doc expr] `(def ~sym ~doc (cell= ~expr))))
+
+  (defmacro alts! [& cells]
+    `(let [olds# (atom (repeat ~(count cells) ::none)) 
+           diff# (fn [x# y#]
+                   (-> (->> y# (map #(vector (not= %1 %2) %2) x#))
+                       (->> (filter first) (map second) distinct)))
+           proc# (fn [& cells#]
+                   (with-let [news# (diff# (deref olds#) cells#)]
+                     (reset! olds# cells#)))]
+       ((~lift' proc#) ~@cells))))
 
 ;; mirroring ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

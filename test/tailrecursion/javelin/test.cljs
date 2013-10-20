@@ -13,7 +13,7 @@
     [tailrecursion.javelin :refer [cell? input? cell set-cell! destroy-cell!]])
   (:require-macros
     [cemerick.cljs.test :refer [deftest testing run-tests is]]
-    [tailrecursion.javelin :refer [cell= defc defc= set-cell!= mx mx2]]))
+    [tailrecursion.javelin :refer [cell= defc defc= set-cell!= alts! mx mx2]]))
 
 ;;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -139,7 +139,8 @@
       (is (= @b 7))
       (reset! c :hello)
       (is (= @a 6))
-      (is (= @b 5)))))
+      (is (= @b 5)))
+    ))
 
 (deftest test-4
   (testing
@@ -169,6 +170,24 @@
         (is (= @b 42))))))
 
 (deftest test-5
+  (testing
+    "alts! works correctly"
+    (let [a (cell 100)
+          b (cell 200)
+          c (alts! a b)]
+      (is (= @c '(100 200)))
+      (swap! a inc)
+      (is (= @c '(101)))
+      (swap! b inc)
+      (is (= @c '(201))))
+    (let [a (cell 100)
+          b (cell 200)
+          c (alts! (cell= (inc a)) (cell= (+ a b)))]
+      (is (= @c '(101 300)))
+      (swap! a inc)
+      (is (= @c '(102 301)))
+      (swap! b inc)
+      (is (= @c '(302)))))
   (testing
     "quoted expressions in formulas are not walked"
     (let [a (cell 100)
@@ -291,9 +310,7 @@
           c (cell 10)
           d (cell= (letfn [(f1 [x] (* a (f2 x)))
                            (f2 [x] (* b x))]
-                     [(f1 c) (f2 c)]))
-          
-          ]
+                     [(f1 c) (f2 c)]))]
       (is (= @d [60 30]))
       (swap! a * 2)
       (is (= @d [120 30]))))
