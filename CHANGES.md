@@ -1,5 +1,11 @@
 # javelin
 
+## 2.2.0
+
+*Mon Oct 21 16:41:17 EDT 2013*
+
+* add `refer-all` macro
+
 ## 2.1.1
 
 *Sun Oct 20 16:25:35 EDT 2013*

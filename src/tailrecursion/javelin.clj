@@ -226,6 +226,12 @@
                     (apply ~(symbol (str ns-sym) (str r)) args#)))
          remote-defns)))
 
+(defn mirror-def-all
+  [ns-sym & {:keys [syms]}]
+  (let [syms (distinct (into ['def 'defn 'defmulti] syms)) 
+        defs (mapcat ops-in syms (repeat ns-sym))]
+    (map (fn [r] `(def ~r ~(symbol (str ns-sym) (str r)))) defs)))
+
 (defmacro mirror
   "Mirrors all public defs and defns in the remote namespace
   represented by ns-sym in whatever the current namespace is.
@@ -234,3 +240,6 @@
   [ns-sym]
   `(do ~@(mirrored-defs  ns-sym)
        ~@(mirrored-defns ns-sym)))
+
+(defmacro refer-all [ns-sym & more]
+  `(do ~@(apply mirror-def-all ns-sym more)))
