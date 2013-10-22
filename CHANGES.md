@@ -1,5 +1,11 @@
 # javelin
 
+## 2.2.1
+
+*Mon Oct 21 23:33:21 EDT 2013*
+
+* add `make-require` and `make-require-macros`
+
 ## 2.2.0
 
 *Mon Oct 21 16:41:17 EDT 2013*

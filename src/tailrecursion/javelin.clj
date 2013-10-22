@@ -182,11 +182,11 @@
 ;; mirroring ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn nsym->path
-  [sym]
+  [sym ext]
   (-> (str sym)
       (s/replace "." java.io.File/separator)
       (s/replace "-" "_")
-      (str ".cljs")))
+      (str "." ext)))
 
 (defn all-list-forms
   [forms]
@@ -204,8 +204,8 @@
          doall)))
 
 (defn ops-in
-  [op-sym sym]
-  (let [ns-file (resource* (nsym->path sym))]
+  [op-sym sym ext]
+  (let [ns-file (resource* (nsym->path sym ext))]
     (->>
      (read-file ns-file)
      list*
@@ -216,12 +216,12 @@
 
 (defn mirrored-defs
   [ns-sym]
-  (let [remote-defs (ops-in 'def ns-sym)]
+  (let [remote-defs (ops-in 'def ns-sym "cljs")]
     (map (fn [r] `(def ~r ~(symbol (str ns-sym) (str r)))) remote-defs)))
 
 (defn mirrored-defns
   [ns-sym]
-  (let [remote-defns (ops-in 'defn ns-sym)]
+  (let [remote-defns (ops-in 'defn ns-sym "cljs")]
     (map (fn [r] `(defn ~r [& args#]
                     (apply ~(symbol (str ns-sym) (str r)) args#)))
          remote-defns)))
@@ -229,8 +229,17 @@
 (defn mirror-def-all
   [ns-sym & {:keys [syms]}]
   (let [syms (distinct (into ['def 'defn 'defmulti] syms)) 
-        defs (mapcat ops-in syms (repeat ns-sym))]
+        defs (mapcat ops-in syms (repeat ns-sym) (repeat "cljs"))]
     (map (fn [r] `(def ~r ~(symbol (str ns-sym) (str r)))) defs)))
+
+(defn make-require
+  [ns-sym]
+  (let [syms ['def 'defn 'defmulti]]
+    [ns-sym :refer (vec (mapcat ops-in syms (repeat ns-sym) (repeat "cljs")))]))
+
+(defn make-require-macros
+  [ns-sym]
+  [ns-sym :refer (ops-in 'defmacro ns-sym "clj")])
 
 (defmacro mirror
   "Mirrors all public defs and defns in the remote namespace
