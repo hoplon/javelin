@@ -406,3 +406,68 @@
       (is (= @b :2))
       (swap! a inc)
       (is (= @b :oops)))))
+
+(deftest data-integrity
+  ;; Test the data integrity constraints documented in the cells manifesto
+  ;;
+  ;; http://smuglispweeny.blogspot.com/2008/02/cells-manifesto.html
+  ;; 
+  (testing "single recomputation of all and only state (a1, a2) affected by change to X"
+    (testing "all and only directly dependent state updated"
+      (let [x (cell 1)
+            y (cell 1)
+            a1 (cell= x)
+            a2 (cell= (+ x x))
+            u (cell= y)
+            log (atom [])]
+        (add-watch a1 nil (fn [_ _ old new] (swap! log conj [old new])))
+        (add-watch a2 nil (fn [_ _ old new] (swap! log conj [old new])))
+        ;; log changes to unaffected (u) state
+        (add-watch u nil (fn [_ _ old new] (swap! log conj [old new])))
+
+        (swap! x inc)
+        (is (= @a1 2))
+        (is (= @a2 4))
+        (is (= @y 1))
+        (is (= (count @log) 2)))
+        )
+
+    (testing "indirectly dependent state updated"
+      (let [x (cell 1)
+            y (cell= (+ x x))
+            z (cell= (+ y y))]
+        (swap! x inc)
+        (is (= @z 8))))
+
+    (testing "recompute exactly once"
+      (let [x (cell 1)
+            a1 (cell= (+ x x))
+            log (atom [])]
+        (add-watch a1 nil (fn [_ _ old new] (swap! log conj [old new])))
+        (swap! x inc)
+        (is (= (count @log) 1))))
+
+    (testing "visibility of change to formula cells"
+      (let [x (cell 1)
+            b (cell= ["b" x])
+            a (cell= [b x])]
+        (swap! x inc)
+        (is (= @b ["b" 2]))
+        (is (= @a [["b" 2] 2]))))
+
+    (testing "visibility of change to observers"
+      (let [x (cell 1)
+            b (cell= ["b" x])
+            a (cell= [b x])
+            log (atom [])]
+        (add-watch a nil (fn [_ _ old new] (swap! log conj {:old old 
+                                                            :new new})))
+        (swap! x inc)
+        (is (= @log [
+                    {:old [["b" 1] 1]
+                     :new [["b" 2] 2]}
+                    ]))))
+
+    
+    ))
+

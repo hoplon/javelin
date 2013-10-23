@@ -3,6 +3,7 @@
 /classes
 /checkouts
 pom.xml
+pom.xml.asc
 *.swn
 *.swo
 *.swp
