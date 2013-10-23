@@ -26,20 +26,32 @@
 (declare Cell cell? cell)
 
 (def  last-rank     (atom 0))
-(defn next-rank [ ] (swap! last-rank inc))
+(def  cache         (atom {}))
+(defn next-rank [ ] (do (swap! last-rank inc)
+                        (reset! cache {})))
 (defn deref*    [x] (if (cell? x) @x x))
 
+(defn dependers [cell]
+  (->> cell
+       (bf-seq identity (fn [c] (sort-by #(.-rank %) (.-sinks c))))
+       distinct
+       vec))
+
+(defn cache! [cell]
+  (or (get @cache cell)
+      (let [newdeps (dependers cell)]
+        (swap! cache assoc cell newdeps)
+        newdeps)))
+
 (defn propagate! [cell]
-  (loop [queue (priority-map cell (.-rank cell))]
-    (when (seq queue)
-      (let [next      (key (peek queue))
-            value     ((.-thunk next))
-            continue? (not= value (.-prev next))
-            reducer   #(assoc %1 %2 (.-rank %2))
-            siblings  (pop queue)
-            children  (.-sinks next)]
-        (if continue? (set! (.-prev next) value))
-        (recur (if continue? (reduce reducer siblings children) siblings))))))
+  (loop [queue (seq (cache! cell))]
+    (when queue
+      (let [dep (first queue)
+            value ((.-thunk dep))
+            continue? (not= value (.-prev dep))]
+        (when continue?
+          (set! (.-prev dep) value)
+          (recur (next queue)))))))
 
 (defn destroy-cell! [this]
   (let [srcs (.-sources this)]
