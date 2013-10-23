@@ -15,3 +15,5 @@ pom.xml.asc
 .DS_Store
 /test/test.js
 /test/firefox-profile
+/bench/bench.js
+/bench/firefox-profile
