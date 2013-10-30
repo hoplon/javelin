@@ -97,3 +97,7 @@
         diff    #(->> %2 (map tag-neq %1) (filter first) (map second) distinct)
         proc    #(let [news (diff (deref olds) %&)] (reset! olds %&) news)]
     (apply (lift proc) cells))) 
+
+(defn cell-map [f c]
+  (let [safe-nth #(try (nth %1 %2) (catch js/Error _))]
+    (map #((lift (comp f safe-nth)) c %) (range 0 (count @c)))))

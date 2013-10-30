@@ -177,7 +177,11 @@
   (defmacro defc=     ([sym expr]     `(def ~sym (cell= ~expr)))
                       ([sym doc expr] `(def ~sym ~doc (cell= ~expr))))
 
-)
+  (defmacro cell-doseq [[bindings cell] & body]
+    (let [syms (->> (tree-seq coll? seq bindings) (filter symbol?) distinct)]
+      `(doseq [e# (->> (cell-map #(let [~bindings %] [~@syms]) ~cell)
+                       (map #(cell-map identity %)))]
+         (let [[~@syms] e#] ~@body)))))
 
 ;; mirroring ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

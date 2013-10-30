@@ -12,6 +12,7 @@ pom.xml.asc
 .lein-deps-sum
 .lein-failures
 .lein-plugins
+.lein-repl-history
 .DS_Store
 /test/test.js
 /test/firefox-profile
