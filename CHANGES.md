@@ -1,5 +1,11 @@
 # javelin
 
+## 2.3.0
+
+*Wed Oct 30 16:09:26 EDT 2013*
+
+* add `cell-map` function and `cell-doseq` macro
+
 ## 2.2.1
 
 *Mon Oct 21 23:33:21 EDT 2013*

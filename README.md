@@ -33,14 +33,14 @@ change._
 Artifacts are published on [Clojars][3].
 
 ```clojure
-[tailrecursion/javelin "2.2.1"]
+[tailrecursion/javelin "2.3.0"]
 ```
 
 ```xml
 <dependency>
   <groupId>tailrecursion</groupId>
   <artifactId>javelin</artifactId>
-  <version>2.2.1</version>
+  <version>2.3.0</version>
 </dependency>
 ```
 
@@ -140,9 +140,11 @@ Requiring the namespace and macros:
 ```clojure
 (ns my-ns
   (:require
-    [tailrecursion.javelin :refer [cell? input? cell set-cell! alts! destroy-cell!]])
+    [tailrecursion.javelin
+     :refer [cell? input? cell set-cell! alts! destroy-cell! cell-map]])
   (:require-macros
-    [tailrecursion.javelin :refer [cell= defc defc= set-cell!=]]))
+    [tailrecursion.javelin
+     :refer [cell= defc defc= set-cell!= cell-doseq]]))
 ```
 
 API functions and macros:
@@ -179,6 +181,17 @@ API functions and macros:
 
 (alts! cs*)
 ;; Creates a formula cell whose value is a list of changed values in the cells cs.
+
+(cell-map f c)
+;; Given a cell c containing a seqable value of size n and a function f, returns
+;; a sequence of n formula cells such that the ith cell's formula is (f (nth c i)).
+
+(cell-doseq seq-expr body*)
+;; Repeatedly executes the body expression(s) for side effects as doseq does.
+;; However seq-expr is a single binding-form/collection-cell-expr pair instead
+;; of the multiple pairs allowed in doseq, and binding forms are bound to formula
+;; cells containing the destructured values which will update as the collection
+;; expr cell is changed.
 ```
 
 ## License
