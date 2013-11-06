@@ -21,6 +21,9 @@
 
 ;; public ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(if (not (.-log (.-console js/window)))
+  (set! (.-console js/window) (js-obj "log" (fn [& _] nil))))
+
 (def log        #(js/console.log %1 (clj->js %2)))
 (def timeout    #(.setTimeout js/window %1 %2))
 (def interval   #(.setInterval js/window %1 %2))
