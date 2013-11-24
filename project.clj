@@ -3,7 +3,9 @@
   :url "https://github.com/tailrecursion/javelin"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[tailrecursion/cljs-priority-map "1.0.3"]]
+  :dependencies [[tailrecursion/cljs-priority-map "1.0.3"]
+                 [org.clojure/data.priority-map   "0.0.2"]
+                 [riddley                         "0.1.6"]]
   :plugins [[lein-cljsbuild "0.3.2"]
             [com.cemerick/clojurescript.test "0.1.0"]]
   :source-paths ["src"]
