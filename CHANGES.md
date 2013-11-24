@@ -1,5 +1,11 @@
 # javelin
 
+## 2.4.0
+
+*Sun Nov 24 12:34:02 EST 2013*
+
+* add clojure implementation
+
 ## 2.3.0
 
 *Wed Oct 30 16:09:26 EDT 2013*
