@@ -200,4 +200,4 @@ API functions and macros:
 [8]: https://github.com/tailrecursion/hoplon-demos/tree/master/todoFRP
 [9]: https://github.com/tailrecursion/javelin#formulas
 [10]: http://clojars.org/tailrecursion/javelin/latest-version.svg
-[11]: tree/master/img/javelin.png
+[11]: https://raw.github.com/tailrecursion/javelin/master/img/javelin.png
