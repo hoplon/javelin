@@ -32,17 +32,7 @@ change._
 
 Artifacts are published on [Clojars][3].
 
-```clojure
-[tailrecursion/javelin "2.4.0"]
-```
-
-```xml
-<dependency>
-  <groupId>tailrecursion</groupId>
-  <artifactId>javelin</artifactId>
-  <version>2.4.0</version>
-</dependency>
-```
+![latest version][10]
 
 ### Demos
 
@@ -214,3 +204,4 @@ API functions and macros:
 [7]: https://github.com/lynaghk/todoFRP/tree/master/todo/javelin
 [8]: https://github.com/lynaghk/todoFRP/tree/master/todo/hlisp-javelin
 [9]: https://github.com/tailrecursion/javelin#formulas
+[10]: http://clojars.org/tailrecursion/javelin/latest-version.svg
