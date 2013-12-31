@@ -37,7 +37,7 @@ Artifacts are published on [Clojars][3].
 ### Demos
 
 * [Javelin with Domina and Dommy][7]
-* [Javelin with Hlisp][8]
+* [Javelin with Hoplon][8]
 
 ## Overview
 
@@ -202,6 +202,6 @@ API functions and macros:
 [5]: https://dl.dropboxusercontent.com/u/12379861/javelin_demos/index.html
 [6]: https://github.com/lynaghk/todoFRP
 [7]: https://github.com/lynaghk/todoFRP/tree/master/todo/javelin
-[8]: https://github.com/lynaghk/todoFRP/tree/master/todo/hlisp-javelin
+[8]: https://github.com/tailrecursion/hoplon-demos/tree/master/todoFRP
 [9]: https://github.com/tailrecursion/javelin#formulas
 [10]: http://clojars.org/tailrecursion/javelin/latest-version.svg
