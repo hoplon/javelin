@@ -6,9 +6,6 @@ align="right" width="152"/>
 
 Spreadsheet-like dataflow programming in ClojureScript.
 
-_This library is usable but under construction and subject to frequent
-change._
-
 ### Example
 
 ```clojure
