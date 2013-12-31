@@ -1,6 +1,4 @@
-<img src="https://raw.github.com/alandipert/javelin/master/img/javelin.png?login=micha&token=b172f1b97acb55c16867dc106e30c646"
-alt="tailrecursion/javelin logo" title="tailrecursion/javelin logo"
-align="right" width="152"/>
+![javelin][11]
 
 # Javelin
 
@@ -202,3 +200,4 @@ API functions and macros:
 [8]: https://github.com/tailrecursion/hoplon-demos/tree/master/todoFRP
 [9]: https://github.com/tailrecursion/javelin#formulas
 [10]: http://clojars.org/tailrecursion/javelin/latest-version.svg
+[11]: tree/master/img/javelin.png
