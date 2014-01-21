@@ -99,5 +99,6 @@
     (apply (lift proc) cells))) 
 
 (defn cell-map [f c]
-  (let [safe-nth #(try (nth %1 %2) (catch js/Error _))]
-    (map #((lift (comp f safe-nth)) c %) (range 0 (count @c)))))
+  (let [cseq     ((lift seq) c)
+        safe-nth #(try (nth %1 %2) (catch js/Error _))]
+    (map #((lift (comp f safe-nth)) cseq %) (range 0 (count @cseq)))))

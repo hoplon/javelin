@@ -14,5 +14,6 @@ pom.xml.asc
 .lein-plugins
 .lein-repl-history
 .DS_Store
+.nrepl-port
 /test/test.js
 /test/firefox-profile

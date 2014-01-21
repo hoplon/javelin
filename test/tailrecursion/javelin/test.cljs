@@ -13,7 +13,7 @@
     [tailrecursion.javelin :refer [cell? input? cell set-cell! alts! destroy-cell!]])
   (:require-macros
     [cemerick.cljs.test :refer [deftest testing run-tests is]]
-    [tailrecursion.javelin :refer [cell= defc defc= set-cell!= mx mx2]]))
+    [tailrecursion.javelin :refer [cell= defc defc= set-cell!= cell-doseq mx mx2]]))
 
 ;;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -407,6 +407,54 @@
       (swap! a inc)
       (is (= @b :oops)))))
 
+(deftest misc-tests
+  (testing "cell-doseq over cell of vector"
+    (let [a (cell [1 2 3 4])
+          b (atom [])]
+      (cell-doseq [x a] (swap! b conj x))
+      (swap! a (partial map inc))
+      (let [[p q r s] @b]
+        (is (= @p 2))
+        (is (= @q 3))
+        (is (= @r 4))
+        (is (= @s 5)))))
+  (testing "cell-doseq over cell of set"
+    (let [a (cell [1 2 3 4])
+          b (cell= (set a))
+          m (atom #{})]
+      (is (= @b #{1 2 3 4}))
+      (cell-doseq [x b] (swap! m conj x))
+      (swap! a (partial map inc))
+      (is (= @b #{2 3 4 5}))
+      (let [m' (->> @m (map deref) set)]
+        (is (= m' #{2 3 4 5})))))
+  (testing "cell-doseq over cell of seq and destructure"
+    (let [a (cell [1 2 3 4])
+          b (cell= (map (partial hash-map :x) a))
+          m (atom [])]
+      (cell-doseq [{:keys [x]} b]
+        (swap! m conj x))
+      (swap! a (partial map inc))
+      (let [[p q r s] @m]
+        (is (= @p 2))
+        (is (= @q 3))
+        (is (= @r 4))
+        (is (= @s 5)))))
+  (testing "cell-doseq destructure seq item with & more"
+    (let [a (cell [[1 2 3] [4 5 6] [7 8 9]])
+          m (atom [])]
+      (cell-doseq [[x & more] a]
+        (swap! m conj [x more]))
+      (swap! a (partial map (partial map inc)))
+      (let [[[p1 p2] [q1 q2] [r1 r2]] @m]
+        (is (= @p1 2))
+        (is (= @q1 5))
+        (is (= @r1 8))
+        (is (= '(3 4) (seq @p2)))
+        (is (= '(6 7) (seq @q2)))
+        (is (= '(9 10) (seq @r2))))))
+  )
+
 (deftest data-integrity
   ;; Test the data integrity constraints documented in the cells manifesto
   ;;
@@ -429,8 +477,7 @@
         (is (= @a1 2))
         (is (= @a2 4))
         (is (= @y 1))
-        (is (= (count @log) 2)))
-        )
+        (is (= (count @log) 2))))
 
     (testing "indirectly dependent state updated"
       (let [x (cell 1)
@@ -460,14 +507,9 @@
             b (cell= ["b" x])
             a (cell= [b x])
             log (atom [])]
-        (add-watch a nil (fn [_ _ old new] (swap! log conj {:old old 
-                                                            :new new})))
+        (add-watch a nil
+          (fn [_ _ old new]
+            (swap! log conj {:old old :new new})))
         (swap! x inc)
-        (is (= @log [
-                    {:old [["b" 1] 1]
-                     :new [["b" 2] 2]}
-                    ]))))
-
-    
-    ))
+        (is (= @log [{:old [["b" 1] 1] :new [["b" 2] 2]}]))))))
 
