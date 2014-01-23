@@ -428,6 +428,17 @@
       (is (= @b #{2 3 4 5}))
       (let [m' (->> @m (map deref) set)]
         (is (= m' #{2 3 4 5})))))
+  (testing "cell-doseq, binding to (cell= ...) expr"
+    (let [a (cell [1 2 3 4])
+          m (atom [])]
+      (cell-doseq [x (cell= (identity a))]
+        (swap! m conj x))
+      (swap! a (partial map inc))
+      (let [[p q r s] @m]
+        (is (= @p 2))
+        (is (= @q 3))
+        (is (= @r 4))
+        (is (= @s 5)))))
   (testing "cell-doseq over cell of seq and destructure"
     (let [a (cell [1 2 3 4])
           b (cell= (map (partial hash-map :x) a))

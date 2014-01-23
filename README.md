@@ -27,9 +27,9 @@ Spreadsheet-like dataflow programming in ClojureScript.
 
 ### Dependency [![Build Status][1]][2]
 
-Artifacts are published on [Clojars][3].
+Artifacts are published on Clojars.
 
-![latest version][10]
+![[latest version][3]][10]
 
 ### Demos
 
