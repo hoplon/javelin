@@ -29,7 +29,7 @@ Spreadsheet-like dataflow programming in ClojureScript.
 
 Artifacts are published on Clojars.
 
-![[latest version][3]][10]
+[![latest version][10]][3]
 
 ### Demos
 
