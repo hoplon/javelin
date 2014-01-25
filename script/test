@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+lein with-profile devz cljsbuild once test && test/run.sh

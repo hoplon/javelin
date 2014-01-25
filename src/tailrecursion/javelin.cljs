@@ -44,6 +44,7 @@
 (defn destroy-cell! [this]
   (let [srcs (.-sources this)]
     (set! (.-sources this) [])
+    (set! (.-watches this) {})
     (doseq [src (filter cell? srcs)]
       (set! (.-sinks src) (disj (.-sinks src) this)))))
 

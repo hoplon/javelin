@@ -123,9 +123,6 @@
       (is (= @b 1))
       (is (= @c 126)))
     (testing
-      "anonymous cells in formula are destroyed correctly"
-      (is (= @u [0 1])))
-    (testing
       "convert formula cell to input cell"
       (set-cell! c :hello)
       (is (= c (input? c)))

@@ -173,6 +173,11 @@ API functions and macros:
 ;; Given a cell c containing a seqable value of size n and a function f, returns
 ;; a sequence of n formula cells such that the ith cell's formula is (f (nth c i)).
 
+(cell-let [binding-form c] body*)
+;; Given a cell c and a binding form, binds names in the binding form to formula
+;; cells containing the destructured values (these values will update as the
+;; value of c changes) and evaluates the body expressions.
+
 (cell-doseq seq-expr body*)
 ;; Repeatedly executes the body expression(s) for side effects as doseq does.
 ;; However seq-expr is a single binding-form/collection-cell-expr pair instead

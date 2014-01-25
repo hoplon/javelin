@@ -27,6 +27,10 @@
   (binding [*print-meta* true]
     (read-string (pr-str form))))
 
+(defn bind-syms [form]
+  (let [sym? #(and (symbol? %) (not= '& %))]
+    (->> form (tree-seq coll? seq) (filter sym?) distinct)))
+
 (defn macroexpand* [env form]
   (if (seq? form)
     (let [ex (a/macroexpand-1 env form)]
@@ -177,9 +181,10 @@
   (defmacro defc=     ([sym expr]     `(def ~sym (cell= ~expr)))
                       ([sym doc expr] `(def ~sym ~doc (cell= ~expr))))
 
-  (defn- bind-syms [form]
-    (let [sym? #(and (symbol? %) (not= '& %))]
-      (->> form (tree-seq coll? seq) (filter sym?) distinct)))
+  (defmacro cell-let [[bindings c] & body]
+    (let [syms  (bind-syms bindings)
+          dcell `(cell= (let [~bindings ~c] [~@syms]))]
+      `(let [[~@syms] (cell-map identity ~dcell)] ~@body)))
 
   (defmacro cell-doseq [[bindings cell] & body]
     (let [syms (bind-syms bindings)]
