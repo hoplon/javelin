@@ -77,6 +77,20 @@
   cljs.core/IDeref
   (-deref [this] (.-state this))
 
+  cljs.core/IReset
+  (-reset! [this new-value]
+    (let [old-value (.-state this)]
+      (set! (.-state this) new-value)
+      (when-not (nil? (.-watches this))
+        (-notify-watches this old-value new-value))
+      new-value))
+
+  cljs.core/ISwap
+  (-swap! [this f] (reset! this (f (.-state this))))
+  (-swap! [this f a] (reset! this (f (.-state this) a)))
+  (-swap! [this f a b] (reset! this (f (.-state this) a b)))
+  (-swap! [this f a b xs] (reset! this (apply f (.-state this) a b xs)))
+
   cljs.core/IWatchable
   (-notify-watches [this oldval newval]
     (doseq [[key f] watches] (f key this oldval newval)))
