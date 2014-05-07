@@ -61,6 +61,8 @@
 (def ^:dynamic *hoist*  nil)
 (def ^:dynamic *pass*   nil)
 
+(create-ns 'js)
+
 (let [to-list   #(into '() (reverse %))
       Cell'     (symbol "tailrecursion.javelin" "Cell")
       cell'     (symbol "tailrecursion.javelin" "cell")
@@ -190,4 +192,20 @@
     (let [syms (bind-syms bindings)]
       `(doseq [e# (->> (cell-map #(let [~bindings %] [~@syms]) ~cell)
                        (map #(cell-map identity %)))]
-         (let [[~@syms] e#] ~@body)))))
+         (let [[~@syms] e#] ~@body))))
+
+  (defmacro prop-cell
+    ([prop]
+       `(let [ret# (cell ~prop)]
+          (js/setInterval #(reset! ret# ~prop) 100)
+          (cell= ret#)))
+    ([prop setter & [callback]]
+       `(let [setter#   ~setter
+              callback# (or ~callback identity)]
+          (cell= (set! ~prop setter#))
+          (js/setInterval
+            #(when (not= @setter# ~prop)
+               (callback# ~prop)
+               (set! ~prop @setter#))
+            100)
+          setter#))))

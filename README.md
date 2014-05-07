@@ -184,6 +184,18 @@ API functions and macros:
 ;; of the multiple pairs allowed in doseq, and binding forms are bound to formula
 ;; cells containing the destructured values which will update as the collection
 ;; expr cell is changed.
+
+(prop-cell prop-expr)
+;; Returns a formula cell whose value is synced to the prop-expr, which is a
+;; JavaScript property access expression, like (.-foo js/bar) for example.
+
+(prop-cell prop-expr setter-cell callback?)
+;; Given a property access expression (see above) prop-expr, a formula cell
+;; setter-cell, and optionally a callback function, the JavaScript object
+;; property specified by prop-expr is kept synced to the value in setter-cell
+;; at all times. If the callback was provided it will be called whenever an
+;; attempt is made to change the value of the property by means other than via
+;; the setter-cell.
 ```
 
 ## License
