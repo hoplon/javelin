@@ -188,11 +188,8 @@
           dcell `(cell= (let [~bindings ~c] [~@syms]))]
       `(let [[~@syms] (cell-map identity ~dcell)] ~@body)))
 
-  (defmacro cell-doseq [[bindings cell] & body]
-    (let [syms (bind-syms bindings)]
-      `(doseq [e# (->> (cell-map #(let [~bindings %] [~@syms]) ~cell)
-                       (map #(cell-map identity %)))]
-         (let [[~@syms] e#] ~@body))))
+  (defmacro cell-doseq [[bindings items] & body]
+    `(cell-doseq* ~items (fn [item#] (cell-let [~bindings item#] ~@body))))
 
   (defmacro prop-cell
     ([prop]

@@ -21,6 +21,8 @@
                                       (if (branch? node) (children node))))))))]
     (walk (conj cljs.core.PersistentQueue.EMPTY root))))
 
+(defn- safe-nth [coll i] (try (nth coll i) (catch js/Error _)))
+
 ;; javelin ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (declare Cell cell? cell)
@@ -114,6 +116,16 @@
     (apply (lift proc) cells))) 
 
 (defn cell-map [f c]
-  (let [cseq     ((lift seq) c)
-        safe-nth #(try (nth %1 %2) (catch js/Error _))]
+  (let [cseq ((lift seq) c)]
     (map #((lift (comp f safe-nth)) cseq %) (range 0 (count @cseq)))))
+
+(defn cell-doseq* [items f]
+  (let [pool-size (cell 0)
+        items-seq ((lift seq) items)
+        cur-count ((lift count) items-seq)
+        ith-item  #((lift safe-nth) items-seq %)]
+    ((lift (fn [pool-size cur-count f ith-item reset-pool-size!]
+             (when (< pool-size cur-count)
+               (doseq [i (range pool-size cur-count)] (f (ith-item i)))
+               (reset-pool-size! cur-count))))
+     pool-size cur-count f ith-item (partial reset! pool-size))))
