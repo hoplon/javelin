@@ -183,10 +183,16 @@
   (defmacro defc=     ([sym expr]     `(def ~sym (cell= ~expr)))
                       ([sym doc expr] `(def ~sym ~doc (cell= ~expr))))
 
-  (defmacro cell-let [[bindings c] & body]
+  (defmacro cell-let-1 [[bindings c] & body]
     (let [syms  (bind-syms bindings)
           dcell `(cell= (let [~bindings ~c] [~@syms]))]
       `(let [[~@syms] (cell-map identity ~dcell)] ~@body)))
+
+  (defmacro cell-let [[bindings c & more] & body]
+    (if-not (seq more)
+      `(cell-let-1 [~bindings ~c] ~@body)
+      `(cell-let-1 [~bindings ~c]
+         (cell-let ~(vec more) ~@body))))
 
   (defmacro cell-doseq [[bindings items] & body]
     `(cell-doseq* ~items (fn [item#] (cell-let [~bindings item#] ~@body))))
