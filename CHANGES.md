@@ -1,5 +1,36 @@
 # javelin
 
+## 3.3.2
+
+*Tue Jul  1 00:27:56 EDT 2014*
+
+* `lift` deprecated and renamed to `formula`
+
+## 3.3.1
+
+* Bugfix: Fix issue with cell-let macro
+
+## 3.3.0
+
+* Bugfix: Fix cell-doseq, making it reactive.
+
+## 3.2.0
+
+* Add prop-cell
+
+## 3.1.1
+
+* cljs 0.0-2173 compat: IReset/ISwap support in Cell
+
+## 3.1.0
+
+* add cell-doseq test; dox
+* Remove watches on destroy; add cell-let; cleanup
+
+## 3.0.0
+
+* Seqify collection cell arg to cell-map; remove mirroring macros
+
 ## 2.4.0
 
 *Sun Nov 24 12:34:02 EST 2013*
