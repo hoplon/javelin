@@ -66,7 +66,7 @@
 (let [to-list   #(into '() (reverse %))
       Cell'     (symbol "tailrecursion.javelin" "Cell")
       cell'     (symbol "tailrecursion.javelin" "cell")
-      lift'     (symbol "tailrecursion.javelin" "lift")
+      formula'  (symbol "tailrecursion.javelin" "formula")
       set-frm'  (symbol "tailrecursion.javelin" "set-formula!")
       special   '#{if def fn* do let* loop* letfn* throw try
                    recur new set! ns deftype* defrecord* . js* & quote}
@@ -170,7 +170,7 @@
 
   (defn cell* [x env]
     (let [[f args] (hoist x env)]
-      (to-list `((~lift' ~f) ~@args))))
+      (to-list `((~formula' ~f) ~@args))))
 
   (defn set-cell* [c x env]
     (let [[f args] (hoist x env)]

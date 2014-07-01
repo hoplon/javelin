@@ -101,7 +101,8 @@
   (-remove-watch [this key]
     (set! (.-watches this) (dissoc watches key))))
 
-(defn lift      [f]   (fn [& sources] (set-formula! (cell ::none) f sources)))
+(defn formula   [f]   (fn [& sources] (set-formula! (cell ::none) f sources)))
+(def ^:deprecated lift formula)
 
 (defn cell      [x]   (set-formula! (Cell. {} x (next-rank) x [] #{} nil {} nil)))
 (defn cell?     [c]   (when (= (type c) Cell) c))
@@ -113,19 +114,19 @@
         tag-neq #(vector (not= %1 %2) %2)
         diff    #(->> %2 (map tag-neq %1) (filter first) (map second) distinct)
         proc    #(let [news (diff (deref olds) %&)] (reset! olds %&) news)]
-    (apply (lift proc) cells))) 
+    (apply (formula proc) cells))) 
 
 (defn cell-map [f c]
-  (let [cseq ((lift seq) c)]
-    (map #((lift (comp f safe-nth)) cseq %) (range 0 (count @cseq)))))
+  (let [cseq ((formula seq) c)]
+    (map #((formula (comp f safe-nth)) cseq %) (range 0 (count @cseq)))))
 
 (defn cell-doseq* [items f]
   (let [pool-size (cell 0)
-        items-seq ((lift seq) items)
-        cur-count ((lift count) items-seq)
-        ith-item  #((lift safe-nth) items-seq %)]
-    ((lift (fn [pool-size cur-count f ith-item reset-pool-size!]
-             (when (< pool-size cur-count)
-               (doseq [i (range pool-size cur-count)] (f (ith-item i)))
-               (reset-pool-size! cur-count))))
+        items-seq ((formula seq) items)
+        cur-count ((formula count) items-seq)
+        ith-item  #((formula safe-nth) items-seq %)]
+    ((formula (fn [pool-size cur-count f ith-item reset-pool-size!]
+                (when (< pool-size cur-count)
+                  (doseq [i (range pool-size cur-count)] (f (ith-item i)))
+                  (reset-pool-size! cur-count))))
      pool-size cur-count f ith-item (partial reset! pool-size))))
