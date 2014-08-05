@@ -171,7 +171,7 @@ Requiring the namespace and macros:
      :refer [cell? input? cell set-cell! alts! destroy-cell! cell-map]])
   (:require-macros
     [tailrecursion.javelin
-     :refer [cell= defc defc= set-cell!= cell-doseq]]))
+     :refer [cell= defc defc= set-cell!= dosync cell-doseq]]))
 ```
 
 API functions and macros:
