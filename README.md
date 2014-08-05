@@ -104,7 +104,23 @@ Cells can be microbeasts...
     (assoc test-results :mean mean :grade grade)))
 ```
 
-#### Atomic Updates to Multiple Cells
+## Formulas
+
+All macros in formula expressions are fully expanded. The resulting
+expression is then interpreted according to the following rules:
+
+* **The unquote form** causes its argument to be evaluated in place
+  and not walked.
+* **The unquote-splicing form** is interpreted as the composition
+  of `unquote` as above and `deref`.
+
+Some things don't make sense in formulas and cause errors:
+
+* **Unsupported forms** `def`, `ns`, `deftype*`, and `defrecord*`.
+* **Circular dependencies** between cells result in infinite loops at
+  runtime.
+
+## Atomic Updates to Multiple Cells
 
 Consider the following program:
 
@@ -144,22 +160,6 @@ can be used, like this:
 
 Note that the sum is only logged a single time, even though both `a` and `b`
 have been updated.
-
-## Formulas
-
-All macros in formula expressions are fully expanded. The resulting
-expression is then interpreted according to the following rules:
-
-* **The unquote form** causes its argument to be evaluated in place
-  and not walked.
-* **The unquote-splicing form** is interpreted as the composition
-  of `unquote` as above and `deref`.
-
-Some things don't make sense in formulas and cause errors:
-
-* **Unsupported forms** `def`, `ns`, `deftype*`, and `defrecord*`.
-* **Circular dependencies** between cells result in infinite loops at
-  runtime.
 
 ## Javelin API
 
