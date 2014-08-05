@@ -108,7 +108,7 @@ Cells can be microbeasts...
 
 Consider the following program:
 
-```
+```clojure
 (defc a 100)
 (defc b 200)
 
@@ -129,7 +129,7 @@ a second time when `b` is updated.
 When coordinated, transactional updates are desired the Javelin `dosync` macro
 can be used, like this:
 
-```
+```clojure
 (defc a 100)
 (defc b 200)
 
