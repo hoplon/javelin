@@ -140,10 +140,8 @@ Consider the following program:
 
 Notice how calling `swap!` on cells `a` and `b` individually causes the
 anonymous cell to print the sum twice–once when `a` is updated and then
-a second time when `b` is updated.
-
-When coordinated, transactional updates are desired the Javelin `dosync` macro
-can be used, like this:
+a second time when `b` is updated. For coordinated, transactional updates,
+Javelin provides the `dosync` macro which can be used like this:
 
 ```clojure
 (defc a 100)
