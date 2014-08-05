@@ -104,6 +104,47 @@ Cells can be microbeasts...
     (assoc test-results :mean mean :grade grade)))
 ```
 
+#### Atomic Updates to Multiple Cells
+
+Consider the following program:
+
+```
+(defc a 100)
+(defc b 200)
+
+(cell= (print "a + b =" (+ a b)))
+;=> LOG: a + b = 300
+
+(do
+  (swap! a inc)
+  (swap! b inc))
+;=> LOG: a + b = 301
+;=> LOG: a + b = 302
+```
+
+Notice how calling `swap!` on cells `a` and `b` individually causes the
+anonymous cell to print the sum twice–once when `a` is updated and then
+a second time when `b` is updated.
+
+When coordinated, transactional updates are desired the Javelin `dosync` macro
+can be used, like this:
+
+```
+(defc a 100)
+(defc b 200)
+
+(cell= (print "a + b =" (+ a b)))
+;=> LOG: a + b = 300
+
+(dosync
+  (swap! a inc)
+  (swap! b inc))
+;=> LOG: a + b = 302
+```
+
+Note that the sum is only logged a single time, even though both `a` and `b`
+have been updated.
+
 ## Formulas
 
 All macros in formula expressions are fully expanded. The resulting
@@ -165,6 +206,12 @@ API functions and macros:
 
 (destroy-cell! c)
 ;; Disconnects c from the propagation graph so it can be GC'd.
+
+(dosync exprs*)
+;; Evaluates exprs (in an implicit do) in a transaction that encompasses exprs
+;; and any nested calls. Cell propagation occurs only after all exprs have been
+;; run, and propagation occurs only once. Only the final values of cells updated
+;; within the transaction are propagated.
 
 (alts! cs*)
 ;; Creates a formula cell whose value is a list of changed values in the cells cs.
