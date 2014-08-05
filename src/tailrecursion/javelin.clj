@@ -7,6 +7,7 @@
 ;; You must not remove this notice, or any other, from this software.
 
 (ns tailrecursion.javelin
+  (:refer-clojure :exclude [dosync])
   (:require [clojure.walk    :refer [prewalk]]
             [clojure.pprint  :as p]
             [cljs.analyzer   :as a]
@@ -193,6 +194,8 @@
       `(cell-let-1 [~bindings ~c] ~@body)
       `(cell-let-1 [~bindings ~c]
          (cell-let ~(vec more) ~@body))))
+
+  (defmacro dosync [& exprs] `(dosync* (fn [] ~@exprs)))
 
   (defmacro cell-doseq [[bindings items] & body]
     `(cell-doseq* ~items (fn [item#] (cell-let [~bindings item#] ~@body))))

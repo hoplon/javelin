@@ -13,7 +13,7 @@
     [tailrecursion.javelin :refer [cell? input? cell set-cell! alts! destroy-cell!]])
   (:require-macros
     [cemerick.cljs.test :refer [deftest testing run-tests is]]
-    [tailrecursion.javelin :refer [cell= defc defc= set-cell!= cell-doseq mx mx2]]))
+    [tailrecursion.javelin :refer [cell= defc defc= set-cell!= dosync cell-doseq mx mx2]]))
 
 ;;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -192,6 +192,22 @@
       (is (= @d 99))
       (swap! a inc)
       (is (= @d 100))))
+  (testing
+    "dosync works correctly"
+    (let [u (atom [])
+          a (cell 100)
+          b (cell 200)
+          c (cell= (~(partial swap! u) conj (+ a b)))
+          d (cell= (inc a))
+          e (cell= (inc b))]
+      (dosync
+        (reset! a 150)
+        (reset! a 200)
+        (reset! b 300))
+      (is (= @u [300 500]))
+      (is (= @c [300 500]))
+      (is (= @d 201))
+      (is (= @e 301))))
   (testing
     "quoted expressions in formulas are not walked"
     (let [a (cell 100)

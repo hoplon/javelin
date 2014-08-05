@@ -27,12 +27,14 @@
 
 (declare Cell cell? cell)
 
+(def ^:dynamic *sync* nil)
+
 (def  last-rank     (atom 0))
 (defn next-rank [ ] (swap! last-rank inc))
 (defn deref*    [x] (if (cell? x) @x x))
 
-(defn propagate! [cell]
-  (loop [queue (priority-map cell (.-rank cell))]
+(defn propagate! [& cells]
+  (loop [queue (reduce #(assoc %1 %2 (.-rank %2)) (priority-map) cells)]
     (when (seq queue)
       (let [next      (key (peek queue))
             value     ((.-thunk next))
@@ -81,6 +83,7 @@
 
   cljs.core/IReset
   (-reset! [this new-value]
+    (when *sync* (swap! *sync* conj this))
     (let [old-value (.-state this)]
       (set! (.-state this) new-value)
       (when-not (nil? (.-watches this))
@@ -95,7 +98,8 @@
 
   cljs.core/IWatchable
   (-notify-watches [this oldval newval]
-    (doseq [[key f] watches] (f key this oldval newval)))
+    (let [w (if-not *sync* watches (dissoc watches ::cell))]
+      (doseq [[key f] w] (f key this oldval newval))))
   (-add-watch [this key f]
     (set! (.-watches this) (assoc watches key f)))
   (-remove-watch [this key]
@@ -108,6 +112,11 @@
 (defn cell?     [c]   (when (= (type c) Cell) c))
 (defn input?    [c]   (when (and (cell? c) (.-input? c)) c))
 (defn set-cell! [c x] (set! (.-state c) x) (set-formula! c))
+
+(defn dosync* [thunk]
+  (binding [*sync* (atom #{})]
+    (thunk)
+    (apply propagate! @*sync*)))
 
 (defn alts! [& cells]
   (let [olds    (atom (repeat (count cells) ::none)) 
