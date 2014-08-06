@@ -1,5 +1,11 @@
 # javelin
 
+## 3.4.0
+
+*Wed Aug  6 11:13:56 EDT 2014*
+
+* Add `dosync` macro.
+
 ## 3.3.2
 
 *Tue Jul  1 00:27:56 EDT 2014*
