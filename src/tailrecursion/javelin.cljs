@@ -114,9 +114,11 @@
 (defn set-cell! [c x] (set! (.-state c) x) (set-formula! c))
 
 (defn dosync* [thunk]
-  (binding [*sync* (atom #{})]
+  (if *sync*
     (thunk)
-    (apply propagate! @*sync*)))
+    (binding [*sync* (atom #{})]
+      (thunk)
+      (apply propagate! @*sync*))))
 
 (defn alts! [& cells]
   (let [olds    (atom (repeat (count cells) ::none)) 
