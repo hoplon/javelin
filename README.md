@@ -160,7 +160,7 @@ The `dosync` macro provides atomic, transactional updates to cells:
 Note that the sum is only logged a single time, even though both `a` and `b`
 have been updated.
 
-##### In-transaction Values
+### In-transaction Values
 
 The effects of `swap!` and `reset!` are visible for input cells, but formula
 cell updates are not visible during a transaction.
