@@ -42,6 +42,10 @@
 (defn ^:export start []
   (setup!)
   (time (run-tests*)) 
+  (time (run-tests*)) 
+  (time (run-tests*)) 
+  (time (run-tests*)) 
+  (time (run-tests*)) 
   (println "\nDone."))
 
 ;;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

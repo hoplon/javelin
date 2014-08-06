@@ -33,16 +33,15 @@
 (defn next-rank [ ] (swap! last-rank inc))
 (defn deref*    [x] (if (cell? x) @x x))
 
-(defn propagate! [pri-map]
-  (loop [queue pri-map]
-    (when-let [next (first (peek queue))]
-      (let [value     ((.-thunk next))
-            continue? (not= value (.-prev next))
-            reducer   #(assoc %1 %2 (.-rank %2))
-            siblings  (pop queue)
-            children  (.-sinks next)]
-        (if continue? (set! (.-prev next) value))
-        (recur (if continue? (reduce reducer siblings children) siblings))))))
+(defn propagate! [queue]
+  (when-let [next (first (peek queue))]
+    (let [value     ((.-thunk next))
+          continue? (not= value (.-prev next))
+          reducer   #(assoc %1 %2 (.-rank %2))
+          siblings  (pop queue)
+          children  (.-sinks next)]
+      (if continue? (set! (.-prev next) value))
+      (recur (if continue? (reduce reducer siblings children) siblings)))))
 
 (defn destroy-cell! [this]
   (let [srcs (.-sources this)]
