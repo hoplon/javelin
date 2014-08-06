@@ -27,32 +27,35 @@
 
 (declare Cell cell? cell)
 
-(def ^:dynamic *sync* nil)
+(def ^:dynamic *sync*    nil)
+(def ^:private last-rank (atom 0))
 
-(def  last-rank     (atom 0))
-(defn next-rank [ ] (swap! last-rank inc))
-(defn deref*    [x] (if (cell? x) @x x))
+(defn  deref*    [x] (if (cell? x) @x x))
+(defn- next-rank [ ] (swap! last-rank inc))
+(defn- cell->pm  [c] (priority-map c (.-rank c)))
+(defn- add-sync! [c] (swap! *sync* assoc c (.-rank c)))
 
-(defn propagate! [queue]
+(defn- propagate! [queue]
   (when-let [next (first (peek queue))]
-    (let [value     ((.-thunk next))
-          continue? (not= value (.-prev next))
+    (let [oldval    (.-prev next)
+          newval    ((.-thunk next))
+          continue? (not= newval oldval)
           reducer   #(assoc %1 %2 (.-rank %2))
           siblings  (pop queue)
           children  (.-sinks next)]
-      (if continue? (set! (.-prev next) value))
+      (when continue? (set! (.-prev next) newval) (-notify-watches next oldval newval))
       (recur (if continue? (reduce reducer siblings children) siblings)))))
 
-(defn destroy-cell! [this]
+(defn destroy-cell! [this & [keep-watches?]]
   (let [srcs (.-sources this)]
     (set! (.-sources this) [])
-    (set! (.-watches this) {})
+    (when-not keep-watches? (set! (.-watches this) {}))
     (doseq [src srcs]
       (when (cell? src)
         (set! (.-sinks src) (disj (.-sinks src) this))))))
 
 (defn set-formula! [this & [f sources]]
-  (destroy-cell! this)
+  (destroy-cell! this true)
   (set! (.-sources this) (if f (conj (vec sources) f) (vec sources)))
   (doseq [source (.-sources this)]
     (when (cell? source)
@@ -62,18 +65,12 @@
           (set! (.-rank dep) (next-rank))))))
   (let [compute   #(apply (deref* (peek %)) (map deref* (pop %)))
         thunk     #(let [x (.-state this), y (compute (.-sources this))]
-                     (doseq [[k f] (.-watches this)]
-                       (when-not (= k ::cell) (f k this x y)))
-                     (set! (.-state this) y))
-        err-mesg  "formula cell can't be updated via swap! or reset!"]
-    (-add-watch this ::cell
-      (if f #(throw (js/Error. err-mesg)) #(propagate! (priority-map %2 (.-rank %2)))))
+                     (set! (.-state this) y))]
     (set! (.-input? this) (if f false true))
     (set! (.-thunk this) (if f thunk #(deref this)))
     (if *sync*
-      (swap! *sync* assoc this (.-rank this))
-      (propagate! (priority-map this (.-rank this))))
-    this))
+      (doto this (add-sync!))
+      (doto this (-> cell->pm propagate!)))))
 
 (deftype Cell [meta state rank prev sources sinks thunk watches input?]
   cljs.core/IPrintWithWriter
@@ -88,11 +85,12 @@
 
   cljs.core/IReset
   (-reset! [this new-value]
-    (when *sync* (swap! *sync* assoc this rank))
+    (when *sync* (add-sync! this))
+    (when-not (.-input? this)
+      (throw (js/Error. "can't swap! or reset! formula cell")))
     (let [old-value (.-state this)]
       (set! (.-state this) new-value)
-      (when-not (nil? (.-watches this))
-        (-notify-watches this old-value new-value))
+      (when-not *sync* (propagate! (cell->pm this)))
       new-value))
 
   cljs.core/ISwap
@@ -103,9 +101,7 @@
 
   cljs.core/IWatchable
   (-notify-watches [this oldval newval]
-    (doseq [[key f] watches]
-      (when-not (and *sync* (= key ::cell))
-        (f key this oldval newval))))
+    (doseq [[key f] watches] (f key this oldval newval)))
   (-add-watch [this key f]
     (set! (.-watches this) (assoc watches key f)))
   (-remove-watch [this key]

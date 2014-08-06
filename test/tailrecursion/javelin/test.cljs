@@ -91,8 +91,8 @@
       (is (= @u [2 3])))
     (testing
       "attempt to swap! or reset! formula cell is an error"
-      (is (thrown-with-msg? js/Error #"can't be updated" (swap! b inc)))
-      (is (thrown-with-msg? js/Error #"can't be updated" (reset! b 3))))))
+      (is (thrown-with-msg? js/Error #"can't swap! or reset! formula cell" (swap! b inc)))
+      (is (thrown-with-msg? js/Error #"can't swap! or reset! formula cell" (reset! b 3))))))
 
 (deftest test-2
   (let [a (cell 0)
@@ -115,23 +115,31 @@
 
 (deftest test-3
   (let [u (atom [])
+        v (atom [])
+        w (atom [])
         a (cell 0)
         b (cell= (do (swap! u conj a) (inc a)))
         c (cell= (+ 123 a b))]
+    (add-watch b (gensym) #(swap! v conj {:old %3 :new %4}))
+    (add-watch c (gensym) #(swap! w conj {:old %3 :new %4}))
     (testing
       "change formula of formula cell"
       (swap! a inc)
-      (set-cell!= b (dec a))
+      (set-cell!= b (do (swap! u conj a) (dec a)))
       (swap! a inc)
       (is (= @a 2))
       (is (= @b 1))
-      (is (= @c 126)))
+      (is (= @c 126))
+      (is (= @u [0 1 1 2]))
+      (is (= @v [{:old 1 :new 2} {:old 2 :new 0} {:old 0 :new 1}]))
+      (is (= @w [{:old 124 :new 126} {:old 126 :new 124} {:old 124 :new 126}])))
     (testing
       "convert formula cell to input cell"
       (set-cell! c :hello)
       (is (= c (input? c)))
       (is (= @c :hello))
-      (reset! c :goodbye))
+      (reset! c :goodbye)
+      (is (= @w [{:old 124 :new 126} {:old 126 :new 124} {:old 124 :new 126} {:old 126 :new :hello} {:old :hello :new :goodbye}])))
     (testing
       "convert input cell to formula cell"
       (set-cell!= a (count (str c)))
@@ -140,8 +148,7 @@
       (is (= @b 7))
       (reset! c :hello)
       (is (= @a 6))
-      (is (= @b 5)))
-    ))
+      (is (= @b 5)))))
 
 (deftest test-4
   (testing
@@ -221,6 +228,27 @@
       (is (= @u [300 500]))
       (is (= @c [300 500]))))
   (testing
+    "watches are fired after dosync completes"
+    (let [u (atom [])
+          v (atom [])
+          w (atom [])
+          x (atom [])
+          a (cell 100)
+          b (cell 200)
+          c (cell= (~(partial swap! u) conj (+ a b)))]
+      (add-watch a nil #(swap! v conj {:old %3 :new %4}))
+      (add-watch b nil #(swap! w conj {:old %3 :new %4}))
+      (add-watch c nil #(swap! x conj {:old %3 :new %4}))
+      (dosync
+        (reset! a 150)
+        (reset! a 200)
+        (reset! b 300))
+      (is (= @c [300 500]))
+      (is (= @u [300 500]))
+      (is (= @v [{:old 100 :new 200}]))
+      (is (= @w [{:old 200 :new 300}]))
+      (is (= @x [{:old [300] :new [300 500]}]))))
+  (testing
     "set-cell!= without dosync formulas recompute repeatedly"
     (let [u (atom [])
           a (cell 100)
@@ -236,16 +264,20 @@
   (testing
     "set-cell!= inside dosync works correctly"
     (let [u (atom [])
+          v (atom [])
           a (cell 100)
           b (cell 200)
           c (cell= (~(partial swap! u) conj (+ a b)))]
+      (add-watch c nil #(swap! v conj {:old %3 :new %4}))
       (dosync
-        (set-cell!= c (~(partial swap! u) conj (- b a)))
+        (set-cell!= c (~(partial swap! u) conj (* b a 1000)))
         (reset! a 150)
         (reset! a 200)
+        (set-cell!= c (~(partial swap! u) conj (- b a)))
         (reset! b 300))
       (is (= @u [300 100]))
-      (is (= @c [300 100]))))
+      (is (= @c [300 100]))
+      (is (= @v [{:old [300] :new [300 100]}]))))
   (testing
     "nested dosyncs are merged correctly"
     (let [u (atom [])
