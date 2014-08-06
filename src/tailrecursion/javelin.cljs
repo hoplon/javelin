@@ -70,7 +70,10 @@
       (if f #(throw (js/Error. err-mesg)) #(propagate! (priority-map %2 (.-rank %2)))))
     (set! (.-input? this) (if f false true))
     (set! (.-thunk this) (if f thunk #(deref this)))
-    (doto this (-> (priority-map (.-rank this)) propagate!))))
+    (if *sync*
+      (swap! *sync* assoc this (.-rank this))
+      (propagate! (priority-map this (.-rank this))))
+    this))
 
 (deftype Cell [meta state rank prev sources sinks thunk watches input?]
   cljs.core/IPrintWithWriter

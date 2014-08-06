@@ -201,48 +201,62 @@
     (let [u (atom [])
           a (cell 100)
           b (cell 200)
-          c (cell= (~(partial swap! u) conj (+ a b)))
-          d (cell= (inc a))
-          e (cell= (inc b))]
+          c (cell= (~(partial swap! u) conj (+ a b)))]
       (do
         (reset! a 150)
         (reset! a 200)
         (reset! b 300))
       (is (= @u [300 350 400 500]))
-      (is (= @c [300 350 400 500]))
-      (is (= @d 201))
-      (is (= @e 301))))
+      (is (= @c [300 350 400 500]))))
   (testing
     "dosync works correctly"
     (let [u (atom [])
           a (cell 100)
           b (cell 200)
-          c (cell= (~(partial swap! u) conj (+ a b)))
-          d (cell= (inc a))
-          e (cell= (inc b))]
+          c (cell= (~(partial swap! u) conj (+ a b)))]
       (dosync
         (reset! a 150)
         (reset! a 200)
         (reset! b 300))
       (is (= @u [300 500]))
-      (is (= @c [300 500]))
-      (is (= @d 201))
-      (is (= @e 301))))
+      (is (= @c [300 500]))))
+  (testing
+    "set-cell!= without dosync formulas recompute repeatedly"
+    (let [u (atom [])
+          a (cell 100)
+          b (cell 200)
+          c (cell= (~(partial swap! u) conj (+ a b)))]
+      (do
+        (set-cell!= c (~(partial swap! u) conj (- b a)))
+        (reset! a 150)
+        (reset! a 200)
+        (reset! b 300))
+      (is (= @u [300 100 50 0 100]))
+      (is (= @c [300 100 50 0 100]))))
+  (testing
+    "set-cell!= inside dosync works correctly"
+    (let [u (atom [])
+          a (cell 100)
+          b (cell 200)
+          c (cell= (~(partial swap! u) conj (+ a b)))]
+      (dosync
+        (set-cell!= c (~(partial swap! u) conj (- b a)))
+        (reset! a 150)
+        (reset! a 200)
+        (reset! b 300))
+      (is (= @u [300 100]))
+      (is (= @c [300 100]))))
   (testing
     "nested dosyncs are merged correctly"
     (let [u (atom [])
           a (cell 100)
           b (cell 200)
           c (cell= (~(partial swap! u) conj (+ a b)))
-          d (cell= (inc a))
-          e (cell= (inc b))
           f #(dosync (reset! a 150) (reset! b 250))
           g #(dosync (swap! a + 50) (swap! b + 50))]
       (dosync (f) (g))
       (is (= @u [300 500]))
-      (is (= @c [300 500]))
-      (is (= @d 201))
-      (is (= @e 301))))
+      (is (= @c [300 500]))))
   (testing
     "quoted expressions in formulas are not walked"
     (let [a (cell 100)
