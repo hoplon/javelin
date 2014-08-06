@@ -87,10 +87,9 @@
   (-reset! [this new-value]
     (when-not (.-input? this)
       (throw (js/Error. "can't swap! or reset! formula cell")))
-    (let [old-value (.-state this)]
-      (set! (.-state this) new-value)
-      (if *sync* (add-sync! this) (propagate! (cell->pm this)))
-      new-value))
+    (set! (.-state this) new-value)
+    (if *sync* (add-sync! this) (propagate! (cell->pm this)))
+    new-value)
 
   cljs.core/ISwap
   (-swap! [this f] (reset! this (f (.-state this))))

@@ -12,11 +12,15 @@
                               [com.cemerick/clojurescript.test "0.1.0"]]
                     :dependencies [[org.clojure/clojurescript "0.0-2202"]]}} 
   :cljsbuild {:builds
-              {:test
+              {:dev-test
+               {:source-paths ["src" "test"]
+                :compiler {:output-to "test/test.js"
+                           :optimizations :whitespace
+                           :warnings true}
+                :jar false}
+               :test
                {:source-paths ["src" "test"]
                 :compiler {:output-to "test/test.js"
                            :optimizations :advanced
-                           ;:optimizations :whitespace
-                           ;:pretty-print true
                            :warnings true}
                 :jar false}}})
