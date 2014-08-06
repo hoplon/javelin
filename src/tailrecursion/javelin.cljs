@@ -11,7 +11,7 @@
 
 ;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn bf-seq
+(defn- bf-seq
   "Like tree-seq but traversal is breadth-first instead of depth-first."
   [branch? children root]
   (letfn [(walk [queue]
@@ -85,12 +85,11 @@
 
   cljs.core/IReset
   (-reset! [this new-value]
-    (when *sync* (add-sync! this))
     (when-not (.-input? this)
       (throw (js/Error. "can't swap! or reset! formula cell")))
     (let [old-value (.-state this)]
       (set! (.-state this) new-value)
-      (when-not *sync* (propagate! (cell->pm this)))
+      (if *sync* (add-sync! this) (propagate! (cell->pm this)))
       new-value))
 
   cljs.core/ISwap
