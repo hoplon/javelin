@@ -33,11 +33,10 @@
 (defn next-rank [ ] (swap! last-rank inc))
 (defn deref*    [x] (if (cell? x) @x x))
 
-(defn propagate! [& cells]
-  (loop [queue (reduce #(assoc %1 %2 (.-rank %2)) (priority-map) cells)]
-    (when (seq queue)
-      (let [next      (key (peek queue))
-            value     ((.-thunk next))
+(defn propagate! [pri-map]
+  (loop [queue pri-map]
+    (when-let [next (first (peek queue))]
+      (let [value     ((.-thunk next))
             continue? (not= value (.-prev next))
             reducer   #(assoc %1 %2 (.-rank %2))
             siblings  (pop queue)
@@ -49,26 +48,30 @@
   (let [srcs (.-sources this)]
     (set! (.-sources this) [])
     (set! (.-watches this) {})
-    (doseq [src (filter cell? srcs)]
-      (set! (.-sinks src) (disj (.-sinks src) this)))))
+    (doseq [src srcs]
+      (when (cell? src)
+        (set! (.-sinks src) (disj (.-sinks src) this))))))
 
 (defn set-formula! [this & [f sources]]
   (destroy-cell! this)
   (set! (.-sources this) (if f (conj (vec sources) f) (vec sources)))
-  (doseq [source (filter cell? (.-sources this))]
-    (set! (.-sinks source) (conj (.-sinks source) this))
-    (if (> (.-rank source) (.-rank this))
-      (doseq [dep (bf-seq identity #(.-sinks %) source)]
-        (set! (.-rank dep) (next-rank)))))
+  (doseq [source (.-sources this)]
+    (when (cell? source)
+      (set! (.-sinks source) (conj (.-sinks source) this))
+      (if (> (.-rank source) (.-rank this))
+        (doseq [dep (bf-seq identity #(.-sinks %) source)]
+          (set! (.-rank dep) (next-rank))))))
   (let [compute   #(apply (deref* (peek %)) (map deref* (pop %)))
         thunk     #(let [x (.-state this), y (compute (.-sources this))]
-                     (doseq [[k f] (dissoc (.-watches this) ::cell)] (f k this x y))
+                     (doseq [[k f] (.-watches this)]
+                       (when-not (= k ::cell) (f k this x y)))
                      (set! (.-state this) y))
         err-mesg  "formula cell can't be updated via swap! or reset!"]
-    (-add-watch this ::cell (if f #(throw (js/Error. err-mesg)) #(propagate! %2)))
+    (-add-watch this ::cell
+      (if f #(throw (js/Error. err-mesg)) #(propagate! (priority-map %2 (.-rank %2)))))
     (set! (.-input? this) (if f false true))
     (set! (.-thunk this) (if f thunk #(deref this)))
-    (doto this propagate!)))
+    (doto this (-> (priority-map (.-rank this)) propagate!))))
 
 (deftype Cell [meta state rank prev sources sinks thunk watches input?]
   cljs.core/IPrintWithWriter
@@ -83,7 +86,7 @@
 
   cljs.core/IReset
   (-reset! [this new-value]
-    (when *sync* (swap! *sync* conj this))
+    (when *sync* (swap! *sync* assoc this rank))
     (let [old-value (.-state this)]
       (set! (.-state this) new-value)
       (when-not (nil? (.-watches this))
@@ -98,8 +101,9 @@
 
   cljs.core/IWatchable
   (-notify-watches [this oldval newval]
-    (let [w (if-not *sync* watches (dissoc watches ::cell))]
-      (doseq [[key f] w] (f key this oldval newval))))
+    (doseq [[key f] watches]
+      (when-not (and *sync* (= key ::cell))
+        (f key this oldval newval))))
   (-add-watch [this key f]
     (set! (.-watches this) (assoc watches key f)))
   (-remove-watch [this key]
@@ -116,9 +120,9 @@
 (defn dosync* [thunk]
   (if *sync*
     (thunk)
-    (binding [*sync* (atom #{})]
+    (binding [*sync* (atom (priority-map))]
       (thunk)
-      (apply propagate! @*sync*))))
+      (propagate! @*sync*))))
 
 (defn alts! [& cells]
   (let [olds    (atom (repeat (count cells) ::none)) 
