@@ -157,13 +157,11 @@ The `dosync` macro provides atomic, transactional updates to cells:
 ;=> LOG: a + b = 302
 ```
 
-Note that the sum is only logged a single time, even though both `a` and `b`
-have been updated.
+The sum is only logged a single time, even though both `a` and `b` have been
+updated.
 
-### In-transaction Values
-
-The effects of `swap!` and `reset!` are visible for input cells, but formula
-cell updates are not visible during a transaction.
+**Note:** The effects of `swap!` and `reset!` are visible for input cells, but
+formula cell updates are not visible during a transaction.
 
 ## Javelin API
 
