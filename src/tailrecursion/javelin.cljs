@@ -16,9 +16,8 @@
   [branch? children root]
   (letfn [(walk [queue]
             (when-let [node (peek queue)]
-              (lazy-seq
-               (cons node (walk (into (pop queue)
-                                      (if (branch? node) (children node))))))))]
+              (->> (when (branch? node) (children node))
+                (into (pop queue)) walk (cons node) lazy-seq)))]
     (walk (conj cljs.core.PersistentQueue.EMPTY root))))
 
 (defn- safe-nth [coll i] (try (nth coll i) (catch js/Error _)))
@@ -106,12 +105,12 @@
     (set! (.-watches this) (dissoc watches key))))
 
 (defn formula   [f]   (fn [& sources] (set-formula! (cell ::none) f sources)))
-(def ^:deprecated lift formula)
-
 (defn cell      [x]   (set-formula! (Cell. {} x (next-rank) x [] #{} nil {} nil)))
 (defn cell?     [c]   (when (= (type c) Cell) c))
 (defn input?    [c]   (when (and (cell? c) (.-input? c)) c))
 (defn set-cell! [c x] (set! (.-state c) x) (set-formula! c))
+
+(def ^:deprecated lift formula)
 
 (defn dosync* [thunk]
   (if *sync*
