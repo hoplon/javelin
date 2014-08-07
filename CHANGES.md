@@ -1,5 +1,14 @@
 # javelin
 
+## 3.5.0
+
+*Thu Aug  7 18:45:31 EDT 2014*
+
+* Add `formula?`, `lens?`, and `lens`.
+* Fix issues with watches not being notified when formulas are mutated.
+* Fix issues with watch notifications and transactions.
+* Better performance.
+
 ## 3.4.0
 
 *Wed Aug  6 11:13:56 EDT 2014*

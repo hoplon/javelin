@@ -1,4 +1,4 @@
-(defproject tailrecursion/javelin "3.5.0-SNAPSHOT"
+(defproject tailrecursion/javelin "3.5.0"
   :description "A Functional Reactive Programming library for ClojureScript"
   :url "https://github.com/tailrecursion/javelin"
   :license {:name "Eclipse Public License"
