@@ -177,24 +177,34 @@ multiple times.
 
 Lenses separate reads and writes in the cell graph. They are formula cells
 created with a special callback that provides the write implementation. The
-read implementation is provided by the underlying cell formula. Lenses are
-useful for encapsulating asymmetric read/write behavior.
+read implementation is provided by the underlying cell formula.
 
 For example:
 
 ```clojure
 (defn path-cell [c path]
   (lens (cell= (get-in c path))
-        (partial swap! c assoc-in path))
+        (partial swap! c assoc-in path)))
 
-(defc a {:a [1 2 3] :b [4 5 6]})
+(defc a {:a [1 2 3], :b [4 5 6]})
 (def  b (path-cell a [:a]))
 
 @b            ;=> [1 2 3]
 (swap! b pop) ;=> [1 2]
 @b            ;=> [1 2]
-@a            ;=> {:a [1 2] :b [4 5 6]}
+@a            ;=> {:a [1 2], :b [4 5 6]}
+
+@b            ;=> [1 2]
+(reset! b :x) ;=> :x
+@b            ;=> :x
+@a            ;=> {:a :x, :b [4 5 6]}
 ```
+
+The `path-cell` function returns a lens whose formula "focuses" in on a part
+of the underlying collection using `get-in`. The provided callback takes the
+desired new value and updates the underlying collection accordingly. The update
+propagates to the lens formula, thereby updating the value of the lens cell
+itself.
 
 ## Javelin API
 

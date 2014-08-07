@@ -526,7 +526,10 @@
       (is (= @b [1 2 3]))
       (is (= (swap! b pop) [1 2]))
       (is (= @b [1 2]))
-      (is (= @a {:a [1 2] :b [4 5 6]}))))
+      (is (= @a {:a [1 2] :b [4 5 6]}))
+      (is (= (reset! b :x) :x))
+      (is (= @b :x))
+      (is (= @a {:a :x :b [4 5 6]}))))
   (testing "swap! or reset! on lens returns new value"
     (let [a (cell 100)
           b (cell 200)
