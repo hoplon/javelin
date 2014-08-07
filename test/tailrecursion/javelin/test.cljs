@@ -10,7 +10,7 @@
   (:require
     [clojure.string :as s]
     [cemerick.cljs.test :as t]
-    [tailrecursion.javelin :refer [cell? input? cell set-cell! alts! destroy-cell!]])
+    [tailrecursion.javelin :refer [cell? input? cell set-cell! lens alts! destroy-cell!]])
   (:require-macros
     [cemerick.cljs.test :refer [deftest testing run-tests is]]
     [tailrecursion.javelin :refer [cell= defc defc= set-cell!= dosync cell-doseq mx mx2]]))
@@ -506,6 +506,49 @@
       (is (= @b :oops)))))
 
 (deftest misc-tests
+  (testing "lenses work correctly"
+    (let [a (cell 100)
+          b (cell 200)
+          c (cell= (+ a b))
+          d (lens c (partial reset! a))]
+      (is (not (input? d)))
+      (is (= @d 300))
+      (reset! d 200)
+      (is (= @d 400))
+      (swap! d inc)
+      (is (= @d 601))))
+  (testing "swap! or reset! on lens returns new value"
+    (let [a (cell 100)
+          b (cell 200)
+          c (cell= (+ a b))
+          d (lens c (partial reset! a))]
+      (is (= (swap! d inc) 501))
+      (is (= (reset! d 100) 300))))
+  (testing "lenses propagate correctly"
+    (let [a (cell 100)
+          b (cell 200)
+          c (cell= (+ a b))
+          d (lens c #(reset! a %))
+          e (cell= (+ d a b))]
+      (is (= @e 600))
+      (reset! d 200)
+      (is (= @e 800))))
+  (testing "lenses notify watches correctly"
+    (let [u (atom [])
+          a (cell 100)
+          b (cell 200)
+          c (cell= (+ a b))
+          d (lens c #(reset! a %))]
+      (add-watch d (gensym) #(swap! u conj {:old %3 :new %4}))
+      (reset! d 200)
+      (is (= @u [{:old 300 :new 400}]))))
+  (testing "lenses work correctly in dosync"
+    (let [u (atom [])
+          a (cell 100)
+          b (cell 200)
+          c (cell= (+ a b))
+          d (lens c #(reset! a %))]
+      ))
   (testing "cell-doseq over cell of vector"
     (let [a (cell [1 2 3 4])
           b (atom [])]

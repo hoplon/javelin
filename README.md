@@ -176,7 +176,7 @@ Requiring the namespace and macros:
 (ns my-ns
   (:require
     [tailrecursion.javelin
-     :refer [cell? input? cell set-cell! alts! destroy-cell! cell-map]])
+     :refer [cell? input? cell lens set-cell! alts! destroy-cell! cell-map]])
   (:require-macros
     [tailrecursion.javelin
      :refer [cell= defc defc= set-cell!= dosync cell-doseq]]))
@@ -213,6 +213,11 @@ API functions and macros:
 
 (destroy-cell! c)
 ;; Disconnects c from the propagation graph so it can be GC'd.
+
+(lens c f)
+;; Creates a "lens" from a cell c and an update callback f. Lenses are formula
+;; cells on which swap! or reset! may be called, firing the update callback.
+;; The callback must be a function of one argument–the requested new value.
 
 (dosync exprs*)
 ;; Evaluates exprs (in an implicit do) in a transaction that encompasses exprs

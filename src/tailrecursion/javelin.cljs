@@ -34,17 +34,19 @@
       (when diff? (set! (.-prev next) new) (-notify-watches next old new))
       (recur (if-not diff? popq (reduce #(assoc %1 %2 (.-rank %2)) popq (.-sinks next)))))))
 
-(defn  deref*     [x] (if (cell? x) @x x))
-(defn- next-rank  [ ] (swap! last-rank inc))
-(defn- cell->pm   [c] (priority-map c (.-rank c)))
-(defn- add-sync!  [c] (swap! *sync* assoc c (.-rank c)))
-(defn- propagate! [c] (if *sync* (doto c add-sync!) (doto c (-> cell->pm propagate*))))
+(defn  deref*     [x]   (if (cell? x) @x x))
+(defn- next-rank  [ ]   (swap! last-rank inc))
+(defn- cell->pm   [c]   (priority-map c (.-rank c)))
+(defn- add-sync!  [c]   (swap! *sync* assoc c (.-rank c)))
+(defn- safe-nth   [c i] (try (nth c i) (catch js/Error _)))
+(defn- propagate! [c]   (if *sync* (doto c add-sync!) (doto c (-> cell->pm propagate*))))
 
 ;; javelin ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn destroy-cell! [this & [keep-watches?]]
   (let [srcs (.-sources this)]
     (set! (.-sources this) [])
+    (set! (.-update this) nil)
     (when-not keep-watches? (set! (.-watches this) {}))
     (doseq [src srcs]
       (when (cell? src)
@@ -65,7 +67,7 @@
     (set! (.-thunk this) (if f thunk #(deref this)))
     (propagate! this)))
 
-(deftype Cell [meta state rank prev sources sinks thunk watches input?]
+(deftype Cell [meta state rank prev sources sinks thunk watches input? update]
   cljs.core/IPrintWithWriter
   (-pr-writer [this writer opts]
     (write-all writer "#<Cell: " (pr-str state) ">"))
@@ -78,9 +80,11 @@
 
   cljs.core/IReset
   (-reset! [this x]
-    (if (.-input? this)
-      (do (set! (.-state this) x) (propagate! this) x)
-      (throw (js/Error. "can't swap! or reset! formula cell"))))
+    (cond
+      (.-input? this) (do (set! (.-state this) x) (propagate! this))
+      (.-update this) ((.-update this) x)
+      :else           (throw (js/Error. "can't swap! or reset! formula cell")))
+    (.-state this))
 
   cljs.core/ISwap
   (-swap! [this f]        (reset! this (f (.-state this))))
@@ -97,7 +101,8 @@
 (defn input?    [c]   (when (and (cell? c) (.-input? c)) c))
 (defn set-cell! [c x] (set! (.-state c) x) (set-formula! c))
 (defn formula   [f]   (fn [& sources] (set-formula! (cell ::none) f sources)))
-(defn cell      [x]   (set-formula! (Cell. {} x (next-rank) x [] #{} nil {} nil)))
+(defn lens      [c f] (let [c ((formula identity) c)] (set! (.-update c) f) c))
+(defn cell      [x]   (set-formula! (Cell. {} x (next-rank) x [] #{} nil {} nil nil)))
 
 (def ^:deprecated lift formula)
 
