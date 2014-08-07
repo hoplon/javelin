@@ -84,6 +84,10 @@
       (is (= @a 1))
       (is (= @b 2)))
     (testing
+      "swap! or reset! on formula cell returns new value"
+      (is (= (swap! a inc) 2))
+      (is (= (reset! a 1) 1)))
+    (testing
       "side effects are performed correctly"
       (cell= (swap! u conj b))
       (is (= @u [2]))

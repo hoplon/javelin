@@ -25,8 +25,6 @@
                 (into (pop queue)) walk (cons node) lazy-seq)))]
     (walk (conj cljs.core.PersistentQueue.EMPTY root))))
 
-(defn- safe-nth [coll i] (try (nth coll i) (catch js/Error _)))
-
 (defn- propagate* [pri-map]
   (when-let [next (first (peek pri-map))]
     (let [popq  (pop pri-map)
