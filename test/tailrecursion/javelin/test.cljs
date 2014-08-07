@@ -517,6 +517,16 @@
       (is (= @d 400))
       (swap! d inc)
       (is (= @d 601))))
+  (testing "lens path-cell example works"
+    (let [a (cell {:a [1 2 3] :b [4 5 6]})
+          path-cell #(lens
+                       (cell= (get-in %1 %2))
+                       (partial swap! %1 assoc-in %2))
+          b (path-cell a [:a])]
+      (is (= @b [1 2 3]))
+      (is (= (swap! b pop) [1 2]))
+      (is (= @b [1 2]))
+      (is (= @a {:a [1 2] :b [4 5 6]}))))
   (testing "swap! or reset! on lens returns new value"
     (let [a (cell 100)
           b (cell 200)
@@ -543,12 +553,25 @@
       (reset! d 200)
       (is (= @u [{:old 300 :new 400}]))))
   (testing "lenses work correctly in dosync"
-    (let [u (atom [])
-          a (cell 100)
-          b (cell 200)
-          c (cell= (+ a b))
-          d (lens c #(reset! a %))]
-      ))
+    (let [u  (atom [])
+          a  (cell 100)
+          b  (cell 200)
+          c  (cell= (+ a b))
+          d  (lens c (partial reset! a))
+          e  (cell= (swap! u conj d))
+          u' (atom [])
+          a' (cell 100)
+          c' (cell= (+ a' b))
+          d' (lens c' (partial reset! a'))
+          e' (cell= (swap! u' conj d'))]
+      (dosync
+        (is (= @d (swap! d inc)))
+        (is (= @d (swap! d inc)))
+        (is (= @d (swap! d inc))))
+      (swap! d' inc)
+      (is (= @d 501))
+      (is (= @d @d'))
+      (is (= @u @u'))))
   (testing "cell-doseq over cell of vector"
     (let [a (cell [1 2 3 4])
           b (atom [])]

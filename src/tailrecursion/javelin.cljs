@@ -11,7 +11,7 @@
 
 ;; helpers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(declare Cell cell? cell)
+(declare Cell cell? cell input? lens?)
 
 (def ^:dynamic *sync*    nil)
 (def ^:private last-rank (atom 0))
@@ -29,7 +29,7 @@
   (when-let [next (first (peek pri-map))]
     (let [popq  (pop pri-map)
           old   (.-prev next)
-          new   ((.-thunk next))
+          new   (if-let [f (.-thunk next)] (f) (.-state next))
           diff? (not= new old)]
       (when diff? (set! (.-prev next) new) (-notify-watches next old new))
       (recur (if-not diff? popq (reduce #(assoc %1 %2 (.-rank %2)) popq (.-sinks next)))))))
@@ -47,6 +47,7 @@
   (let [srcs (.-sources this)]
     (set! (.-sources this) [])
     (set! (.-update this) nil)
+    (set! (.-thunk this) nil)
     (when-not keep-watches? (set! (.-watches this) {}))
     (doseq [src srcs]
       (when (cell? src)
@@ -54,23 +55,21 @@
 
 (defn set-formula! [this & [f sources]]
   (destroy-cell! this true)
-  (set! (.-sources this) (if f (conj (vec sources) f) (vec sources)))
-  (doseq [source (.-sources this)]
-    (when (cell? source)
-      (set! (.-sinks source) (conj (.-sinks source) this))
-      (if (> (.-rank source) (.-rank this))
-        (doseq [dep (bf-seq identity #(.-sinks %) source)]
-          (set! (.-rank dep) (next-rank))))))
-  (let [compute #(apply (deref* (peek %)) (map deref* (pop %)))
-        thunk   #(set! (.-state this) (compute (.-sources this)))]
-    (set! (.-input? this) (not f))
-    (set! (.-thunk this) (if f thunk #(deref this)))
-    (propagate! this)))
+  (when f
+    (set! (.-sources this) (conj (vec sources) f))
+    (doseq [source (.-sources this)]
+      (when (cell? source)
+        (set! (.-sinks source) (conj (.-sinks source) this))
+        (if (> (.-rank source) (.-rank this))
+          (doseq [dep (bf-seq identity #(.-sinks %) source)]
+            (set! (.-rank dep) (next-rank))))))
+    (let [compute #(apply (deref* (peek %)) (map deref* (pop %)))]
+      (set! (.-thunk this) #(set! (.-state this) (compute (.-sources this))))))
+  (propagate! this))
 
-(deftype Cell [meta state rank prev sources sinks thunk watches input? update]
+(deftype Cell [meta state rank prev sources sinks thunk watches update]
   cljs.core/IPrintWithWriter
-  (-pr-writer [this writer opts]
-    (write-all writer "#<Cell: " (pr-str state) ">"))
+  (-pr-writer [this w _] (write-all w "#<Cell: " (pr-str state) ">"))
 
   cljs.core/IMeta
   (-meta [this] meta)
@@ -80,10 +79,9 @@
 
   cljs.core/IReset
   (-reset! [this x]
-    (cond
-      (.-input? this) (do (set! (.-state this) x) (propagate! this))
-      (.-update this) ((.-update this) x)
-      :else           (throw (js/Error. "can't swap! or reset! formula cell")))
+    (cond (lens? this)  ((.-update this) x)
+          (input? this) (do (set! (.-state this) x) (propagate! this))
+          :else         (throw (js/Error. "can't swap! or reset! formula cell")))
     (.-state this))
 
   cljs.core/ISwap
@@ -98,11 +96,13 @@
   (-remove-watch   [this k]   (set! (.-watches this) (dissoc watches k))))
 
 (defn cell?     [c]   (when (= (type c) Cell) c))
-(defn input?    [c]   (when (and (cell? c) (.-input? c)) c))
+(defn formula?  [c]   (when (and (cell? c) (.-thunk c)) c))
+(defn lens?     [c]   (when (and (cell? c) (.-update c)) c))
+(defn input?    [c]   (when (and (cell? c) (not (formula? c))) c))
 (defn set-cell! [c x] (set! (.-state c) x) (set-formula! c))
 (defn formula   [f]   (fn [& sources] (set-formula! (cell ::none) f sources)))
 (defn lens      [c f] (let [c ((formula identity) c)] (set! (.-update c) f) c))
-(defn cell      [x]   (set-formula! (Cell. {} x (next-rank) x [] #{} nil {} nil nil)))
+(defn cell      [x]   (set-formula! (Cell. {} x (next-rank) x [] #{} nil {} nil)))
 
 (def ^:deprecated lift formula)
 

@@ -120,9 +120,13 @@ Some things don't make sense in formulas and cause errors:
 * **Circular dependencies** between cells result in infinite loops at
   runtime.
 
-## Atomic Updates to Multiple Cells
+## Transactions
 
-Consider the following program:
+The `dosync` macro facilitates atomic, transactional updates to cells. This can
+be used to coordinate or batch updates such that propagation occurs only once
+for the entire transaction instead of once for each individual cell update.
+
+For example, consider the following program:
 
 ```clojure
 (defc a 100)
@@ -144,7 +148,8 @@ Notice how calling `swap!` on cells `a` and `b` individually causes the
 anonymous cell to print the sum three times–once for each update to `a`
 and `b`.
 
-The `dosync` macro provides atomic, transactional updates:
+Using `dosync` these updates can be made inside of a transaction during which
+propagation is suspended:
 
 ```clojure
 (defc a 100)
@@ -167,6 +172,29 @@ multiple times.
 > immediately visible for input cells, but not for formula cells. Formula
 > cells are updated and watchers are notified only after the transaction is
 > complete.
+
+## Lenses
+
+Lenses separate reads and writes in the cell graph. They are formula cells
+created with a special callback that provides the write implementation. The
+read implementation is provided by the underlying cell formula. Lenses are
+useful for encapsulating asymmetric read/write behavior.
+
+For example:
+
+```clojure
+(defn path-cell [c path]
+  (lens (cell= (get-in c path))
+        (partial swap! c assoc-in path))
+
+(defc a {:a [1 2 3] :b [4 5 6]})
+(def  b (path-cell a [:a]))
+
+@b            ;=> [1 2 3]
+(swap! b pop) ;=> [1 2]
+@b            ;=> [1 2]
+@a            ;=> {:a [1 2] :b [4 5 6]}
+```
 
 ## Javelin API
 
@@ -191,11 +219,24 @@ API functions and macros:
 (input? c)
 ;; Returns c if c is an input cell, nil otherwise.
 
+(formula? c)
+;; Returns c if c is a formula cell, nil otherwise.
+
+(lens? c)
+;; Returns c if c is a lens cell, nil otherwise.
+
 (cell expr)
 ;; Create new input cell with initial value expr.
 
 (cell= expr)
 ;; Create new fomula cell with formula expr.
+
+(lens c f)
+;; Creates a "lens" from a cell c and an update callback f. Lenses are formula
+;; cells on which swap! or reset! may be called, firing the update callback.
+;; The callback must be a function of one argument–the requested new value. The
+;; lens will always return the value of the underlying formula cell when it is
+;; dereferenced.
 
 (defc symbol doc-string? expr)
 ;; Creates a new input cell and binds it to a var with the name symbol and
@@ -213,11 +254,6 @@ API functions and macros:
 
 (destroy-cell! c)
 ;; Disconnects c from the propagation graph so it can be GC'd.
-
-(lens c f)
-;; Creates a "lens" from a cell c and an update callback f. Lenses are formula
-;; cells on which swap! or reset! may be called, firing the update callback.
-;; The callback must be a function of one argument–the requested new value.
 
 (dosync exprs*)
 ;; Evaluates exprs (in an implicit do) in a transaction that encompasses exprs
