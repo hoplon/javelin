@@ -27,16 +27,14 @@
 
 (defn- safe-nth [coll i] (try (nth coll i) (catch js/Error _)))
 
-(defn- propagate* [queue]
-  (when-let [next (first (peek queue))]
-    (let [oldval    (.-prev next)
-          newval    ((.-thunk next))
-          continue? (not= newval oldval)
-          reducer   #(assoc %1 %2 (.-rank %2))
-          siblings  (pop queue)
-          children  (.-sinks next)]
-      (when continue? (set! (.-prev next) newval) (-notify-watches next oldval newval))
-      (recur (if continue? (reduce reducer siblings children) siblings)))))
+(defn- propagate* [pri-map]
+  (when-let [next (first (peek pri-map))]
+    (let [popq  (pop pri-map)
+          old   (.-prev next)
+          new   ((.-thunk next))
+          diff? (not= new old)]
+      (when diff? (set! (.-prev next) new) (-notify-watches next old new))
+      (recur (if-not diff? popq (reduce #(assoc %1 %2 (.-rank %2)) popq (.-sinks next)))))))
 
 (defn  deref*     [x] (if (cell? x) @x x))
 (defn- next-rank  [ ] (swap! last-rank inc))
@@ -108,11 +106,8 @@
 ;; javelin util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn dosync* [thunk]
-  (if *sync*
-    (thunk)
-    (binding [*sync* (atom (priority-map))]
-      (thunk)
-      (propagate* @*sync*))))
+  (let [bind #(binding [*sync* (atom (priority-map))] (%))]
+    (if *sync* (thunk) (bind #(do (thunk) (propagate* @*sync*))))))
 
 (defn alts! [& cells]
   (let [olds    (atom (repeat (count cells) ::none)) 
