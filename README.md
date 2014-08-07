@@ -189,15 +189,19 @@ For example:
 (defc a {:a [1 2 3], :b [4 5 6]})
 (def  b (path-cell a [:a]))
 
-@b            ;=> [1 2 3]
-(swap! b pop) ;=> [1 2]
-@b            ;=> [1 2]
-@a            ;=> {:a [1 2], :b [4 5 6]}
+@b                       ;=> [1 2 3]
+(swap! b pop)            ;=> [1 2]
+@b                       ;=> [1 2]
+@a                       ;=> {:a [1 2], :b [4 5 6]}
 
-@b            ;=> [1 2]
-(reset! b :x) ;=> :x
-@b            ;=> :x
-@a            ;=> {:a :x, :b [4 5 6]}
+@b                       ;=> [1 2]
+(reset! b :x)            ;=> :x
+@b                       ;=> :x
+@a                       ;=> {:a :x, :b [4 5 6]}
+
+@b                       ;=> :x
+(swap! a assoc :a [1 2]) ;=> {:a [1 2] :b [4 5 6]}
+@b                       ;=> [1 2]
 ```
 
 The `path-cell` function returns a lens whose formula "focuses" in on a part
