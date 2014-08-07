@@ -133,16 +133,18 @@ Consider the following program:
 
 (do
   (swap! a inc)
+  (swap! a inc)
   (swap! b inc))
 ;=> LOG: a + b = 301
 ;=> LOG: a + b = 302
+;=> LOG: a + b = 303
 ```
 
 Notice how calling `swap!` on cells `a` and `b` individually causes the
-anonymous cell to print the sum twice–once when `a` is updated and then
-a second time when `b` is updated.
+anonymous cell to print the sum three times–once for each update to `a`
+and `b`.
 
-The `dosync` macro provides atomic, transactional updates to cells:
+The `dosync` macro provides atomic, transactional updates:
 
 ```clojure
 (defc a 100)
@@ -153,15 +155,18 @@ The `dosync` macro provides atomic, transactional updates to cells:
 
 (dosync
   (swap! a inc)
+  (swap! a inc)
   (swap! b inc))
-;=> LOG: a + b = 302
+;=> LOG: a + b = 303
 ```
 
-The sum is only logged a single time, even though both `a` and `b` have been
-updated.
+The sum is only logged a single time, even though `a` and `b` were updated
+multiple times.
 
 > **Note:** During a transaction the effects of `swap!` and `reset!` are
-> immediately visible for input cells, but not for formula cells.
+> immediately visible for input cells, but not for formula cells. Formula
+> cells are updated and watchers are notified only after the transaction is
+> complete.
 
 ## Javelin API
 

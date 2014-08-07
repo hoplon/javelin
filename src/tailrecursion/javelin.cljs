@@ -9,7 +9,12 @@
 (ns tailrecursion.javelin
   (:require [tailrecursion.priority-map :refer [priority-map]]))
 
-;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; helpers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(declare Cell cell? cell)
+
+(def ^:dynamic *sync*    nil)
+(def ^:private last-rank (atom 0))
 
 (defn- bf-seq
   "Like tree-seq but traversal is breadth-first instead of depth-first."
@@ -22,19 +27,7 @@
 
 (defn- safe-nth [coll i] (try (nth coll i) (catch js/Error _)))
 
-;; javelin ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(declare Cell cell? cell)
-
-(def ^:dynamic *sync*    nil)
-(def ^:private last-rank (atom 0))
-
-(defn  deref*    [x] (if (cell? x) @x x))
-(defn- next-rank [ ] (swap! last-rank inc))
-(defn- cell->pm  [c] (priority-map c (.-rank c)))
-(defn- add-sync! [c] (swap! *sync* assoc c (.-rank c)))
-
-(defn- propagate! [queue]
+(defn- propagate* [queue]
   (when-let [next (first (peek queue))]
     (let [oldval    (.-prev next)
           newval    ((.-thunk next))
@@ -44,6 +37,14 @@
           children  (.-sinks next)]
       (when continue? (set! (.-prev next) newval) (-notify-watches next oldval newval))
       (recur (if continue? (reduce reducer siblings children) siblings)))))
+
+(defn  deref*     [x] (if (cell? x) @x x))
+(defn- next-rank  [ ] (swap! last-rank inc))
+(defn- cell->pm   [c] (priority-map c (.-rank c)))
+(defn- add-sync!  [c] (swap! *sync* assoc c (.-rank c)))
+(defn- propagate! [c] (if *sync* (doto c add-sync!) (doto c (-> cell->pm propagate*))))
+
+;; javelin ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn destroy-cell! [this & [keep-watches?]]
   (let [srcs (.-sources this)]
@@ -62,14 +63,11 @@
       (if (> (.-rank source) (.-rank this))
         (doseq [dep (bf-seq identity #(.-sinks %) source)]
           (set! (.-rank dep) (next-rank))))))
-  (let [compute   #(apply (deref* (peek %)) (map deref* (pop %)))
-        thunk     #(let [x (.-state this), y (compute (.-sources this))]
-                     (set! (.-state this) y))]
-    (set! (.-input? this) (if f false true))
+  (let [compute #(apply (deref* (peek %)) (map deref* (pop %)))
+        thunk   #(set! (.-state this) (compute (.-sources this)))]
+    (set! (.-input? this) (not f))
     (set! (.-thunk this) (if f thunk #(deref this)))
-    (if *sync*
-      (doto this (add-sync!))
-      (doto this (-> cell->pm propagate!)))))
+    (propagate! this)))
 
 (deftype Cell [meta state rank prev sources sinks thunk watches input?]
   cljs.core/IPrintWithWriter
@@ -83,41 +81,38 @@
   (-deref [this] (.-state this))
 
   cljs.core/IReset
-  (-reset! [this new-value]
-    (when-not (.-input? this)
-      (throw (js/Error. "can't swap! or reset! formula cell")))
-    (set! (.-state this) new-value)
-    (if *sync* (add-sync! this) (propagate! (cell->pm this)))
-    new-value)
+  (-reset! [this x]
+    (if (.-input? this)
+      (do (set! (.-state this) x) (propagate! this) x)
+      (throw (js/Error. "can't swap! or reset! formula cell"))))
 
   cljs.core/ISwap
-  (-swap! [this f] (reset! this (f (.-state this))))
-  (-swap! [this f a] (reset! this (f (.-state this) a)))
-  (-swap! [this f a b] (reset! this (f (.-state this) a b)))
+  (-swap! [this f]        (reset! this (f (.-state this))))
+  (-swap! [this f a]      (reset! this (f (.-state this) a)))
+  (-swap! [this f a b]    (reset! this (f (.-state this) a b)))
   (-swap! [this f a b xs] (reset! this (apply f (.-state this) a b xs)))
 
   cljs.core/IWatchable
-  (-notify-watches [this oldval newval]
-    (doseq [[key f] watches] (f key this oldval newval)))
-  (-add-watch [this key f]
-    (set! (.-watches this) (assoc watches key f)))
-  (-remove-watch [this key]
-    (set! (.-watches this) (dissoc watches key))))
+  (-notify-watches [this o n] (doseq [[key f] watches] (f key this o n)))
+  (-add-watch      [this k f] (set! (.-watches this) (assoc watches k f)))
+  (-remove-watch   [this k]   (set! (.-watches this) (dissoc watches k))))
 
-(defn formula   [f]   (fn [& sources] (set-formula! (cell ::none) f sources)))
-(defn cell      [x]   (set-formula! (Cell. {} x (next-rank) x [] #{} nil {} nil)))
 (defn cell?     [c]   (when (= (type c) Cell) c))
 (defn input?    [c]   (when (and (cell? c) (.-input? c)) c))
 (defn set-cell! [c x] (set! (.-state c) x) (set-formula! c))
+(defn formula   [f]   (fn [& sources] (set-formula! (cell ::none) f sources)))
+(defn cell      [x]   (set-formula! (Cell. {} x (next-rank) x [] #{} nil {} nil)))
 
 (def ^:deprecated lift formula)
+
+;; javelin util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn dosync* [thunk]
   (if *sync*
     (thunk)
     (binding [*sync* (atom (priority-map))]
       (thunk)
-      (propagate! @*sync*))))
+      (propagate* @*sync*))))
 
 (defn alts! [& cells]
   (let [olds    (atom (repeat (count cells) ::none)) 
