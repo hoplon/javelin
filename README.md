@@ -207,7 +207,7 @@ For example:
 The `path-cell` function returns a converging lens whose formula focuses in
 on a part of the underlying collection using `get-in`. The provided callback
 takes the desired new value and updates the underlying collection accordingly
-using `update-in`. The update propagates to the lens formula, thereby updating
+using `assoc-in`. The update propagates to the lens formula, thereby updating
 the value of the lens cell itself.
 
 Interestingly, transactions can be used to create diverging lenses, inverting
