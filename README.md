@@ -200,15 +200,43 @@ For example:
 @a                       ;=> {:a :x, :b [4 5 6]}
 
 @b                       ;=> :x
-(swap! a assoc :a [1 2]) ;=> {:a [1 2] :b [4 5 6]}
+(swap! a assoc :a [1 2]) ;=> {:a [1 2], :b [4 5 6]}
 @b                       ;=> [1 2]
 ```
 
 The `path-cell` function returns a lens whose formula "focuses" in on a part
 of the underlying collection using `get-in`. The provided callback takes the
-desired new value and updates the underlying collection accordingly. The update
-propagates to the lens formula, thereby updating the value of the lens cell
-itself.
+desired new value and updates the underlying collection accordingly using
+`update-in`. The update propagates to the lens formula, thereby updating the
+value of the lens cell itself.
+
+Interestingly, transactions can be used to create "diverging" lenses, inverting
+the above relationship between lens and underlying collection. Instead of
+focusing the lens on a single collection to extract a part it, the lens can be
+directed toward a number of individual cells to combine them into a single
+collection.
+
+For example:
+
+```clojure
+(defc a 100)
+(defc b 200)
+
+(def c (lens (cell= {:a a, :b b})
+             #(dosync (reset! a (:a %)) (reset! b (:b %)))))
+
+@a                       ;=> 100
+@c                       ;=> {:a 100, :b 200}
+(swap! c assoc :a 200)   ;=> {:a 200, :b 200}
+@a                       ;=> 200
+```
+
+The `c` lens encapsulates the machinery of atomically updating both `a` and
+`b` in the standard cell interface.
+
+Converging and diverging lenses can be useful for low-impact, surgical
+refactoring. They encapsulate the value and mutation semantic, eliminating
+the need to modify existing code that references the underlying cells.
 
 ## Javelin API
 
