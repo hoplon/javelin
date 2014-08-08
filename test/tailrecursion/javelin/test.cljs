@@ -506,7 +506,7 @@
       (is (= @b :oops)))))
 
 (deftest misc-tests
-  (testing "lenses work correctly"
+  (testing "lenses work correctly using lens function"
     (let [a (cell 100)
           b (cell 200)
           c (cell= (+ a b))
@@ -517,10 +517,20 @@
       (is (= @d 400))
       (swap! d inc)
       (is (= @d 601))))
+  (testing "lenses work correctly using cell= macro"
+    (let [a (cell 100)
+          b (cell 200)
+          d (cell= (+ a b) (partial reset! a))]
+      (is (not (input? d)))
+      (is (= @d 300))
+      (reset! d 200)
+      (is (= @d 400))
+      (swap! d inc)
+      (is (= @d 601))))
   (testing "lens path-cell example works"
     (let [a (cell {:a [1 2 3] :b [4 5 6]})
-          path-cell #(lens
-                       (cell= (get-in %1 %2))
+          path-cell #(cell=
+                       (get-in %1 %2)
                        (partial swap! %1 assoc-in %2))
           b (path-cell a [:a])]
       (is (= @b [1 2 3]))
@@ -533,15 +543,13 @@
   (testing "swap! or reset! on lens returns new value"
     (let [a (cell 100)
           b (cell 200)
-          c (cell= (+ a b))
-          d (lens c (partial reset! a))]
+          d (cell= (+ a b) (partial reset! a))]
       (is (= (swap! d inc) 501))
       (is (= (reset! d 100) 300))))
   (testing "lenses propagate correctly"
     (let [a (cell 100)
           b (cell 200)
-          c (cell= (+ a b))
-          d (lens c #(reset! a %))
+          d (cell= (+ a b) #(reset! a %))
           e (cell= (+ d a b))]
       (is (= @e 600))
       (reset! d 200)
@@ -550,8 +558,7 @@
     (let [u (atom [])
           a (cell 100)
           b (cell 200)
-          c (cell= (+ a b))
-          d (lens c #(reset! a %))]
+          d (cell= (+ a b) #(reset! a %))]
       (add-watch d (gensym) #(swap! u conj {:old %3 :new %4}))
       (reset! d 200)
       (is (= @u [{:old 300 :new 400}]))))
@@ -559,13 +566,11 @@
     (let [u  (atom [])
           a  (cell 100)
           b  (cell 200)
-          c  (cell= (+ a b))
-          d  (lens c (partial reset! a))
+          d  (cell= (+ a b) (partial reset! a))
           e  (cell= (swap! u conj d))
           u' (atom [])
           a' (cell 100)
-          c' (cell= (+ a' b))
-          d' (lens c' (partial reset! a'))
+          d' (cell= (+ a' b) (partial reset! a'))
           e' (cell= (swap! u' conj d'))]
       (dosync
         (is (= @d (swap! d inc)))

@@ -59,6 +59,7 @@ reference type to represent both.
 * are updated _reactively_ according to a formula.
 * are read-only&mdash;updating a formula cell via `swap!` or `reset!`
   is an error.
+  * unless it's a [lens](#lenses)&mdash;in that case a callback is fired.
 
 Some examples of cells:
 
@@ -183,8 +184,7 @@ For example:
 
 ```clojure
 (defn path-cell [c path]
-  (lens (cell= (get-in c path))
-        (partial swap! c assoc-in path)))
+  (cell= (get-in c path) (partial swap! c assoc-in path)))
 
 (defc a {:a [1 2 3], :b [4 5 6]})
 (def  b (path-cell a [:a]))
@@ -219,11 +219,9 @@ collection.
 For example:
 
 ```clojure
-(defc a 100)
-(defc b 200)
-
-(def c (lens (cell= {:a a, :b b})
-             #(dosync (reset! a (:a %)) (reset! b (:b %)))))
+(defc  a 100)
+(defc  b 200)
+(defc= c {:a a, :b b} #(dosync (reset! a (:a %)) (reset! b (:b %))))
 
 @a                       ;=> 100
 @c                       ;=> {:a 100, :b 200}
