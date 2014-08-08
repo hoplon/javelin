@@ -58,7 +58,7 @@ reference type to represent both.
 * are created by the `cell=` or `defc=` macros.
 * are updated _reactively_ according to a formula.
 * are read-only&mdash;updating a formula cell via `swap!` or `reset!`
-  is an error.
+  is an error (unless it's a [lens](#lenses)).
 
 Some examples of cells:
 
@@ -176,15 +176,15 @@ multiple times.
 ## Lenses
 
 Lenses separate reads and writes in the cell graph. They are formula cells
-created with a special callback that provides the write implementation. The
-read implementation is provided by the underlying cell formula.
+created with an extra argument&mdash;a special callback that provides the
+write implementation. The read implementation is provided by the underlying
+cell formula.
 
 For example:
 
 ```clojure
 (defn path-cell [c path]
-  (lens (cell= (get-in c path))
-        (partial swap! c assoc-in path)))
+  (cell= (get-in c path) (partial swap! c assoc-in path)))
 
 (defc a {:a [1 2 3], :b [4 5 6]})
 (def  b (path-cell a [:a]))
@@ -200,15 +200,41 @@ For example:
 @a                       ;=> {:a :x, :b [4 5 6]}
 
 @b                       ;=> :x
-(swap! a assoc :a [1 2]) ;=> {:a [1 2] :b [4 5 6]}
+(swap! a assoc :a [1 2]) ;=> {:a [1 2], :b [4 5 6]}
 @b                       ;=> [1 2]
 ```
 
-The `path-cell` function returns a lens whose formula "focuses" in on a part
-of the underlying collection using `get-in`. The provided callback takes the
-desired new value and updates the underlying collection accordingly. The update
-propagates to the lens formula, thereby updating the value of the lens cell
-itself.
+The `path-cell` function returns a converging lens whose formula focuses in
+on a part of the underlying collection using `get-in`. The provided callback
+takes the desired new value and updates the underlying collection accordingly
+using `assoc-in`. The update propagates to the lens formula, thereby updating
+the value of the lens cell itself.
+
+Interestingly, transactions can be used to create diverging lenses, inverting
+the above relationship between lens and underlying collection. Instead of
+focusing the lens on a single collection to extract a part it, the lens can be
+directed toward a number of individual cells to combine them into a single
+collection.
+
+For example:
+
+```clojure
+(defc  a 100)
+(defc  b 200)
+(defc= c {:a a, :b b} #(dosync (reset! a (:a %)) (reset! b (:b %))))
+
+@a                       ;=> 100
+@c                       ;=> {:a 100, :b 200}
+(swap! c assoc :a 200)   ;=> {:a 200, :b 200}
+@a                       ;=> 200
+```
+
+The `c` lens encapsulates the machinery of atomically updating both `a` and
+`b` in the standard cell interface.
+
+Converging and diverging lenses can be useful for low-impact, surgical
+refactoring. They encapsulate the value and mutation semantic, eliminating
+the need to modify existing code that references the underlying cells.
 
 ## Javelin API
 
@@ -245,26 +271,33 @@ API functions and macros:
 (cell= expr)
 ;; Create new fomula cell with formula expr.
 
-(lens c f)
-;; Creates a "lens" from a cell c and an update callback f. Lenses are formula
-;; cells on which swap! or reset! may be called, firing the update callback.
-;; The callback must be a function of one argument–the requested new value. The
-;; lens will always return the value of the underlying formula cell when it is
-;; dereferenced.
+(cell= expr f)
+;; Create new lens cell with formula expr and callback f. When swap! or reset!
+;; is applied to the cell the callback is fired with the requested new value
+;; provided as an argument. The callback does not manipulate the lens cell's
+;; value directly, but it can swap! or reset! input cells (or do anything else),
+;; possibly resulting in a new value being computed by the lens formula.
 
 (defc symbol doc-string? expr)
 ;; Creates a new input cell and binds it to a var with the name symbol and
 ;; the docstring doc-string if provided.
 
 (defc= symbol doc-string? expr)
-;; Creates a new formula cell and binds it to a var with the name symbol and
-;; the docstring doc-string if provided.
+;; Creates a new formula cell with formula expr and binds it to a var with the
+;; name symbol and the docstring doc-string if provided.
+
+(defc= symbol doc-string? expr f)
+;; Creates a new lens cell with formula expr and callback f, and binds it to a
+;; var with the name symbol and the docstring doc-string if provided.
 
 (set-cell! c expr)
 ;; Convert c to input cell (if necessary) with value expr.
 
 (set-cell!= c expr)
 ;; Convert c to formula cell (if necessary) with formula expr.
+
+(set-cell!= c expr f)
+;; Convert c to lens cell (if necessary) with formula expr and callback f.
 
 (destroy-cell! c)
 ;; Disconnects c from the propagation graph so it can be GC'd.

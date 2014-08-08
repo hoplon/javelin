@@ -177,12 +177,31 @@
     (let [[f args] (hoist x env)]
       (list set-frm' c f args)))
 
-  (defmacro cell=      [expr]         (cell* expr &env))
-  (defmacro set-cell!= [c expr]       (set-cell* c expr &env))
-  (defmacro defc      ([sym expr]     `(def ~sym (~cell' ~expr)))
-                      ([sym doc expr] `(def ~sym ~doc (~cell' ~expr))))
-  (defmacro defc=     ([sym expr]     `(def ~sym (cell= ~expr)))
-                      ([sym doc expr] `(def ~sym ~doc (cell= ~expr))))
+  (defmacro cell=
+    ([expr] (cell* expr &env))
+    ([expr f]
+       `(with-let [c# (cell= ~expr)]
+          (set! (.-update c#) ~f))))
+
+  (defmacro set-cell!=
+    ([c expr] (set-cell* c expr &env))
+    ([c expr f]
+       `(with-let [c# c]
+          (set-cell!= ~c ~expr)
+          (set! (.-update c#) ~f))))
+
+  (defmacro defc
+    ([sym expr] `(def ~sym (~cell' ~expr)))
+    ([sym doc expr] `(def ~sym ~doc (~cell' ~expr))))
+
+  (defmacro defc=
+    ([sym expr] `(def ~sym (cell= ~expr)))
+    ([sym doc & [expr f]]
+       (let [doc? (string? doc)
+             doc  (when doc? [doc])
+             expr (if doc? expr doc)
+             f    (when-let [f' (if doc? f expr)] [f'])]
+         `(def ~sym ~@doc (cell= ~expr ~@f)))))
 
   (defmacro cell-let-1 [[bindings c] & body]
     (let [syms  (bind-syms bindings)

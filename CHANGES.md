@@ -1,5 +1,12 @@
 # javelin
 
+## 3.6.0
+
+*Fri Aug  8 13:15:23 EDT 2014*
+
+* Add optional additional argument to `cell=` and `defc=` macros. When called
+  with this additional argument they return lens cells.
+
 ## 3.5.0
 
 *Thu Aug  7 18:45:31 EDT 2014*
