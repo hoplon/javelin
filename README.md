@@ -204,13 +204,13 @@ For example:
 @b                       ;=> [1 2]
 ```
 
-The `path-cell` function returns a lens whose formula "focuses" in on a part
-of the underlying collection using `get-in`. The provided callback takes the
-desired new value and updates the underlying collection accordingly using
-`update-in`. The update propagates to the lens formula, thereby updating the
-value of the lens cell itself.
+The `path-cell` function returns a converging lens whose formula focuses in
+on a part of the underlying collection using `get-in`. The provided callback
+takes the desired new value and updates the underlying collection accordingly
+using `update-in`. The update propagates to the lens formula, thereby updating
+the value of the lens cell itself.
 
-Interestingly, transactions can be used to create "diverging" lenses, inverting
+Interestingly, transactions can be used to create diverging lenses, inverting
 the above relationship between lens and underlying collection. Instead of
 focusing the lens on a single collection to extract a part it, the lens can be
 directed toward a number of individual cells to combine them into a single
