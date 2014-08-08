@@ -176,8 +176,9 @@ multiple times.
 ## Lenses
 
 Lenses separate reads and writes in the cell graph. They are formula cells
-created with a special callback that provides the write implementation. The
-read implementation is provided by the underlying cell formula.
+created with an extra argument&mdash;a special callback that provides the
+write implementation. The read implementation is provided by the underlying
+cell formula.
 
 For example:
 
@@ -270,26 +271,33 @@ API functions and macros:
 (cell= expr)
 ;; Create new fomula cell with formula expr.
 
-(lens c f)
-;; Creates a "lens" from a cell c and an update callback f. Lenses are formula
-;; cells on which swap! or reset! may be called, firing the update callback.
-;; The callback must be a function of one argument–the requested new value. The
-;; lens will always return the value of the underlying formula cell when it is
-;; dereferenced.
+(cell= expr f)
+;; Create new lens cell with formula expr and callback f. When swap! or reset!
+;; is applied to the cell the callback is fired with the requested new value
+;; provided as an argument. The callback does not manipulate the lens cell's
+;; value directly, but it can swap! or reset! input cells (or do anything else),
+;; possibly resulting in a new value being computed by the lens formula.
 
 (defc symbol doc-string? expr)
 ;; Creates a new input cell and binds it to a var with the name symbol and
 ;; the docstring doc-string if provided.
 
 (defc= symbol doc-string? expr)
-;; Creates a new formula cell and binds it to a var with the name symbol and
-;; the docstring doc-string if provided.
+;; Creates a new formula cell with formula expr and binds it to a var with the
+;; name symbol and the docstring doc-string if provided.
+
+(defc= symbol doc-string? expr f)
+;; Creates a new lens cell with formula expr and callback f, and binds it to a
+;; var with the name symbol and the docstring doc-string if provided.
 
 (set-cell! c expr)
 ;; Convert c to input cell (if necessary) with value expr.
 
 (set-cell!= c expr)
 ;; Convert c to formula cell (if necessary) with formula expr.
+
+(set-cell!= c expr f)
+;; Convert c to lens cell (if necessary) with formula expr and callback f.
 
 (destroy-cell! c)
 ;; Disconnects c from the propagation graph so it can be GC'd.
