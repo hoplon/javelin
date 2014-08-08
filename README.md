@@ -187,21 +187,21 @@ For example:
   (cell= (get-in c path) (partial swap! c assoc-in path)))
 
 (defc a {:a [1 2 3], :b [4 5 6]})
-(def  b (path-cell a [:a]))
+(def  c (path-cell a [:a]))
 
-@b                       ;=> [1 2 3]
-(swap! b pop)            ;=> [1 2]
-@b                       ;=> [1 2]
+@c                       ;=> [1 2 3]
+(swap! c pop)            ;=> [1 2]
+@c                       ;=> [1 2]
 @a                       ;=> {:a [1 2], :b [4 5 6]}
 
-@b                       ;=> [1 2]
-(reset! b :x)            ;=> :x
-@b                       ;=> :x
+@c                       ;=> [1 2]
+(reset! c :x)            ;=> :x
+@c                       ;=> :x
 @a                       ;=> {:a :x, :b [4 5 6]}
 
-@b                       ;=> :x
+@c                       ;=> :x
 (swap! a assoc :a [1 2]) ;=> {:a [1 2], :b [4 5 6]}
-@b                       ;=> [1 2]
+@c                       ;=> [1 2]
 ```
 
 The `path-cell` function returns a converging lens whose formula focuses in
