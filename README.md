@@ -25,7 +25,7 @@ Spreadsheet-like dataflow programming in ClojureScript.
     ))
 ```
 
-For more examples you can check out [the Javelin testing thing][12].
+There are many more examples in [the Javelin tests][12].
 
 ### Dependency [![Build Status][1]][2]
 
