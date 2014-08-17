@@ -1,4 +1,4 @@
-(defproject tailrecursion/javelin "3.6.0"
+(defproject tailrecursion/javelin "3.6.1"
   :description "A Functional Reactive Programming library for ClojureScript"
   :url "https://github.com/tailrecursion/javelin"
   :license {:name "Eclipse Public License"
@@ -10,7 +10,8 @@
   :repl-options {:init-ns tailrecursion.javelin}
   :profiles {:devz {:plugins [[lein-cljsbuild "0.3.2"]
                               [com.cemerick/clojurescript.test "0.1.0"]]
-                    :dependencies [[org.clojure/clojurescript "0.0-2202"]]}} 
+                    :dependencies [[org.clojure/clojure "1.6.0"]
+                                   [org.clojure/clojurescript "0.0-2311"]]}} 
   :cljsbuild {:builds
               {:dev-test
                {:source-paths ["src" "test"]

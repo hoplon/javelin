@@ -69,8 +69,7 @@
       cell'     (symbol "tailrecursion.javelin" "cell")
       formula'  (symbol "tailrecursion.javelin" "formula")
       set-frm'  (symbol "tailrecursion.javelin" "set-formula!")
-      special   '#{if def fn* do let* loop* letfn* throw try
-                   recur new set! ns deftype* defrecord* . js* & quote}
+      special   a/specials
       listy?    #(or (list? %)
                      (= clojure.lang.LazySeq (type %))
                      (= clojure.lang.Cons (type %)))
