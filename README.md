@@ -25,6 +25,8 @@ Spreadsheet-like dataflow programming in ClojureScript.
     ))
 ```
 
+For more examples you can check out [the Javelin testing thing][12].
+
 ### Dependency [![Build Status][1]][2]
 
 Artifacts are published on Clojars.
@@ -380,3 +382,4 @@ results in the JavaScript console.
 [9]: https://github.com/tailrecursion/javelin#formulas
 [10]: http://clojars.org/tailrecursion/javelin/latest-version.svg?cachebust=2
 [11]: tree/master/img/javelin.png
+[12]: https://github.com/tailrecursion/javelin/blob/master/test/tailrecursion/javelin/test.cljs
