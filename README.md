@@ -340,6 +340,24 @@ API functions and macros:
 ;; the setter-cell.
 ```
 
+## Building and Running Tests
+
+To build Javelin with advanced optimizations and prepare test harness:
+
+```
+lein with-profile devz cljsbuild clean
+lein with-profile devz cljsbuild once test
+```
+
+To run the tests in PhantomJS (Unix):
+
+```
+test/run.sh
+```
+
+Alternatively, open the `test/test.html` file in a browser and view the test
+results in the JavaScript console.
+
 ## License
 
     Copyright (c) Alan Dipert and Micha Niskin. All rights
