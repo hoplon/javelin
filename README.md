@@ -29,8 +29,6 @@ For more examples you can check out [the Javelin testing thing][12].
 
 ### Dependency [![Build Status][1]][2]
 
-Artifacts are published on Clojars.
-
 [![latest version][10]][3]
 
 ### Demos
