@@ -197,9 +197,9 @@
     ([sym expr] `(def ~sym (cell= ~expr)))
     ([sym doc & [expr f]]
        (let [doc? (string? doc)
-             doc  (when doc? [doc])
+             f    (when-let [f' (if doc? f expr)] [f'])
              expr (if doc? expr doc)
-             f    (when-let [f' (if doc? f expr)] [f'])]
+             doc  (when doc? [doc])]
          `(def ~sym ~@doc (cell= ~expr ~@f)))))
 
   (defmacro cell-let-1 [[bindings c] & body]

@@ -527,6 +527,16 @@
       (is (= @d 400))
       (swap! d inc)
       (is (= @d 601))))
+  (testing "lenses work correctly using defc= macro"
+    (let [a (cell 100)
+          b (cell 200)]
+      (defc= _d (+ a b) (partial reset! a))
+      (is (not (input? _d)))
+      (is (= @_d 300))
+      (reset! _d 200)
+      (is (= @_d 400))
+      (swap! _d inc)
+      (is (= @_d 601))))
   (testing "lens path-cell example works"
     (let [a (cell {:a [1 2 3] :b [4 5 6]})
           path-cell #(cell=
