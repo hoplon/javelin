@@ -125,9 +125,8 @@
   (let [cseq ((formula seq) c)]
     (map #((formula (comp f safe-nth)) cseq %) (range 0 (count @cseq)))))
 
-(defn cell-doseq* [items f]
+(defn cell-doseq* [items-seq f]
   (let [pool-size (cell 0)
-        items-seq ((formula seq) items)
         cur-count ((formula count) items-seq)
         ith-item  #((formula safe-nth) items-seq %)]
     ((formula (fn [pool-size cur-count f ith-item reset-pool-size!]

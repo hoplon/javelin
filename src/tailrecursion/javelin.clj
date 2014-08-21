@@ -204,7 +204,7 @@
 
   (defmacro cell-let-1 [[bindings c] & body]
     (let [syms  (bind-syms bindings)
-          dcell `(cell= (let [~bindings ~c] [~@syms]))]
+          dcell `((formula (fn [~bindings] [~@syms])) ~c)]
       `(let [[~@syms] (cell-map identity ~dcell)] ~@body)))
 
   (defmacro cell-let [[bindings c & more] & body]
@@ -215,8 +215,21 @@
 
   (defmacro dosync [& exprs] `(dosync* (fn [] ~@exprs)))
 
-  (defmacro cell-doseq [[bindings items] & body]
+  #_(defmacro cell-doseq [[bindings items] & body]
     `(cell-doseq* ~items (fn [item#] (cell-let [~bindings item#] ~@body))))
+
+  (defmacro cell-doseq [[& seq-exprs] & body]
+    (let [pairs (partition 2 seq-exprs)
+          lets    (->> pairs (filter (comp (partial = :let) first)) (mapcat second))
+          binds*  (->> pairs (take-while (complement (comp keyword? first))))
+          mods*   (->> pairs (drop-while (complement (comp keyword? first))) (mapcat identity))
+          syms    (->> binds* (mapcat (comp bind-syms first)))
+          exprs   (->> binds* (map second))
+          gens    (take (count exprs) (repeatedly gensym))
+          fors    (-> (->> binds* (map first)) (interleave gens) (concat mods*))]
+      `(cell-doseq*
+         ((formula (fn [~@gens] (for [~@fors] [~@syms]))) ~@exprs)
+         (fn [item#] (cell-let [[~@syms] item#, ~@lets] ~@body)))))
 
   (defmacro prop-cell
     ([prop]
