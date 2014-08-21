@@ -13,7 +13,7 @@
 
 (declare Cell cell? cell input? lens?)
 
-(def ^:dynamic *sync*    nil)
+(def ^:private ^:dynamic *tx* nil)
 (def ^:private last-rank (atom 0))
 
 (defn- bf-seq
@@ -26,6 +26,7 @@
     (walk (conj cljs.core.PersistentQueue.EMPTY root))))
 
 (defn- propagate* [pri-map]
+  (when *tx* (prn :propagate pri-map))
   (when-let [next (first (peek pri-map))]
     (let [popq  (pop pri-map)
           old   (.-prev next)
@@ -37,9 +38,9 @@
 (defn  deref*     [x]   (if (cell? x) @x x))
 (defn- next-rank  [ ]   (swap! last-rank inc))
 (defn- cell->pm   [c]   (priority-map c (.-rank c)))
-(defn- add-sync!  [c]   (swap! *sync* assoc c (.-rank c)))
+(defn- add-sync!  [c]   (swap! *tx* assoc c (.-rank c)))
 (defn- safe-nth   [c i] (try (nth c i) (catch js/Error _)))
-(defn- propagate! [c]   (if *sync* (doto c add-sync!) (doto c (-> cell->pm propagate*))))
+(defn- propagate! [c]   (if *tx* (doto c add-sync!) (doto c (-> cell->pm propagate*))))
 
 ;; javelin ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -109,8 +110,9 @@
 ;; javelin util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn dosync* [thunk]
-  (let [bind #(binding [*sync* (atom (priority-map))] (%))]
-    (if *sync* (thunk) (bind #(do (thunk) (propagate* @*sync*))))))
+  (let [bind #(binding [*tx* (atom (priority-map))] (%))
+        prop #(let [tx @*tx*] (binding [*tx* nil] (propagate* tx)))]
+    (if *tx* (thunk) (bind #(do (thunk) (prop))))))
 
 (defn alts! [& cells]
   (let [olds    (atom (repeat (count cells) ::none)) 
