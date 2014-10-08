@@ -320,12 +320,11 @@ API functions and macros:
 ;; cells containing the destructured values (these values will update as the
 ;; value of c changes) and evaluates the body expressions.
 
-(cell-doseq seq-expr body*)
-;; Repeatedly executes the body expression(s) for side effects as doseq does.
-;; However seq-expr is a single binding-form/collection-cell-expr pair instead
-;; of the multiple pairs allowed in doseq, and binding forms are bound to formula
-;; cells containing the destructured values which will update as the collection
-;; expr cell is changed.
+(cell-doseq seq-exprs body*)
+;; Repeatedly executes the body expressions for side effects as doseq does, with
+;; bindings as provided by "for", except that the binding forms are bound to
+;; javelin cells, not values. The :while and :when filters are not supported at
+;; this time.
 
 (prop-cell prop-expr)
 ;; Returns a formula cell whose value is synced to the prop-expr, which is a

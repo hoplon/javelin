@@ -13,7 +13,7 @@
     [tailrecursion.javelin :refer [cell? input? cell set-cell! lens alts! destroy-cell!]])
   (:require-macros
     [cemerick.cljs.test :refer [deftest testing run-tests is]]
-    [tailrecursion.javelin :refer [cell= defc defc= set-cell!= dosync cell-doseq mx mx2]]))
+    [tailrecursion.javelin :refer [cell= defc defc= set-cell!= dosync cell-doseq cell-let mx mx2]]))
 
 ;;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -124,8 +124,8 @@
         a (cell 0)
         b (cell= (do (swap! u conj a) (inc a)))
         c (cell= (+ 123 a b))]
-    (add-watch b (gensym) #(swap! v conj {:old %3 :new %4}))
-    (add-watch c (gensym) #(swap! w conj {:old %3 :new %4}))
+    (add-watch b nil #(swap! v conj {:old %3 :new %4}))
+    (add-watch c nil #(swap! w conj {:old %3 :new %4}))
     (testing
       "change formula of formula cell"
       (swap! a inc)
@@ -569,7 +569,7 @@
           a (cell 100)
           b (cell 200)
           d (cell= (+ a b) #(reset! a %))]
-      (add-watch d (gensym) #(swap! u conj {:old %3 :new %4}))
+      (add-watch d nil #(swap! u conj {:old %3 :new %4}))
       (reset! d 200)
       (is (= @u [{:old 300 :new 400}]))))
   (testing "lenses work correctly in dosync"
@@ -593,13 +593,34 @@
   (testing "cell-doseq over cell of vector"
     (let [a (cell [1 2 3 4])
           b (atom [])]
-      (cell-doseq [x a] (swap! b conj x))
+      (cell-doseq [x a]
+        (swap! b conj (cell= [x (when x (even? x))])))
       (swap! a (partial map inc))
-      (let [[p q r s] @b]
-        (is (= @p 2))
-        (is (= @q 3))
-        (is (= @r 4))
-        (is (= @s 5)))))
+      (let [[p q r s t] @b]
+        (is (= 4 (count @b)))
+        (is (= @p [2 true]))
+        (is (= @q [3 false]))
+        (is (= @r [4 true]))
+        (is (= @s [5 false]))
+        (is (= t nil))
+        (testing "cell-doseq growing"
+          (swap! a conj 1)
+          (let [[p q r s t] @b]
+            (is (= 5 (count @b)))
+            (is (= @p [1 false]))
+            (is (= @q [2 true]))
+            (is (= @r [3 false]))
+            (is (= @s [4 true]))
+            (is (= @t [5 false]))))
+        (testing "cell-doseq shrinking"
+          (swap! a rest)
+          (let [[p q r s t] @b]
+            (is (= 5 (count @b)))
+            (is (= @p [2 true]))
+            (is (= @q [3 false]))
+            (is (= @r [4 true]))
+            (is (= @s [5 false]))
+            (is (= @t [nil nil])))))))
   (testing "cell-doseq over cell of set"
     (let [a (cell [1 2 3 4])
           b (cell= (set a))
@@ -610,17 +631,17 @@
       (is (= @b #{2 3 4 5}))
       (let [m' (->> @m (map deref) set)]
         (is (= m' #{2 3 4 5})))))
-  (testing "cell-doseq, binding to (cell= ...) expr"
+  (testing "cell-doseq, binding to formula expr"
     (let [a (cell [1 2 3 4])
           m (atom [])]
-      (cell-doseq [x (cell= (identity a))]
+      (cell-doseq [x (cell= (map inc a))]
         (swap! m conj x))
       (swap! a (partial map inc))
       (let [[p q r s] @m]
-        (is (= @p 2))
-        (is (= @q 3))
-        (is (= @r 4))
-        (is (= @s 5)))))
+        (is (= @p 3))
+        (is (= @q 4))
+        (is (= @r 5))
+        (is (= @s 6)))))
   (testing "cell-doseq over cell of seq and destructure"
     (let [a (cell [1 2 3 4])
           b (cell= (map (partial hash-map :x) a))
@@ -646,7 +667,83 @@
         (is (= '(3 4) (seq @p2)))
         (is (= '(6 7) (seq @q2)))
         (is (= '(9 10) (seq @r2))))))
-  )
+  (testing "cell-doseq list comprehension"
+    (let [a (cell [{:w 1 :x 3}])
+          b (cell [:a])
+          m (atom [])]
+      (cell-doseq [{:keys [w x]} (cell= (conj a {:w 2 :x 4}))
+                   y             (cell= (conj b :b))
+                   :let          [p (cell= (str y))]
+                   :let          [q (cell= (inc x))]]
+        (swap! m conj (cell= {:w w :x x :y y :p p :q q})))
+      (is (= 4 (count @m)))
+      (is (every? cell? @m))
+      (let [[p q r s] @m]
+        (is (= @p {:w 1, :x 3, :y :a, :p ":a", :q 4}))
+        (is (= @q {:w 1, :x 3, :y :b, :p ":b", :q 4}))
+        (is (= @r {:w 2, :x 4, :y :a, :p ":a", :q 5}))
+        (is (= @s {:w 2, :x 4, :y :b, :p ":b", :q 5})))
+      (testing "cell-doseq list comprehension growing"
+        (dosync
+          (swap! a conj {:w -2 :x -4})
+          (swap! b conj :c))
+        (is (= 9 (count @m)))
+        (is (every? cell? @m))
+        (let [[p q r s t u v w x] @m]
+          (is (= @p {:w  1, :x  3, :y :a, :p ":a", :q  4}))
+          (is (= @q {:w  1, :x  3, :y :c, :p ":c", :q  4}))
+          (is (= @r {:w  1, :x  3, :y :b, :p ":b", :q  4}))
+          (is (= @s {:w -2, :x -4, :y :a, :p ":a", :q -3}))
+          (is (= @t {:w -2, :x -4, :y :c, :p ":c", :q -3}))
+          (is (= @u {:w -2, :x -4, :y :b, :p ":b", :q -3}))
+          (is (= @v {:w  2, :x  4, :y :a, :p ":a", :q  5}))
+          (is (= @w {:w  2, :x  4, :y :c, :p ":c", :q  5}))
+          (is (= @x {:w  2, :x  4, :y :b, :p ":b", :q  5}))))
+      (testing "cell-doseq list comprehension shrinking"
+        (dosync
+          (swap! a pop)
+          (swap! b pop))
+        (is (= 9 (count @m)))
+        (is (every? cell? @m))
+        (let [[p q r s & more] @m]
+          (is (= @p {:w 1, :x 3, :y :a, :p ":a", :q 4}))
+          (is (= @q {:w 1, :x 3, :y :b, :p ":b", :q 4}))
+          (is (= @r {:w 2, :x 4, :y :a, :p ":a", :q 5}))
+          (is (= @s {:w 2, :x 4, :y :b, :p ":b", :q 5}))
+          (is (every? #(= {:w nil, :x nil, :y nil, :p "", :q 1} @%) more))))))
+  (testing "cell-let correctly binds local cells"
+    (let [a (cell [1 2 3 4])
+          b (cell {:p 1 :q 2 :r 3 :s 4})]
+      (cell-let [[x & xs] a, {:keys [p q r s]} b]
+        (is (= @x 1))
+        (is (= @xs '(2 3 4)))
+        (is (= @p 1))
+        (is (= @q 2))
+        (is (= @r 3))
+        (is (= @s 4))
+        (testing "cell-let bindings update when underlying cells change"
+          (swap! a (partial map inc))
+          (swap! b assoc :p 2 :q 3 :r 4 :s 5)
+          (is (= @x 2))
+          (is (= @xs '(3 4 5)))
+          (is (= @p 2))
+          (is (= @q 3))
+          (is (= @r 4))
+          (is (= @s 5))))))
+  (testing "cell-let always binds to cells under destructuring"
+    (let [a (cell [1 2])]
+      (cell-let [[x y z] a]
+        (is (every? cell? [x y z]))
+        (is (= @x 1))
+        (is (= @y 2))
+        (is (= @z nil)))))
+  (testing "cell-let binding to formula"
+    (let [a (cell [1 2])]
+      (cell-let [[x y z] (cell= (map inc a))]
+        (is (every? cell? [x y z]))
+        (is (= @x 2))
+        (is (= @y 3))
+        (is (= @z nil))))))
 
 (deftest data-integrity
   ;; Test the data integrity constraints documented in the cells manifesto
