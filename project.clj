@@ -6,6 +6,7 @@
   :dependencies [[tailrecursion/cljs-priority-map "1.0.3"]
                  [org.clojure/data.priority-map   "0.0.2"]
                  [riddley                         "0.1.6"]]
+  :deploy-repositories [["clojars" {:url "https://clojars.org/repo" :sign-releases false :creds :gpg}]]
   :source-paths ["src"]
   :repl-options {:init-ns tailrecursion.javelin}
   :profiles {:devz {:plugins [[lein-cljsbuild "0.3.2"]
