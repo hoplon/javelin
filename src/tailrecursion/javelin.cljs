@@ -114,11 +114,11 @@
     (if *tx* (thunk) (bind #(do (thunk) (prop))))))
 
 (defn alts! [& cells]
-  (let [olds    (atom (repeat (count cells) ::none)) 
+  (let [olds    (atom (repeat (count cells) ::none))
         tag-neq #(vector (not= %1 %2) %2)
         diff    #(->> %2 (map tag-neq %1) (filter first) (map second) distinct)
         proc    #(let [news (diff (deref olds) %&)] (reset! olds %&) news)]
-    (apply (formula proc) cells))) 
+    (apply (formula proc) cells)))
 
 (defn cell-map [f c]
   (let [cseq ((formula seq) c)]
