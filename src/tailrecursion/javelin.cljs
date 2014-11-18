@@ -26,7 +26,6 @@
     (walk (conj cljs.core.PersistentQueue.EMPTY root))))
 
 (defn- propagate* [pri-map]
-  (when *tx* (prn :propagate pri-map))
   (when-let [next (first (peek pri-map))]
     (let [popq  (pop pri-map)
           old   (.-prev next)
