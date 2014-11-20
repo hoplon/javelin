@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/tailrecursion/javelin.png?label=ready&title=Ready)](https://waffle.io/tailrecursion/javelin)
 <img src="https://raw.github.com/tailrecursion/javelin/master/img/javelin.png"
 alt="tailrecursion/javelin logo" title="tailrecursion/javelin logo"
 align="right" width="152"/>
