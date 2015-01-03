@@ -29,7 +29,7 @@
     ([this] (get (meta this) key))
     ([this val] (alter-meta! this assoc key val))))
 
-(def cell?    #(contains? (meta %) ::rank))
+(def cell?    #(when (contains? (meta %) ::rank) %))
 (def rank     (accessor ::rank))
 (def prev     (accessor ::prev))
 (def sources  (accessor ::sources))
@@ -78,15 +78,19 @@
 (defn lift      [f]   (fn [& sources] (set-formula! (cell ::none) f sources)))
 (defn set-cell! [c x] (doto c (remove-watch ::cell) (reset! x) (set-formula!)))
 
-(def specials '#{if def do loop* letfn* throw try recur new set! ns
-                 deftype* defrecord* & monitor-enter monitor-exit case*})
+(def specials (into #{} (keys (. clojure.lang.Compiler specials))))
 
 (defmacro cell= [expr]
   (let [hoist   (atom [])
         local   #(symbol (name %))
         core?   #(= "clojure.core" (namespace %))
-        skip?   #(or (contains? (locals) %) (contains? specials %) (core? %))
-        walk!   #(do (if-not (skip? %) (do (swap! hoist conj %) (local %)) %))
+        skip?   #(or 
+                   (not (contains? &env %)) 
+                   (contains? specials %) 
+                   (core? %))
+        walk!   #(do (if-not (skip? %) 
+                       (do (swap! hoist conj %) (local %))
+                       %))
         walked  (walk-exprs symbol? walk! expr)
         hoisted (distinct @hoist)]
     `((lift (fn ~(mapv local hoisted) ~walked)) ~@hoisted)))
