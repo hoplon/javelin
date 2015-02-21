@@ -74,6 +74,10 @@
   cljs.core/IMeta
   (-meta [this] meta)
 
+  cljs.core/IWithMeta
+  (-with-meta [this meta]
+    (Cell. meta state rank prev sources sinks thunk watches update))
+
   cljs.core/IDeref
   (-deref [this] (.-state this))
 
