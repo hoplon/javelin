@@ -1,5 +1,5 @@
 language: clojure
-before_script:
+install:
   - wget -O boot https://github.com/boot-clj/boot/releases/download/2.0.0-rc12/boot.sh
   - chmod 755 boot
 script: ./boot test-javelin --advanced
