@@ -37,15 +37,15 @@
 ;  (defc a 42.3)
 ;  (mx2 #(+ % a))
 ;  (mx2 (fn [x] (+ x a)))
-;  ) 
+;  )
 
 (defn ^:export start []
   (setup!)
-  (time (run-tests*)) 
-  (time (run-tests*)) 
-  (time (run-tests*)) 
-  (time (run-tests*)) 
-  (time (run-tests*)) 
+  (time (run-tests*))
+  (time (run-tests*))
+  (time (run-tests*))
+  (time (run-tests*))
+  (time (run-tests*))
   (println "\nDone."))
 
 ;;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

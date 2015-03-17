@@ -2,9 +2,15 @@
 alt="tailrecursion/javelin logo" title="tailrecursion/javelin logo"
 align="right" width="152"/>
 
-# Javelin
+# Javelin [![Build Status][1]][2]
 
 Spreadsheet-like dataflow programming in ClojureScript.
+
+[](dependency)
+```clojure
+[tailrecursion/javelin "3.7.2"] ;; latest release
+```
+[](/dependency)
 
 ### Example
 
@@ -26,10 +32,6 @@ Spreadsheet-like dataflow programming in ClojureScript.
 ```
 
 There are many more examples in [the Javelin tests][12].
-
-### Dependency [![Build Status][1]][2]
-
-[![latest version][10]][3]
 
 ### Demos
 
@@ -341,21 +343,17 @@ API functions and macros:
 
 ## Building and Running Tests
 
-To build Javelin with advanced optimizations and prepare test harness:
+To build Javelin with advanced optimizations and run tests in PhantomJS:
 
 ```
-lein with-profile devz cljsbuild clean
-lein with-profile devz cljsbuild once test
+boot test-javelin --advanced
 ```
 
-To run the tests in PhantomJS (Unix):
+For development you may want to forgo optimizations and test continuously:
 
 ```
-test/run.sh
+boot watch speak test-javelin
 ```
-
-Alternatively, open the `test/test.html` file in a browser and view the test
-results in the JavaScript console.
 
 ## License
 

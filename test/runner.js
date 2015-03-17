@@ -34,4 +34,4 @@ page.onLoadFinished = function(status) {
   phantom.exit(0);
 };
 
-page.open("test/test.html");
+page.open("test.html");

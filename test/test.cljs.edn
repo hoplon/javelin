@@ -1,0 +1,2 @@
+{:require [tailrecursion.javelin.test]
+ :init-fns [tailrecursion.javelin.test/start]}

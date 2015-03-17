@@ -1,3 +1,6 @@
 language: clojure
 lein: lein2
-script: lein2 with-profile devz test && lein2 with-profile devz cljsbuild once test && test/run.sh
+before_script:
+  - wget -O boot https://github.com/boot-clj/boot/releases/download/2.0.0-rc12/boot.sh
+  - chmod 755 boot
+script: ./boot test-javelin --advanced
