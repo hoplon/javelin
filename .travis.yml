@@ -1,5 +1,4 @@
 language: clojure
-lein: lein2
 before_script:
   - wget -O boot https://github.com/boot-clj/boot/releases/download/2.0.0-rc12/boot.sh
   - chmod 755 boot
