@@ -20,7 +20,7 @@
 (task-options!
   pom  {:project     'tailrecursion/javelin
         :version     +version+
-        :description "A Functional Reactive Programming library for ClojureScript"
+        :description "Spreadsheet-like dataflow programming in ClojureScript"
         :url         "https://github.com/tailrecursion/javelin"
         :scm         {:url "https://github.com/tailrecursion/javelin"}
         :license     {"Eclipse Public License" "http://www.eclipse.org/legal/epl-v10.html"}})
@@ -37,7 +37,7 @@
         (binding [*sh-dir* (.getPath tmp)] (dosh "bash" "run.sh"))))))
 
 (deftask test-javelin
-  "Build hoplon.io for local development."
+  "Run Javelin tests"
   [a advanced bool "Test with :advanced optimizations."]
   (merge-env! :resource-paths #{"test"})
   (when advanced (task-options! cljs {:optimizations :advanced}))
