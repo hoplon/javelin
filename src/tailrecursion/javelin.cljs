@@ -71,6 +71,9 @@
   cljs.core/IPrintWithWriter
   (-pr-writer [this w _] (write-all w "#<Cell: " (pr-str state) ">"))
 
+  cljs.core/IWithMeta
+  (-with-meta  [this meta]  (Cell. meta state rank prev sources sinks thunk watches update))
+
   cljs.core/IMeta
   (-meta [this] meta)
 
@@ -102,7 +105,9 @@
 (defn set-cell! [c x] (set! (.-state c) x) (set-formula! c))
 (defn formula   [f]   (fn [& sources] (set-formula! (cell ::none) f sources)))
 (defn lens      [c f] (let [c ((formula identity) c)] (set! (.-update c) f) c))
-(defn cell      [x]   (set-formula! (Cell. {} x (next-rank) x [] #{} nil {} nil)))
+(defn cell
+  ([x] (set-formula! (Cell. nil x (next-rank) x [] #{} nil {} nil)))
+  ([x & {:keys [meta]}] (set-formula! (Cell. meta x (next-rank) x [] #{} nil {} nil))))
 
 (def ^:deprecated lift formula)
 

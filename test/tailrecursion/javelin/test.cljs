@@ -801,5 +801,12 @@
           (fn [_ _ old new]
             (swap! log conj {:old old :new new})))
         (swap! x inc)
-        (is (= @log [{:old [["b" 1] 1] :new [["b" 2] 2]}]))))))
+        (is (= @log [{:old [["b" 1] 1] :new [["b" 2] 2]}]))))
 
+    (testing "adding meta"
+      (let [x (cell 1 :meta {:foo :bar})
+            y (cell 1)]
+        (is (= (meta x) {:foo :bar}))
+        (is (nil? (meta y)))
+        (is (= {:bar :baz} (meta (with-meta y {:bar :baz}))))
+        (is (= {:a :b} (meta (vary-meta y assoc :a :b))))))))
