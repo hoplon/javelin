@@ -57,7 +57,7 @@ reference type to represent both.
 
 ##### Formula Cells
 
-* are created by the `cell=` or `defc=` macros.
+* are created with the `formula` function or the `cell=` and `defc=` macros.
 * are updated _reactively_ according to a formula.
 * are read-only&mdash;updating a formula cell via `swap!` or `reset!`
   is an error (unless it's a [lens](#lenses)).
