@@ -7,6 +7,7 @@
 ;; You must not remove this notice, or any other, from this software.
 
 (ns tailrecursion.javelin
+  (:require-macros [tailrecursion.javelin])
   (:require [tailrecursion.priority-map :refer [priority-map]]))
 
 ;; helpers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
