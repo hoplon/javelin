@@ -6,13 +6,14 @@
 ;; the terms of this license.
 ;; You must not remove this notice, or any other, from this software.
 
-(ns tailrecursion.javelin
+(ns javelin.core
   (:refer-clojure :exclude [dosync])
-  (:require [clojure.walk    :refer [prewalk]]
-            [clojure.pprint  :as p]
-            [cljs.analyzer   :as a]
-            [clojure.java.io :as io]
-            [clojure.string  :as s]))
+  (:require
+    [clojure.walk    :refer [prewalk]]
+    [clojure.pprint  :as p]
+    [cljs.analyzer   :as a]
+    [clojure.java.io :as io]
+    [clojure.string  :as s]))
 
 (declare walk)
 
@@ -65,10 +66,10 @@
 (create-ns 'js)
 
 (let [to-list   #(into '() (reverse %))
-      Cell'     (symbol "tailrecursion.javelin" "Cell")
-      cell'     (symbol "tailrecursion.javelin" "cell")
-      formula'  (symbol "tailrecursion.javelin" "formula")
-      set-frm'  (symbol "tailrecursion.javelin" "set-formula!")
+      Cell'     (symbol "javelin.core" "Cell")
+      cell'     (symbol "javelin.core" "cell")
+      formula'  (symbol "javelin.core" "formula")
+      set-frm'  (symbol "javelin.core" "set-formula!")
       special   a/specials
       listy?    #(or (list? %)
                      (= clojure.lang.LazySeq (type %))

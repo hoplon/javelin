@@ -13,16 +13,16 @@
   '[adzerk.bootlaces :refer :all]
   '[adzerk.boot-cljs :refer :all])
 
-(def +version+ "3.8.0")
+(def +version+ "3.8.1")
 
 (bootlaces! +version+)
 
 (task-options!
-  pom  {:project     'tailrecursion/javelin
+  pom  {:project     'javelin
         :version     +version+
         :description "Spreadsheet-like dataflow programming in ClojureScript"
-        :url         "https://github.com/tailrecursion/javelin"
-        :scm         {:url "https://github.com/tailrecursion/javelin"}
+        :url         "https://github.com/hoplon/javelin"
+        :scm         {:url "https://github.com/hoplon/javelin"}
         :license     {"Eclipse Public License" "http://www.eclipse.org/legal/epl-v10.html"}})
 
 (deftask test-runner

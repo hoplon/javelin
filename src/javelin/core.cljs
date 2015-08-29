@@ -6,8 +6,8 @@
 ;; the terms of this license.
 ;; You must not remove this notice, or any other, from this software.
 
-(ns tailrecursion.javelin
-  (:require-macros [tailrecursion.javelin])
+(ns javelin.core
+  (:require-macros [javelin.core])
   (:require [tailrecursion.priority-map :refer [priority-map]]))
 
 ;; helpers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

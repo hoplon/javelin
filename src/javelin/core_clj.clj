@@ -1,4 +1,4 @@
-(ns tailrecursion.javelin-clj
+(ns javelin.core-clj
   (:refer-clojure :exclude [accessor])
   (:require
     [riddley.compiler           :refer [locals]]

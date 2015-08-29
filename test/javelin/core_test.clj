@@ -6,12 +6,12 @@
 ;; the terms of this license.
 ;; You must not remove this notice, or any other, from this software.
 
-(ns tailrecursion.javelin.test
+(ns javelin.core-test
   (:require
     [clojure.string :as s]
     [clojure.test :as t :refer [deftest testing run-tests is are]]
-    [tailrecursion.javelin-clj :refer [cell? #_input? cell set-cell! #_lens #_alts! destroy-cell!
-                                       cell= defc defc= #_set-cell!= #_dosync #_cell-doseq #_cell-let #_#_mx mx2]])
+    [javelin.core-clj :refer [cell? #_input? cell set-cell! #_lens #_alts! destroy-cell!
+                              cell= defc defc= #_set-cell!= #_dosync #_cell-doseq #_cell-let #_#_mx mx2]])
   )
 
 ;;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
