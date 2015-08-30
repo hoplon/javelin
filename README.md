@@ -244,7 +244,7 @@ Requiring the namespace and macros:
 ```clojure
 (ns my-ns
   (:require
-    [javelin
+    [javelin.core
      :refer [cell? input? cell lens set-cell! alts! destroy-cell! cell-map]
      :refer-macros [cell= defc defc= set-cell!= dosync cell-doseq]]))
 ```
