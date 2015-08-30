@@ -16,8 +16,8 @@ Spreadsheet-like dataflow programming in ClojureScript.
 
 ```clojure
 (ns your-ns
-  (:require [tailrecursion.javelin :refer [cell]])
-  (:require-macros [tailrecursion.javelin :refer [cell=]]))
+  (:require [javelin :refer [cell]])
+  (:require-macros [javelin :refer [cell=]]))
 
 (defn start []
   (let [a (cell 0)              ;; input cell with initial value of 0.
@@ -245,10 +245,10 @@ Requiring the namespace and macros:
 ```clojure
 (ns my-ns
   (:require
-    [tailrecursion.javelin
+    [javelin
      :refer [cell? input? cell lens set-cell! alts! destroy-cell! cell-map]])
   (:require-macros
-    [tailrecursion.javelin
+    [javelin
      :refer [cell= defc defc= set-cell!= dosync cell-doseq]]))
 ```
 
@@ -366,15 +366,15 @@ boot watch speak test-javelin
     agreeing to be bound by the terms of this license. You must not
     remove this notice, or any other, from this software.
 
-[1]: https://travis-ci.org/tailrecursion/javelin.png?branch=master
-[2]: https://travis-ci.org/tailrecursion/javelin
-[3]: http://clojars.org/tailrecursion/javelin
+[1]: https://travis-ci.org/hoplon/javelin.png?branch=master
+[2]: https://travis-ci.org/hoplon/javelin
+[3]: http://clojars.org/javelin/javelin
 [4]: https://github.com/tailrecursion/javelin-demos
 [5]: https://dl.dropboxusercontent.com/u/12379861/javelin_demos/index.html
 [6]: https://github.com/lynaghk/todoFRP
 [7]: https://github.com/lynaghk/todoFRP/tree/master/todo/javelin
 [8]: https://github.com/tailrecursion/hoplon-demos/tree/master/todoFRP
-[9]: https://github.com/tailrecursion/javelin#formulas
-[10]: http://clojars.org/tailrecursion/javelin/latest-version.svg?cachebust=2
+[9]: https://github.com/hoplon/javelin#formulas
+[10]: http://clojars.org/javelin/javelin/latest-version.svg?cachebust=2
 [11]: tree/master/img/javelin.png
-[12]: https://github.com/tailrecursion/javelin/blob/master/test/tailrecursion/javelin/test.cljs
+[12]: https://github.com/hoplon/javelin/blob/master/test/javelin/core_test.cljs
