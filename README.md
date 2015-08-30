@@ -1,4 +1,4 @@
-<img src="https://raw.github.com/tailrecursion/javelin/master/img/javelin.png"
+<img src="https://raw.github.com/hoplon/javelin/master/img/javelin.png"
 alt="tailrecursion/javelin logo" title="tailrecursion/javelin logo"
 align="right" width="152"/>
 
@@ -8,7 +8,7 @@ Spreadsheet-like dataflow programming in ClojureScript.
 
 [](dependency)
 ```clojure
-[javelin "3.8.1"] ;; latest release
+[hoplon/javelin "3.8.2"] ;; latest release
 ```
 [](/dependency)
 
@@ -16,7 +16,7 @@ Spreadsheet-like dataflow programming in ClojureScript.
 
 ```clojure
 (ns your-ns
-  (:require [javelin :refer [cell] :refer-macros [cell=]]))
+  (:require [javelin.core :refer [cell] :refer-macros [cell=]]))
 
 (defn start []
   (let [a (cell 0)              ;; input cell with initial value of 0.
@@ -368,10 +368,7 @@ boot watch speak test-javelin
 [3]: http://clojars.org/javelin/javelin
 [4]: https://github.com/tailrecursion/javelin-demos
 [5]: https://dl.dropboxusercontent.com/u/12379861/javelin_demos/index.html
-[6]: https://github.com/lynaghk/todoFRP
 [7]: https://github.com/lynaghk/todoFRP/tree/master/todo/javelin
-[8]: https://github.com/tailrecursion/hoplon-demos/tree/master/todoFRP
+[8]: https://github.com/hoplon/demos/tree/master/todoFRP
 [9]: https://github.com/hoplon/javelin#formulas
-[10]: http://clojars.org/javelin/javelin/latest-version.svg?cachebust=2
-[11]: tree/master/img/javelin.png
 [12]: https://github.com/hoplon/javelin/blob/master/test/javelin/core_test.cljs

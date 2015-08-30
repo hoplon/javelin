@@ -9,10 +9,10 @@
 (ns javelin.core-test
   (:require
     [clojure.string :as s]
-    [cemerick.cljs.test :as t]
+    [cljs.test :as t]
     [javelin.core :refer [cell? input? cell set-cell! lens alts! destroy-cell!]])
   (:require-macros
-    [cemerick.cljs.test :refer [deftest testing run-tests is]]
+    [cljs.test :refer [deftest testing run-tests is]]
     [javelin.core :refer [cell= defc defc= set-cell!= dosync cell-doseq cell-let mx mx2]]))
 
 ;;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

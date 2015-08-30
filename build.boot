@@ -1,8 +1,7 @@
 (set-env!
-  :dependencies   '[[org.clojure/clojurescript       "0.0-2814"   :scope "provided"]
+  :dependencies   '[[org.clojure/clojurescript       "1.7.48"     :scope "provided"]
                     [adzerk/bootlaces                "0.1.10"     :scope "test"]
-                    [adzerk/boot-cljs                "0.0-2814-0" :scope "test"]
-                    [com.cemerick/clojurescript.test "0.3.3"      :scope "test"]
+                    [adzerk/boot-cljs                "1.7.48-3"   :scope "test"]
                     [tailrecursion/cljs-priority-map "1.0.3"]
                     [org.clojure/data.priority-map   "0.0.2"]
                     [riddley                         "0.1.6"]]
@@ -13,12 +12,12 @@
   '[adzerk.bootlaces :refer :all]
   '[adzerk.boot-cljs :refer :all])
 
-(def +version+ "3.8.1")
+(def +version+ "3.8.2")
 
 (bootlaces! +version+)
 
 (task-options!
-  pom  {:project     'javelin
+  pom  {:project     'hoplon/javelin
         :version     +version+
         :description "Spreadsheet-like dataflow programming in ClojureScript"
         :url         "https://github.com/hoplon/javelin"
@@ -27,11 +26,11 @@
 
 (deftask test-runner
   []
-  (let [tmp (temp-dir!)]
+  (let [tmp (tmp-dir!)]
     (with-pre-wrap fileset
       (with-let [fs fileset]
         (empty-dir! tmp)
-        (doseq [[path in-file] (map (juxt tmppath tmpfile) (output-files fs))]
+        (doseq [[path in-file] (map (juxt tmp-path tmp-file) (output-files fs))]
           (let [out-file (doto (io/file tmp path) io/make-parents)]
             (io/copy in-file out-file)))
         (binding [*sh-dir* (.getPath tmp)] (dosh "bash" "run.sh"))))))
