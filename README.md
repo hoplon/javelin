@@ -16,8 +16,7 @@ Spreadsheet-like dataflow programming in ClojureScript.
 
 ```clojure
 (ns your-ns
-  (:require [javelin :refer [cell]])
-  (:require-macros [javelin :refer [cell=]]))
+  (:require [javelin :refer [cell] :refer-macros [cell=]]))
 
 (defn start []
   (let [a (cell 0)              ;; input cell with initial value of 0.
@@ -246,10 +245,8 @@ Requiring the namespace and macros:
 (ns my-ns
   (:require
     [javelin
-     :refer [cell? input? cell lens set-cell! alts! destroy-cell! cell-map]])
-  (:require-macros
-    [javelin
-     :refer [cell= defc defc= set-cell!= dosync cell-doseq]]))
+     :refer [cell? input? cell lens set-cell! alts! destroy-cell! cell-map]
+     :refer-macros [cell= defc defc= set-cell!= dosync cell-doseq]]))
 ```
 
 API functions and macros:
