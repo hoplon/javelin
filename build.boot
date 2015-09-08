@@ -1,5 +1,6 @@
 (set-env!
-  :dependencies   '[[org.clojure/clojurescript       "1.7.48"     :scope "provided"]
+  :dependencies   '[[org.clojure/clojure             "1.7.0"      :scope "provided"]
+                    [org.clojure/clojurescript       "1.7.122"    :scope "provided"]
                     [adzerk/bootlaces                "0.1.10"     :scope "test"]
                     [adzerk/boot-cljs                "1.7.48-3"   :scope "test"]
                     [tailrecursion/cljs-priority-map "1.0.3"]
@@ -12,7 +13,7 @@
   '[adzerk.bootlaces :refer :all]
   '[adzerk.boot-cljs :refer :all])
 
-(def +version+ "3.8.2")
+(def +version+ "3.8.3")
 
 (bootlaces! +version+)
 

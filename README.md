@@ -8,7 +8,7 @@ Spreadsheet-like dataflow programming in ClojureScript.
 
 [](dependency)
 ```clojure
-[hoplon/javelin "3.8.2"] ;; latest release
+[hoplon/javelin "3.8.3"] ;; latest release
 ```
 [](/dependency)
 

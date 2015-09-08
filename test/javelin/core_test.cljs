@@ -17,36 +17,20 @@
 
 ;;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn setup! []
-  (set! cljs.core/*print-fn*
-        (if (undefined? (aget js/window "dump"))
-          ;; phantomjs
-          (fn [arg]
-            (let [arg (s/trim-newline (str arg))]
-              (.call (.-log js/console) (.-console js/window) arg)))
-          ;; firefox
-          (fn [arg]
-            (.call (aget js/window "dump") js/window arg)))))
+(set! cljs.core/*print-fn*
+      (if (undefined? (aget js/window "dump"))
+        ;; phantomjs
+        (fn [arg]
+          (let [arg (s/trim-newline (str arg))]
+            (.call (.-log js/console) (.-console js/window) arg)))
+        ;; firefox
+        (fn [arg]
+          (.call (aget js/window "dump") js/window arg))))
 
-(defn run-tests* []
-  (when (< 0 (apply max ((juxt :fail :error) (run-tests))))
+(defmethod t/report [:cljs.test/default :end-run-tests] [m]
+  (if (t/successful? m)
+    (println "\nDone")
     (throw (js/Error. "some test(s) failed"))))
-
-;(defn ^:export start []
-;  (setup!)
-;  (defc a 42.3)
-;  (mx2 #(+ % a))
-;  (mx2 (fn [x] (+ x a)))
-;  )
-
-(defn ^:export start []
-  (setup!)
-  (time (run-tests*))
-  (time (run-tests*))
-  (time (run-tests*))
-  (time (run-tests*))
-  (time (run-tests*))
-  (println "\nDone."))
 
 ;;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -745,6 +729,27 @@
         (is (= @y 3))
         (is (= @z nil))))))
 
+(deftest try-catch-finally
+  (testing "try, catch, finally -- body throws"
+    (let [a (atom 0)
+          b (atom 0)
+          c (cell= (try (throw (js/Error. "asdf"))
+                        (catch js/Error ex
+                          (reset! a (.-message ex)))
+                        (finally (swap! b inc))))]
+      (is (= @a "asdf"))
+      (is (= @b 1))
+      (is (= @c "asdf"))))
+  (testing "try, catch, finally -- body doesn't throw"
+    (let [a (atom 0)
+          b (atom 0)
+          c (cell= (try 2
+                        (catch js/Error _ (swap! a inc))
+                        (finally (swap! b inc))))]
+      (is (= @a 0))
+      (is (= @b 1))
+      (is (= @c 2)))))
+
 (deftest data-integrity
   ;; Test the data integrity constraints documented in the cells manifesto
   ;;
@@ -810,3 +815,5 @@
         (is (nil? (meta y)))
         (is (= {:bar :baz} (meta (with-meta y {:bar :baz}))))
         (is (= {:a :b} (meta (vary-meta y assoc :a :b))))))))
+
+(time (run-tests))

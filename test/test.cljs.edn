@@ -1,2 +1,1 @@
-{:require [javelin.core-test]
- :init-fns [javelin.core-test/start]}
+{:require [javelin.core-test]}

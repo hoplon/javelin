@@ -25,10 +25,6 @@
   [[binding resource] & body]
   `(let [~binding ~resource] ~@body ~binding))
 
-(defn make-sane [form]
-  (binding [*print-meta* true]
-    (read-string (pr-str form))))
-
 (defn bind-syms [form]
   (let [sym? #(and (symbol? %) (not= '& %))]
     (->> form (tree-seq coll? seq) (filter sym?) distinct)))
@@ -42,7 +38,7 @@
     form))
 
 (defn macroexpand-all* [env form]
-  (make-sane (prewalk (partial macroexpand* env) form)))
+  (prewalk (partial macroexpand* env) form))
 
 (defmacro macroexpand-all [form]
   (macroexpand-all* &env form))
@@ -66,14 +62,7 @@
 (create-ns 'js)
 
 (let [to-list   #(into '() (reverse %))
-      Cell'     (symbol "javelin.core" "Cell")
-      cell'     (symbol "javelin.core" "cell")
-      formula'  (symbol "javelin.core" "formula")
-      set-frm'  (symbol "javelin.core" "set-formula!")
-      special   a/specials
-      listy?    #(or (list? %)
-                     (= clojure.lang.LazySeq (type %))
-                     (= clojure.lang.Cons (type %)))
+      special   (into a/specials ['catch 'finally])
       special?  #(contains? special %)
       unsupp?*  #(contains? '#{def ns deftype* defrecord*} %)
       core?     #(contains? #{"clojure.core" "cljs.core"} (namespace %))
@@ -82,6 +71,7 @@
       binding1? #(contains? '#{let* loop*} (first %))
       binding2? #(= 'letfn* (first %))
       binding3? #(= 'fn* (first %))
+      binding4? #(= 'catch (first %))
       quoted?   #(= 'quote (first %))
       unwrap1?  #(= 'clojure.core/unquote (first %))
       unwrap2?  #(= 'clojure.core/unquote-splicing (first %))
@@ -115,6 +105,9 @@
           bindings  (mapcat bind1 (partition 2 bindings))]
       (to-list `(~sym [~@bindings] ~@(map #(walk % @local) body)))))
 
+  (defn walk-bind4 [[sym etype bind & body] local]
+    (to-list `(~sym ~etype ~bind ~@(map #(walk % (conj local bind)) body))))
+
   (defn walk-bind2 [[sym bindings & body] local]
     (let [local     (reduce conj local (map first (partition 2 bindings)))
           bindings  (map #(%1 %2) (cycle [identity #(walk % local)]) bindings)]
@@ -138,7 +131,7 @@
     (let [obj       (walk obj local)
           more      (map #(walk % local) more)
           walk-meth (fn [m] (list (first m) (map #(walk % local) (rest m))))]
-      (to-list `(~sym ~obj ~@(if-not (listy? meth) `[~meth ~@more] [(walk-meth meth)])))))
+      (to-list `(~sym ~obj ~@(if-not (seq? meth) `[~meth ~@more] [(walk-meth meth)])))))
 
   (defn walk-list [x local]
     (let [unsupp? #(unsupp? % local)]
@@ -147,6 +140,7 @@
             (binding1? x) (walk-bind1 x local)
             (binding2? x) (walk-bind2 x local)
             (binding3? x) (walk-bind3 x local)
+            (binding4? x) (walk-bind4 x local)
             (quoted?   x) (walk-passthru x local)
             (unwrap1?  x) (walk-passthru (second x) local) 
             (unwrap2?  x) (walk-passthru (list 'deref (second x)) local) 
@@ -158,7 +152,7 @@
           (map?    x) (walk-map x local)
           (set?    x) (walk-seq x local)
           (vector? x) (walk-seq x local)
-          (listy?  x) (walk-list x local)
+          (seq?    x) (walk-list x local)
           :else       x))
 
   (defn hoist [x env]
@@ -171,11 +165,11 @@
 
   (defn cell* [x env]
     (let [[f args] (hoist x env)]
-      (to-list `((~formula' ~f) ~@args))))
+      (to-list `((formula ~f) ~@args))))
 
   (defn set-cell* [c x env]
     (let [[f args] (hoist x env)]
-      (list set-frm' c f args)))
+      (list `set-formula! c f args)))
 
   (defmacro cell=
     ([expr] (cell* expr &env))
@@ -191,8 +185,8 @@
           (set! (.-update c#) ~f))))
 
   (defmacro defc
-    ([sym expr] `(def ~sym (~cell' ~expr)))
-    ([sym doc expr] `(def ~sym ~doc (~cell' ~expr))))
+    ([sym expr] `(def ~sym (cell ~expr)))
+    ([sym doc expr] `(def ~sym ~doc (cell ~expr))))
 
   (defmacro defc=
     ([sym expr] `(def ~sym (cell= ~expr)))
