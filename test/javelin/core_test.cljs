@@ -748,7 +748,19 @@
                         (finally (swap! b inc))))]
       (is (= @a 0))
       (is (= @b 1))
-      (is (= @c 2)))))
+      (is (= @c 2))))
+  (testing "catch, finally are only special in certain cases"
+    (let [catch   inc
+          finally dec
+          a       (atom 0)
+          b       (atom 0)
+          c       (cell= (try (+ (catch 100) (finally 200)) 
+                              (catch js/Error _ (swap! a inc))
+                              (finally (swap! b inc))))]
+      (is (= @a 0))
+      (is (= @b 1))
+      (is (= @c 300))))
+  )
 
 (deftest data-integrity
   ;; Test the data integrity constraints documented in the cells manifesto

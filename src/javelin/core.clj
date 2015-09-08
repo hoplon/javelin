@@ -62,16 +62,19 @@
 (create-ns 'js)
 
 (let [to-list   #(into '() (reverse %))
-      special   (into a/specials ['catch 'finally])
+      special   a/specials
       special?  #(contains? special %)
       unsupp?*  #(contains? '#{def ns deftype* defrecord*} %)
-      core?     #(contains? #{"clojure.core" "cljs.core"} (namespace %))
+      core?     #(contains? #{"clojure.core" "cljs.core" "js"} (namespace %))
       empty?*   #(= 0 (count %))
       dot?      #(= '. (first %))
+      try?      #(= 'try (first %))
+      catch?    #(= 'catch (first %))
+      finally?  #(= 'finally (first %))
       binding1? #(contains? '#{let* loop*} (first %))
       binding2? #(= 'letfn* (first %))
       binding3? #(= 'fn* (first %))
-      binding4? #(= 'catch (first %))
+      catch?    #(= 'catch (first %))
       quoted?   #(= 'quote (first %))
       unwrap1?  #(= 'clojure.core/unquote (first %))
       unwrap2?  #(= 'clojure.core/unquote-splicing (first %))
@@ -105,8 +108,19 @@
           bindings  (mapcat bind1 (partition 2 bindings))]
       (to-list `(~sym [~@bindings] ~@(map #(walk % @local) body)))))
 
-  (defn walk-bind4 [[sym etype bind & body] local]
+  (defn walk-catch [[sym etype bind & body] local]
     (to-list `(~sym ~etype ~bind ~@(map #(walk % (conj local bind)) body))))
+
+  (defn walk-finally [[sym & body] local]
+    (to-list `(~sym ~@(map #(walk % local) body))))
+
+  (defn walk-try [[sym & body] local]
+    (to-list `(~sym ~@(map #((cond (not (seq? %)) walk
+                                   (catch?   %)   walk-catch
+                                   (finally? %)   walk-finally
+                                   :else          walk)
+                             % local)
+                           body))))
 
   (defn walk-bind2 [[sym bindings & body] local]
     (let [local     (reduce conj local (map first (partition 2 bindings)))
@@ -137,10 +151,10 @@
     (let [unsupp? #(unsupp? % local)]
       (cond (empty?*   x) x
             (dot?      x) (walk-dot x local)
+            (try?      x) (walk-try x local)
             (binding1? x) (walk-bind1 x local)
             (binding2? x) (walk-bind2 x local)
             (binding3? x) (walk-bind3 x local)
-            (binding4? x) (walk-bind4 x local)
             (quoted?   x) (walk-passthru x local)
             (unwrap1?  x) (walk-passthru (second x) local) 
             (unwrap2?  x) (walk-passthru (list 'deref (second x)) local) 
