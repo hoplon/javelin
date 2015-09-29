@@ -245,7 +245,7 @@ Requiring the namespace and macros:
 (ns my-ns
   (:require
     [javelin.core
-     :refer [cell? input? cell lens set-cell! alts! destroy-cell! cell-map]
+     :refer [cell? input? cell formula lens set-cell! alts! destroy-cell! cell-map]
      :refer-macros [cell= defc defc= set-cell!= dosync cell-doseq]]))
 ```
 
@@ -266,6 +266,10 @@ API functions and macros:
 
 (cell expr)
 ;; Create new input cell with initial value expr.
+
+((formula f) x y z)
+;; Create a new formula cell with the formula function.
+;; Analagous to (cell= (f x y z)) but is a function, not a macro.
 
 (cell= expr)
 ;; Create new fomula cell with formula expr.
