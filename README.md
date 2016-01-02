@@ -176,10 +176,19 @@ multiple times.
 
 ## Lenses
 
-Lenses separate reads and writes in the cell graph. They are formula cells
-created with an extra argument&mdash;a special callback that provides the
-write implementation. The read implementation is provided by the underlying
-cell formula.
+A [lens][14] is a tool for extracting and updating a part of a data
+structure. A lens then is defined by a complementary pair of getter and setter 
+functions. Moreover lenses are composable, in that multiple lenses can be
+combined to access and alter the contents of structures of structures.
+
+Formula cells can easily be defined with a getter method for accessing some
+selected content of a data structure. Formula cells as we have defined them
+are read-only. but simply by providing a setter function as a second argument
+they become bi-directional lenses.
+
+Lenses still serve as formula cells, allowing you to access the content of
+a data structure. But you can do a swap! or reset! on a lens to update
+that same structure.
 
 For example:
 
@@ -376,3 +385,4 @@ boot watch speak test-javelin
 [8]: https://github.com/hoplon/demos/tree/master/todoFRP
 [9]: https://github.com/hoplon/javelin#formulas
 [12]: https://github.com/hoplon/javelin/blob/master/test/javelin/core_test.cljs
+[14]: https://www.thoughtworks.com/talks/journey-through-the-looking-glass-and-what-i-found-there
