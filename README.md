@@ -278,7 +278,7 @@ API functions and macros:
 
 ((formula f) x y z)
 ;; Create a new formula cell with the formula function.
-;; Analagous to (cell= (f x y z)) but is a function, not a macro.
+;; Analogous to (cell= (f x y z)) but is a function, not a macro.
 
 (cell= expr)
 ;; Create new fomula cell with formula expr.
