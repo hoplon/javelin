@@ -209,19 +209,28 @@
      (binding [*cljs* (boolean (:js-globals &env))]
        (cell* expr (or &env {}))))
     ([expr f]
-       `(with-let [c# (cell= ~expr)]
-          (set! (.-update c#) ~f))))
+     (binding [*cljs* (boolean (:js-globals &env))]
+       (if *cljs*
+         `(with-let [c# (cell= ~expr)]
+            (set! (.-update c#) ~f))
+         `(with-let [c# (cell= ~expr)]
+            (clojure.core/dosync (ref-set (.-update c#) ~f)))))))
 
   (defmacro set-cell!=
     ([c expr] (set-cell* c expr &env))
     ([c expr f]
-       `(with-let [c# c]
-          (set-cell!= ~c ~expr)
-          (set! (.-update c#) ~f))))
+     (binding [*cljs* (boolean (:js-globals &env))]
+       (if *cljs*
+         `(with-let [c# c]
+            (set-cell!= ~c ~expr)
+            (set! (.-update c#) ~f))
+         `(with-let [c# c]
+            (set-cell!= ~c ~expr)
+            (dosync (ref-set (.-update c#) ~f)))))))
 
   (defmacro defc
-    ([sym expr] `(def ~sym (cell ~expr)))
-    ([sym doc expr] `(def ~sym ~doc (cell ~expr))))
+    ([sym expr] `(def ~sym (javelin.core/cell ~expr)))
+    ([sym doc expr] `(def ~sym ~doc (javelin.core/cell ~expr))))
 
   (defmacro defc=
     ([sym expr] `(def ~sym (cell= ~expr)))
@@ -243,7 +252,8 @@
       `(cell-let-1 [~bindings ~c]
          (cell-let ~(vec more) ~@body))))
 
-  (defmacro dosync [& exprs] `(javelin.core/dosync* (fn [] ~@exprs)))
+  (defmacro dosync [& exprs]
+    `(javelin.core/dosync* (fn [] ~@exprs)))
 
   #_(defmacro cell-doseq [[bindings items] & body]
     `(cell-doseq* ~items (fn [item#] (cell-let [~bindings item#] ~@body))))

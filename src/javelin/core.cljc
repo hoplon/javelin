@@ -9,7 +9,6 @@
 (ns javelin.core
   #?(:cljs (:require-macros [javelin.macros])
      :clj  (:require javelin.macros))
-  #?(:clj  (:refer-clojure :exclude [dosync]))
   #?(:cljs (:require [tailrecursion.priority-map :refer [priority-map]])
      :clj  (:require [clojure.data.priority-map :refer [priority-map]]))
   #?(:cljs (:require-macros [javelin.impl-macros :as x])
@@ -20,7 +19,8 @@
 ;; doesn't properly fix up line numbers, docstring, etc. Need a
 ;; better strategy.
 #?(:clj (doseq [[sym var] (ns-publics 'javelin.macros)
-                :when (:macro (meta var))
+                :when (and (not= sym 'dosync)
+                           (:macro (meta var)))
                 :let [new-var (intern *ns* sym @var)]]
           (alter-meta! new-var assoc :macro true)))
 
@@ -141,7 +141,7 @@
      clojure.lang.IAtom
      (reset [this x]
        (cond (lens? this)  (@(.-update this) x)
-             (input? this) (do (c/dosync (ref-set (.-state this) x)) (propagate! this))
+             (input? this) (do (dosync (ref-set (.-state this) x)) (propagate! this))
              :else         (throw (ex-info "can't swap! or reset! formula cell" {:cell this})))
        @(.-state this))
      (swap [this f]        (reset! this (f @(.-state this))))
@@ -177,10 +177,11 @@
 
 ;; javelin util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn dosync* [thunk]
-  (let [bind #(binding [*tx* (atom (priority-map))] (%))
-        prop #(let [tx @*tx*] (binding [*tx* nil] (propagate* tx)))]
-    (if *tx* (thunk) (bind #(do (thunk) (prop))))))
+#?(:cljs
+   (defn dosync* [thunk]
+     (let [bind #(binding [*tx* (atom (priority-map))] (%))
+           prop #(let [tx @*tx*] (binding [*tx* nil] (propagate* tx)))]
+       (if *tx* (thunk) (bind #(do (thunk) (prop)))))))
 
 (defn alts! [& cells]
   (let [olds    (atom (repeat (count cells) ::none))
