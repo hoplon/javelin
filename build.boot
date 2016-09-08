@@ -4,7 +4,7 @@
                     [adzerk/bootlaces                "0.1.10"     :scope "test"]
                     [adzerk/boot-cljs                "1.7.48-3"   :scope "test"]
                     [tailrecursion/cljs-priority-map "1.0.3"]
-                    [org.clojure/data.priority-map   "0.0.2"]
+                    [org.clojure/data.priority-map   "0.0.7"]
                     [riddley                         "0.1.6"]]
   :resource-paths #{"src"})
 

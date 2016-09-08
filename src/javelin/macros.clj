@@ -6,16 +6,17 @@
 ;; the terms of this license.
 ;; You must not remove this notice, or any other, from this software.
 
-(ns javelin.core
+(ns javelin.macros
   (:refer-clojure :exclude [dosync])
   (:require
-    [clojure.walk    :refer [prewalk]]
+    [clojure.walk    :as w :refer [prewalk]]
     [clojure.pprint  :as p]
-    [cljs.analyzer   :as a]
     [clojure.java.io :as io]
     [clojure.string  :as s]))
 
 (declare walk)
+
+(def ^:dynamic *cljs* false)
 
 ;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -29,19 +30,26 @@
   (let [sym? #(and (symbol? %) (not= '& %))]
     (->> form (tree-seq coll? seq) (filter sym?) distinct)))
 
+(try (require 'cljs.analyzer)
+     (catch java.io.FileNotFoundException e))
+
 (defn macroexpand* [env form]
   (if (seq? form)
-    (let [ex (a/macroexpand-1 env form)]
+    (let [ex ((resolve 'cljs.analyzer/macroexpand-1) env form)]
       (if (identical? ex form)
         form
         (macroexpand* env ex)))
     form))
 
 (defn macroexpand-all* [env form]
-  (prewalk (partial macroexpand* env) form))
+  (if *cljs*
+    (prewalk (partial macroexpand* env) form)
+    (w/macroexpand-all form)))
 
 (defmacro macroexpand-all [form]
-  (macroexpand-all* &env form))
+  (if *cljs*
+    (macroexpand-all* &env form)
+    (w/macroexpand-all form)))
 
 (defmacro mx [form]
   `(println
@@ -61,10 +69,21 @@
 
 (create-ns 'js)
 
+(def cljs-specials '#{if def fn* do let* loop* letfn* throw try recur new set!
+                      ns deftype* defrecord* . js* & quote case* var})
+
+(def clj-specials '#{& monitor-exit case* try reify* finally loop* do letfn* if
+                     clojure.core/import* new deftype* let* fn* recur set! . var
+                     quote catch throw monitor-enter def})
+
 (let [to-list   #(into '() (reverse %))
-      special   a/specials
+      special   (if *cljs* cljs-specials clj-specials)
       special?  #(contains? special %)
-      unsupp?*  #(contains? '#{def ns deftype* defrecord*} %)
+      unsupp?*  #(contains?
+                  (if *cljs*
+                    '#{def ns deftype* defrecord*}
+                    '#{def ns deftype defrecord})
+                  %)
       core?     #(contains? #{"clojure.core" "cljs.core" "js"} (namespace %))
       empty?*   #(= 0 (count %))
       dot?      #(= '. (first %))
@@ -179,14 +198,16 @@
 
   (defn cell* [x env]
     (let [[f args] (hoist x env)]
-      (to-list `((formula ~f) ~@args))))
+      (to-list `((javelin.core/formula ~f) ~@args))))
 
   (defn set-cell* [c x env]
     (let [[f args] (hoist x env)]
-      (list `set-formula! c f args)))
+      (list `javelin.core/set-formula! c f args)))
 
   (defmacro cell=
-    ([expr] (cell* expr &env))
+    ([expr]
+     (binding [*cljs* (boolean (:js-globals &env))]
+       (cell* expr (or &env {}))))
     ([expr f]
        `(with-let [c# (cell= ~expr)]
           (set! (.-update c#) ~f))))
@@ -213,8 +234,8 @@
 
   (defmacro cell-let-1 [[bindings c] & body]
     (let [syms  (bind-syms bindings)
-          dcell `((formula (fn [~bindings] [~@syms])) ~c)]
-      `(let [[~@syms] (cell-map identity ~dcell)] ~@body)))
+          dcell `((javelin.core/formula (fn [~bindings] [~@syms])) ~c)]
+      `(let [[~@syms] (javelin.core/cell-map identity ~dcell)] ~@body)))
 
   (defmacro cell-let [[bindings c & more] & body]
     (if-not (seq more)
@@ -222,7 +243,7 @@
       `(cell-let-1 [~bindings ~c]
          (cell-let ~(vec more) ~@body))))
 
-  (defmacro dosync [& exprs] `(dosync* (fn [] ~@exprs)))
+  (defmacro dosync [& exprs] `(javelin.core/dosync* (fn [] ~@exprs)))
 
   #_(defmacro cell-doseq [[bindings items] & body]
     `(cell-doseq* ~items (fn [item#] (cell-let [~bindings item#] ~@body))))
@@ -237,21 +258,26 @@
           gens    (take (count exprs) (repeatedly gensym))
           fors    (-> (->> binds* (map first)) (interleave gens) (concat mods*))]
       `(cell-doseq*
-         ((formula (fn [~@gens] (for [~@fors] [~@syms]))) ~@exprs)
+         ((javelin.core/formula (fn [~@gens] (for [~@fors] [~@syms]))) ~@exprs)
          (fn [item#] (cell-let [[~@syms] item#, ~@lets] ~@body)))))
 
   (defmacro prop-cell
     ([prop]
+     (if (:js-globals &env)
        `(let [ret# (cell ~prop)]
           (js/setInterval #(reset! ret# ~prop) 100)
-          (cell= ret#)))
+          (cell= ret#))
+       (throw (RuntimeException. "prop-cell macro is cljs-only"))))
     ([prop setter & [callback]]
+     (if (:js-globals &env)
        `(let [setter#   ~setter
               callback# (or ~callback identity)]
           (cell= (set! ~prop setter#))
           (js/setInterval
-            #(when (not= @setter# ~prop)
-               (callback# ~prop)
-               (set! ~prop @setter#))
-            100)
-          setter#))))
+           #(when (not= @setter# ~prop)
+              (callback# ~prop)
+              (set! ~prop @setter#))
+           100)
+          setter#)
+       (throw (RuntimeException. "prop-cell macro is cljs-only"))))))
+
