@@ -229,8 +229,8 @@
             (dosync (ref-set (.-update c#) ~f)))))))
 
   (defmacro defc
-    ([sym expr] `(def ~sym (javelin.core/cell ~expr)))
-    ([sym doc expr] `(def ~sym ~doc (javelin.core/cell ~expr))))
+    ([sym expr] `(def ~sym (~'javelin.core/cell ~expr)))
+    ([sym doc expr] `(def ~sym ~doc (~'javelin.core/cell ~expr))))
 
   (defmacro defc=
     ([sym expr] `(def ~sym (cell= ~expr)))

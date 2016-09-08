@@ -9,6 +9,7 @@
 (ns javelin.core
   #?(:cljs (:require-macros [javelin.macros])
      :clj  (:require javelin.macros))
+  #?(:clj  (:refer-clojure :exclude [dosync]))
   #?(:cljs (:require [tailrecursion.priority-map :refer [priority-map]])
      :clj  (:require [clojure.data.priority-map :refer [priority-map]]))
   #?(:cljs (:require-macros [javelin.impl-macros :as x])
@@ -18,11 +19,11 @@
 ;; NOTE: Below hack to mirror macros in this namespace when we're on Clojure
 ;; doesn't properly fix up line numbers, docstring, etc. Need a
 ;; better strategy.
-#?(:clj (doseq [[sym var] (ns-publics 'javelin.macros)
-                :when (and (not= sym 'dosync)
-                           (:macro (meta var)))
-                :let [new-var (intern *ns* sym @var)]]
-          (alter-meta! new-var assoc :macro true)))
+#?(:clj (doseq [sym '[cell= set-cell!= dosync defc defc=]
+                :let [src-var (resolve (symbol "javelin.macros" (name sym)))]]
+          (ns-unmap *ns* sym)
+          (doto (intern *ns* sym @src-var)
+            (alter-meta! assoc :macro true))))
 
 ;; helpers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -43,10 +44,10 @@
                 root))))
 
 #?(:clj
-   (defprotocol IWatchable
-     (-notify-watches [this o n])
-     (-add-watch      [this k f])
-     (-remove-watch   [this k])))
+   (defn -notify-watches
+     [c old new]
+     (doseq [[k f] (.getWatches c)]
+       (f k c old new))))
 
 (defn- propagate* [pri-map]
   (when-let [next (first (peek pri-map))]
@@ -135,26 +136,24 @@
      (withMeta [this meta] (Cell. meta state rank prev sources sinks thunk watches update))
      (meta [this] @meta)
 
-     clojure.lang.IDeref
+     clojure.lang.IRef
      (deref [this] @(.-state this))
+     (setValidator [this vf] (throw (ex-info "TODO" {:cell this})))
+     (getValidator [this] (throw (ex-info "TODO" {:cell this})))
+     (getWatches [this] @(.-watches this))
+     (addWatch [this k f] (c/dosync (alter (.-watches this) assoc k f)) this)
+     (removeWatch [this k] (c/dosync (alter (.-watches this) dissoc k)) this)
 
      clojure.lang.IAtom
      (reset [this x]
        (cond (lens? this)  (@(.-update this) x)
-             (input? this) (do (dosync (ref-set (.-state this) x)) (propagate! this))
+             (input? this) (do (c/dosync (ref-set (.-state this) x)) (propagate! this))
              :else         (throw (ex-info "can't swap! or reset! formula cell" {:cell this})))
        @(.-state this))
      (swap [this f]        (reset! this (f @(.-state this))))
      (swap [this f a]      (reset! this (f @(.-state this) a)))
      (swap [this f a b]    (reset! this (f @(.-state this) a b)))
-     (swap [this f a b xs] (reset! this (apply f @(.-state this) a b xs)))
-
-     IWatchable
-     (-notify-watches [this o n] (doseq [[key f] @watches] (f key this o n)))
-     (-add-watch      [this k f] (c/dosync
-                                  (alter (.-watches this) assoc k f)))
-     (-remove-watch   [this k]   (c/dosync
-                                  (alter (.-watches this) dissoc watches k)))))
+     (swap [this f a b xs] (reset! this (apply f @(.-state this) a b xs)))))
 
 (defn cell?     [c]   (when (= (type c) javelin.core.Cell) c))
 (defn formula?  [c]   (when (and (cell? c) (x/get (.-thunk c))) c))
@@ -177,11 +176,10 @@
 
 ;; javelin util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#?(:cljs
-   (defn dosync* [thunk]
-     (let [bind #(binding [*tx* (atom (priority-map))] (%))
-           prop #(let [tx @*tx*] (binding [*tx* nil] (propagate* tx)))]
-       (if *tx* (thunk) (bind #(do (thunk) (prop)))))))
+(defn dosync* [thunk]
+  (let [bind #(binding [*tx* (atom (priority-map))] (%))
+        prop #(let [tx @*tx*] (binding [*tx* nil] (propagate* tx)))]
+    (if *tx* (thunk) (bind #(do (thunk) (prop))))))
 
 (defn alts! [& cells]
   (let [olds    (atom (repeat (count cells) ::none))
