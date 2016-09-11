@@ -36,15 +36,15 @@
 ;  (defc a 42.3)
 ;  (mx2 #(+ % a))
 ;  (mx2 (fn [x] (+ x a)))
-;  ) 
+;  )
 
 (defn ^:export start []
   (setup!)
-  (time (run-tests*)) 
-  (time (run-tests*)) 
-  (time (run-tests*)) 
-  (time (run-tests*)) 
-  (time (run-tests*)) 
+  (time (run-tests*))
+  (time (run-tests*))
+  (time (run-tests*))
+  (time (run-tests*))
+  (time (run-tests*))
   (println "\nDone."))
 
 ;;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -171,7 +171,7 @@
              d (cell= (str a c))]
          (is (= @d "abcDEF"))
          (swap! b #(.replace % "d" "z"))
-         (is (= @d "abcZEF")))) 
+         (is (= @d "abcZEF"))))
      (testing
        "Math.round()"
        (let [a (cell 123.2)
@@ -314,7 +314,7 @@
            c (cell= (when (odd? b) (reset! ~(cell a) (* b 2))))]
        (is (= @a 100))
        (swap! b inc)
-       (is (= @a 402)))) 
+       (is (= @a 402))))
    (testing
      "unquote-splicing (~@) in formulas is equiv to ~(deref expr)"
      (let [a (cell 100)
@@ -332,37 +332,37 @@
            c (cell= (/ b 2))
            d (cell= (* b c))]
        (swap! a inc)
-       (is (= 200 @d)))) 
+       (is (= 200 @d))))
    (testing
      "complicated formulas are ok"
      (let [a (cell= ((comp inc (comp inc identity)) 123))]
-       (is (= 125 @a)))) 
+       (is (= 125 @a))))
    (testing
      "higher order functions in formulas work correctly"
      (let [a (cell [1 2 3])
            b (cell= (mapv (fn [x] (inc x)) a))]
-       (is (= [2 3 4] @b)))) 
+       (is (= [2 3 4] @b))))
    (testing
      "map formulas perform correctly"
      (let [a (cell 0)
            b (cell= {:a a})]
-       (is (= {:a 0} @b)) 
+       (is (= {:a 0} @b))
        (swap! a inc)
-       (is (= {:a 1} @b)))) 
+       (is (= {:a 1} @b))))
    (testing
      "map input cells perform correctly"
      (let [a (cell {:n 0})]
-       (is (= 0 (:n @a))) 
+       (is (= 0 (:n @a)))
        (swap! a update-in [:n] inc)
-       (is (= 1 (:n @a))))) 
+       (is (= 1 (:n @a)))))
    (testing
      "cells in function position are handled correctly"
      (let [a (cell 0)
            b (cell (fn [x] (inc x)))
            c (cell= (b a))]
-       (is (= 1 @c)) 
+       (is (= 1 @c))
        (reset! b (fn [x] (dec x)))
-       (is (= -1 @c)))) 
+       (is (= -1 @c))))
    (testing
      "side effects are performed correctly"
      (let [effect1 (atom nil)
@@ -374,35 +374,35 @@
                       (reset! effect1 x)
                       (reset! effect2 c)
                       (* x 2)))]
-       (is (= 4 @d)) 
-       (is (= 2 @effect1)) 
-       (is (= 1 @effect2)) 
+       (is (= 4 @d))
+       (is (= 2 @effect1))
+       (is (= 1 @effect2))
        (swap! a inc)
        (swap! c inc)
        (is (= 6 @d))
        (is (= 3 @effect1))
-       (is (= 2 @effect2)))) 
+       (is (= 2 @effect2))))
    (testing
      "map lookups are handled correctly"
      (let [m (cell {:some-kw [1 2 3]})
            a (cell= (seq (:some-kw m)))
            b (cell= (reduce + a))]
-       (is (= 6 @b))) 
+       (is (= 6 @b)))
      (let [m (cell {:some-kw [1 2 3]})
            a (cell= {:sum (reduce + (:some-kw m))})]
-       (is (= 6 (:sum @a))))) 
+       (is (= 6 (:sum @a)))))
    (testing
      "booleans are handled correctly"
      (let [a (cell true)
            b (cell false)
            c (cell= (not (or a b)))]
-       (is (= false @c)))) 
+       (is (= false @c))))
    (testing
      "set! is handled correctly"
      (let [o (js-obj)
            a (cell 0)]
        (cell= (set! (.-foo o) (inc a)))
-       (is (= (.-foo o) 1)) 
+       (is (= (.-foo o) 1))
        (swap! a inc)
        (is (= (.-foo o) 2)))))
 
@@ -452,7 +452,7 @@
      "anon fn with name binds name locally"
      (let [a (cell 10)
            b (cell 20)
-           c (cell= (fn asdf [x] (if (even? x) (+ x (asdf (/ x 2))) (+ x a)))) 
+           c (cell= (fn asdf [x] (if (even? x) (+ x (asdf (/ x 2))) (+ x a))))
            d (cell= (c b))]
        (is (= @d 45))
        (swap! a / 2)
@@ -742,13 +742,27 @@
          (is (every? cell? [x y z]))
          (is (= @x 2))
          (is (= @y 3))
+         (is (= @z nil)))))
+   (testing "cell-let binds map destruction"
+     (let [m (cell {:x 1 :y 2})]
+       (cell-let [{x :x y :y} m]
+         (is (every? cell? [x y z]))
+         (is (= @x 1))
+         (is (= @y 2))
+         (is (= @z nil)))))
+   (testing "cell-let binds map destruction with :keys"
+     (let [m (cell {:x 1 :y 2})]
+       (cell-let [{:keys [x y]} m]
+         (is (every? cell? [x y z]))
+         (is (= @x 1))
+         (is (= @y 2))
          (is (= @z nil))))))
 
 (deftest data-integrity
   ;; Test the data integrity constraints documented in the cells manifesto
   ;;
   ;; http://smuglispweeny.blogspot.com/2008/02/cells-manifesto.html
-  ;; 
+  ;;
   (testing "single recomputation of all and only state (a1, a2) affected by change to X"
     (testing "all and only directly dependent state updated"
       (let [x (cell 1)
@@ -801,4 +815,3 @@
             (swap! log conj {:old old :new new})))
         (swap! x inc)
         (is (= @log [{:old [["b" 1] 1] :new [["b" 2] 2]}]))))))
-

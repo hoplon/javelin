@@ -25,9 +25,16 @@
   [[binding resource] & body]
   `(let [~binding ~resource] ~@body ~binding))
 
+(defn extract-syms [bindings]
+  (map first (partition 2 (cljs.core/destructure bindings))))
+
+(defn extract-syms-without-autogen [bindings]
+  (let [syms1 (set (extract-syms bindings))
+        syms2 (set (extract-syms bindings))]
+    (seq (clojure.set/intersection syms1 syms2))))
+
 (defn bind-syms [form]
-  (let [sym? #(and (symbol? %) (not= '& %))]
-    (->> form (tree-seq coll? seq) (filter sym?) distinct)))
+  (extract-syms-without-autogen [form nil]))
 
 (defn macroexpand* [env form]
   (if (seq? form)
@@ -85,7 +92,7 @@
       (and (not (*env* op)) (not (local op)) (unsupp?* op))))
 
   (defn hoist? [x local]
-    (and (not (or (local x) (core? x))) (or (*env* x) (not (special? x))))) 
+    (and (not (or (local x) (core? x))) (or (*env* x) (not (special? x)))))
 
   (defn walk-sym [x local]
     (if-not (hoist? x local)
@@ -156,8 +163,8 @@
             (binding2? x) (walk-bind2 x local)
             (binding3? x) (walk-bind3 x local)
             (quoted?   x) (walk-passthru x local)
-            (unwrap1?  x) (walk-passthru (second x) local) 
-            (unwrap2?  x) (walk-passthru (list 'deref (second x)) local) 
+            (unwrap1?  x) (walk-passthru (second x) local)
+            (unwrap2?  x) (walk-passthru (list 'deref (second x)) local)
             (unsupp?   x) (throw (Exception. (err1 (first x))))
             :else         (to-list (map #(walk % local) x)))))
 
