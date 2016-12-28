@@ -26,7 +26,7 @@
   `(let [~binding ~resource] ~@body ~binding))
 
 (defn extract-syms [bindings]
-  (map first (partition 2 (cljs.core/destructure bindings))))
+  (map first (partition 2 (clojure.core/destructure bindings))))
 
 (defn extract-syms-without-autogen [bindings]
   (let [syms1 (set (extract-syms bindings))
@@ -201,7 +201,7 @@
   (defmacro set-cell!=
     ([c expr] (set-cell* c expr &env))
     ([c expr f]
-       `(with-let [c# c]
+       `(with-let [c# ~c]
           (set-cell!= ~c ~expr)
           (set! (.-update c#) ~f))))
 
