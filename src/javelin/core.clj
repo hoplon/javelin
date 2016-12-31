@@ -254,6 +254,67 @@
          doc  (when doc? [doc])]
      `(def ~sym ~@doc (cell= ~expr ~@f)))))
 
+(defmacro formula-of
+  "ALPHA: this macro may change.
+
+  Given a vector of dependencies and one or more body expressions, emits a
+  form that will produce a formula cell. The dependencies must be names that
+  will be re-bound to their values within the body. No code walking is done.
+  The value of the formula cell is computed by evaluating the body expressions
+  whenever any of the dependencies change.
+
+  Note: the dependencies need not be cells.
+
+  E.g.
+      (def x 100)
+      (def y (cell 200))
+      (def z (cell= (inc y)))
+
+      (def c (formula-of [x y z] (+ x y z)))
+
+      (deref c) ;=> 501
+
+      (swap! y inc)
+      (deref c) ;=> 503
+  "
+  [deps & body]
+  (assert (and (vector? deps) (every? symbol? deps))
+          "first argument must be a vector of symbols")
+  `((formula (fn [~@deps] ~@body)) ~@deps))
+
+(defmacro formulet
+  "ALPHA: this macro may change.
+
+  Given a vector of binding-form/dependency pairs and one or more body
+  expressions, emits a form that will produce a formula cell. Each binding
+  form is bound to the value of the corresponding dependency within the body.
+  No code walking is done. The value of the formula cell is computed by
+  evaluating the body expressions whenever any of the dependencies change.
+
+  Note: the depdendency expressions are evaluated only once, when the formula
+  cell is created, and they need not evaluate to javelin cells.
+
+  E.g.
+      (def a (cell 42))
+      (def b (cell {:x 100 :y 200}))
+
+      (def c (formulet [v (cell= (inc a))
+                        w (+ 1 2)
+                        {:keys [x y]} b]
+                (+ v w x y)))
+
+      (deref c) ;=> 346
+
+      (swap! a inc)
+      (deref c) ;=> 347
+  "
+  [bindings & body]
+  (let [binding-pairs (partition 2 bindings)]
+    (assert (and (vector? bindings) (even? (count binding-pairs)))
+            "first argument must be a vector of binding pairs")
+    `((formula (fn [~@(map first binding-pairs)] ~@body))
+      ~@(map second binding-pairs))))
+
 (defmacro ^:private cell-let-1 [[bindings c] & body]
   (let [syms  (bind-syms bindings)
         dcell `((formula (fn [~bindings] [~@syms])) ~c)]
@@ -274,24 +335,22 @@
   `(dosync* (fn [] ~@body)))
 
 (defmacro cell-doseq
-  "Given a vector of binding-form/collection-cell pairs, 
-  function f and a cell c that contains a seqable collection of items,
-  calls f for side effects once for each item in c, passing one argument: a
-  formula cell equivalent to (cell= (nth c i)) for the ith item in c. Whenever
-  c grows beyond its previous maximum size f is called as above for each item
-  beyond the maximum size. Nothing happens when c shrinks.
+  "Takes a vector of binding-form/collection-cell pairs and one or more body
+  expressions, similar to clojure.core/doseq. Iterating over the collection
+  cells produces a sequence of items that may grow, shrink, or update over
+  time. Whenever this sequence grows the body expressions are evaluated (for
+  side effects) exactly once for each new location in the sequence. Bindings
+  are bound to cells that refer to the item at that location.
 
   Consider:
 
-      (def things (cell [:a :b :c]))
+      (def things (cell [{:x :a} {:x :b} {:x :c}]))
 
-      (cell-doseq*
-        things
-        (fn doit [x]
-          (prn :creating @x)
-          (add-watch x nil #(prn :updating %3 %4))))
+      (cell-doseq [{:keys [x]} things]
+        (prn :creating @x)
+        (add-watch x nil #(prn :updating %3 %4)))
 
-      ;; the following is printed:
+      ;; the following is printed -- note that x is a cell:
 
       :creating :a
       :creating :b
@@ -309,10 +368,11 @@
 
   Grow things such that it is one item larger than it ever was:
 
-      (swap! things into [:u :v])
+      (swap! things into [{:x :u} {:x :v}])
 
       ;; the following is printed (because things now has 4 items, so the 3rd
-      ;; item is now :u and the max size increases by one with the new item :v):
+      ;; item is now {:x :u} and the max size increases by one with the new
+      ;; item {:x :v}):
 
       :updating nil :u
       :creating :v

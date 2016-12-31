@@ -10,10 +10,10 @@
   (:require
     [clojure.string :as s]
     [cljs.test :as t]
-    [javelin.core :refer [cell? input? cell set-cell! lens alts! destroy-cell! constant?]])
+    [javelin.core :refer [cell? input? cell set-cell! lens alts! destroy-cell! constant? formula?]])
   (:require-macros
     [cljs.test :refer [deftest testing run-tests is]]
-    [javelin.core :refer [cell= defc defc= set-cell!= dosync cell-doseq cell-let mx mx2]]))
+    [javelin.core :refer [cell= defc defc= set-cell!= dosync cell-doseq cell-let mx mx2 formula-of formulet]]))
 
 ;;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -770,7 +770,7 @@
       (is (= d (constant? d)))
       (is (= e (constant? e)))))
 
-  (testing "formula cells that aren't constatnt don't say they are"
+  (testing "formula cells that aren't constant don't say they are"
     (let [a (cell 1)
           b 2
           c (cell= (+ a b))
@@ -778,7 +778,52 @@
           e (cell= (+ a b c d))]
       (is (not= c (constant? c)))
       (is (not= d (constant? d)))
-      (is (not= e (constant? e))))))
+      (is (not= e (constant? e)))))
+
+  (testing "formula-of returns a formula cell"
+    (is (formula? (formula-of [] 42))))
+
+  (testing "formula-of"
+    (let [a (cell 1)
+          b (cell 2)
+          c (cell 3)
+          u (atom 0)
+          d (formula-of [a b]
+              (swap! u inc)
+              (+ a b @c))]
+      (testing "initial value is computed correctly"
+        (is (= 6 @d))
+        (is (= 1 @u)))
+      (testing "doesn't update unless declared dependencies change"
+        (swap! c inc)
+        (is (= 1 @u))
+        (is (= 6 @d)))
+      (testing "does update when declared dependecies change"
+        (swap! a inc)
+        (is (= 8 @d))
+        (is (= 2 @u)))))
+
+  (testing "formulet"
+    (let [x (cell {:a 1 :b 2})
+          y (cell {:c 3 :d 4})
+          z (cell {:e 5 :f 6})
+          u (atom 0)
+          v (formulet [{:keys [a b]} x
+                       {:keys [c d]} y]
+              (swap! u inc)
+              (+ a b c d (:e @z) (:f @z)))]
+      (testing "initial value is computed correctly"
+        (is (= 21 @v))
+        (is (= 1 @u)))
+      (testing "doesn't update unless declared dependecies change"
+        (swap! z update :e inc)
+        (is (= 21 @v))
+        (is (= 1 @u)))
+      (testing "does update when declared dependecies change"
+        (swap! x update :a inc)
+        (is (= 23 @v))
+        (is (= 2 @u)))))
+  )
 
 (deftest data-integrity
   ;; Test the data integrity constraints documented in the cells manifesto
