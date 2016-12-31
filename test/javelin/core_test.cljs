@@ -10,7 +10,7 @@
   (:require
     [clojure.string :as s]
     [cljs.test :as t]
-    [javelin.core :refer [cell? input? cell set-cell! lens alts! destroy-cell!]])
+    [javelin.core :refer [cell? input? cell set-cell! lens alts! destroy-cell! constant?]])
   (:require-macros
     [cljs.test :refer [deftest testing run-tests is]]
     [javelin.core :refer [cell= defc defc= set-cell!= dosync cell-doseq cell-let mx mx2]]))
@@ -50,8 +50,8 @@
       (is (= @b @q)))
     (testing
       "printed representation is correct"
-      (is (= (pr-str a) "#<Cell: 0>"))
-      (is (= (pr-str b) "#<Cell: 1>")))
+      (is (= (pr-str a) "#object [javelin.core.Cell 0]"))
+      (is (= (pr-str b) "#object [javelin.core.Cell 1]")))
     (testing
       "cell? correctly identifies cells"
       (is (= a (cell? a)))
@@ -657,8 +657,8 @@
           m (atom [])]
       (cell-doseq [{:keys [w x]} (cell= (conj a {:w 2 :x 4}))
                    y             (cell= (conj b :b))
-                   :let          [p (cell= (str y))]
-                   :let          [q (cell= (inc x))]]
+                   :let          [q (cell= (inc x))]
+                   :let          [p (cell= (str y))]]
         (swap! m conj (cell= {:w w :x x :y y :p p :q q})))
       (is (= 4 (count @m)))
       (is (every? cell? @m))
@@ -760,7 +760,25 @@
       (is (= @a 0))
       (is (= @b 1))
       (is (= @c 300))))
-  )
+  (testing "constant formula cells propagate constantness"
+    (let [a 1
+          b 2
+          c (cell= (+ a b))
+          d (cell= (+ a b c))
+          e (cell= (+ a b c d))]
+      (is (= c (constant? c)))
+      (is (= d (constant? d)))
+      (is (= e (constant? e)))))
+
+  (testing "formula cells that aren't constatnt don't say they are"
+    (let [a (cell 1)
+          b 2
+          c (cell= (+ a b))
+          d (cell= (+ a b c))
+          e (cell= (+ a b c d))]
+      (is (not= c (constant? c)))
+      (is (not= d (constant? d)))
+      (is (not= e (constant? e))))))
 
 (deftest data-integrity
   ;; Test the data integrity constraints documented in the cells manifesto

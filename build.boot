@@ -1,8 +1,8 @@
 (set-env!
-  :dependencies   '[[org.clojure/clojure             "1.7.0"      :scope "provided"]
-                    [org.clojure/clojurescript       "1.7.122"    :scope "provided"]
+  :dependencies   '[[org.clojure/clojure             "1.8.0"      :scope "provided"]
+                    [org.clojure/clojurescript       "1.9.293"    :scope "provided"]
                     [adzerk/bootlaces                "0.1.10"     :scope "test"]
-                    [adzerk/boot-cljs                "1.7.48-3"   :scope "test"]
+                    [adzerk/boot-cljs                "1.7.228-2"   :scope "test"]
                     [tailrecursion/cljs-priority-map "1.0.3"]
                     [org.clojure/data.priority-map   "0.0.2"]
                     [riddley                         "0.1.6"]]
@@ -41,4 +41,14 @@
   [a advanced bool "Test with :advanced optimizations."]
   (merge-env! :resource-paths #{"test"})
   (when advanced (task-options! cljs {:optimizations :advanced}))
-  (comp (cljs) (test-runner)))
+  (comp (cljs)
+        (test-runner)
+        (test-runner)
+        (test-runner)
+        (test-runner)
+        (test-runner)
+        (test-runner)
+        (test-runner)
+        (test-runner)
+        (test-runner)
+        (test-runner)))
