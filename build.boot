@@ -13,7 +13,7 @@
   '[adzerk.bootlaces :refer :all]
   '[adzerk.boot-cljs :refer :all])
 
-(def +version+ "3.8.5")
+(def +version+ "3.9.0")
 
 (bootlaces! +version+)
 
