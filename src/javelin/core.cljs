@@ -240,13 +240,13 @@
 
   then,
 
-      @z ;=> (1 2)
+      (deref z) ;=> (1 2)
 
       (swap! a assoc :x 42)
-      @z ;=> (42)
+      (deref z) ;=> (42)
 
       (reset! a {:x 10 :y 20})
-      @z ;=> (10 20)
+      (deref z) ;=> (10 20)
   "
   [& cells]
   (let [olds    (atom (repeat (count cells) ::none))
