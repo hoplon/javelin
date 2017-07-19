@@ -179,7 +179,7 @@ multiple times.
 A [lens][14] is a tool for extracting and updating a part of a data
 structure. A lens then is defined by a complementary pair of getter and setter 
 functions. Moreover lenses are composable, in that multiple lenses can be
-combined to access and alter the contents of structures of structures.
+combined to access and alter the contents of structures.
 
 Formula cells can easily be defined with a getter method for accessing some
 selected content of a data structure. Formula cells as we have defined them
