@@ -386,3 +386,4 @@ boot watch speak test-javelin
 [9]: https://github.com/hoplon/javelin#formulas
 [12]: https://github.com/hoplon/javelin/blob/master/test/javelin/core_test.cljs
 [14]: https://www.thoughtworks.com/talks/journey-through-the-looking-glass-and-what-i-found-there
+# javelin-benchmark
