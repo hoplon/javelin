@@ -809,7 +809,8 @@
           z (cell {:e 5 :f 6})
           u (atom 0)
           v (formulet [{:keys [a b]} x
-                       {:keys [c d]} y]
+                       {:keys [c d]} y
+                       _ {}]
               (swap! u inc)
               (+ a b c d (:e @z) (:f @z)))]
       (testing "initial value is computed correctly"
