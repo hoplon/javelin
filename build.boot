@@ -1,21 +1,22 @@
 (set-env!
-  :dependencies   '[[org.clojure/clojure             "1.8.0"      :scope "provided"]
+  :dependencies   '[[org.clojure/clojure             "1.9.0"      :scope "provided"]
                     [org.clojure/clojurescript       "1.9.293"    :scope "provided"]
                     [adzerk/bootlaces                "0.1.10"     :scope "test"]
-                    [adzerk/boot-cljs                "1.7.228-2"   :scope "test"]
-                    [tailrecursion/cljs-priority-map "1.0.3"]
-                    [org.clojure/data.priority-map   "0.0.2"]
-                    [riddley                         "0.1.6"]]
+                    [adzerk/boot-cljs                "1.7.228-2"  :scope "test"]
+                    [riddley                         "0.2.0"]]
   :resource-paths #{"src"})
 
 (require
+  '[clojure.test :as t]
   '[clojure.java.io  :as io]
   '[adzerk.bootlaces :refer :all]
   '[adzerk.boot-cljs :refer :all])
 
-(def +version+ "3.9.0")
+(def +version+ "3.10.0")
 
 (bootlaces! +version+)
+
+(alter-var-root #'build-jar #(fn [] (comp (javac) (%))))
 
 (task-options!
   pom  {:project     'hoplon/javelin
@@ -52,3 +53,12 @@
         (test-runner)
         (test-runner)
         (test-runner)))
+
+(deftask test-javelin-clj
+  "Run Javelin-CLJ tests"
+  []
+  (merge-env! :resource-paths #{"test"})
+  (comp (javac)
+        (with-pass-thru [_]
+          (require 'javelin.cell-test :reload)
+          (time (t/run-tests 'javelin.cell-test)))))
