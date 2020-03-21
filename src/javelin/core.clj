@@ -309,9 +309,9 @@
       (deref c) ;=> 347
   "
   [bindings & body]
+  (assert (and (vector? bindings) (even? (count bindings)))
+          "first argument must be a vector of binding pairs")
   (let [binding-pairs (partition 2 bindings)]
-    (assert (and (vector? bindings) (even? (count binding-pairs)))
-            "first argument must be a vector of binding pairs")
     `((formula (fn [~@(map first binding-pairs)] ~@body))
       ~@(map second binding-pairs))))
 
