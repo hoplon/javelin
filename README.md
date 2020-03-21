@@ -2,15 +2,10 @@
 alt="tailrecursion/javelin logo" title="tailrecursion/javelin logo"
 align="right" width="152"/>
 
-# Javelin [![Build Status][1]][2]
+# Javelin
+[![clojars][10]][3]  [![snapshot status][11]][3]
 
 Spreadsheet-like dataflow programming in ClojureScript.
-
-[](dependency)
-```clojure
-[hoplon/javelin "3.9.0"] ;; latest release
-```
-[](/dependency)
 
 ### Example
 
@@ -386,3 +381,5 @@ boot watch speak test-javelin
 [9]: https://github.com/hoplon/javelin#formulas
 [12]: https://github.com/hoplon/javelin/blob/master/test/javelin/core_test.cljs
 [14]: https://www.thoughtworks.com/talks/journey-through-the-looking-glass-and-what-i-found-there
+[10]: https://img.shields.io/clojars/v/hoplon/javelin.svg
+[11]: https://img.shields.io/clojars/vpre/hoplon/javelin.svg
