@@ -373,7 +373,7 @@ boot watch speak test-javelin
 
 [1]: https://travis-ci.org/hoplon/javelin.png?branch=master
 [2]: https://travis-ci.org/hoplon/javelin
-[3]: http://clojars.org/javelin/javelin
+[3]: http://clojars.org/hoplon/javelin
 [4]: https://github.com/tailrecursion/javelin-demos
 [5]: https://dl.dropboxusercontent.com/u/12379861/javelin_demos/index.html
 [7]: https://github.com/lynaghk/todoFRP/tree/master/todo/javelin
