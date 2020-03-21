@@ -382,4 +382,4 @@ boot watch speak test-javelin
 [12]: https://github.com/hoplon/javelin/blob/master/test/javelin/core_test.cljs
 [14]: https://www.thoughtworks.com/talks/journey-through-the-looking-glass-and-what-i-found-there
 [10]: https://img.shields.io/clojars/v/hoplon/javelin.svg
-[11]: https://img.shields.io/clojars/vpre/hoplon/javelin.svg
+[11]: https://img.shields.io/clojars/v/hoplon/javelin.svg?include_prereleases
