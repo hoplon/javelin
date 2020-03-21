@@ -1,29 +1,30 @@
 (set-env!
-  :dependencies   '[[org.clojure/clojure             "1.8.0"      :scope "provided"]
-                    [org.clojure/clojurescript       "1.9.293"    :scope "provided"]
-                    [adzerk/bootlaces                "0.1.10"     :scope "test"]
-                    [adzerk/boot-cljs                "1.7.228-2"   :scope "test"]
-                    [tailrecursion/cljs-priority-map "1.0.3"]
-                    [org.clojure/data.priority-map   "0.0.2"]
-                    [riddley                         "0.1.6"]]
+  :dependencies   (template [[org.clojure/clojure             ~(clojure-version)]
+                             [org.clojure/clojurescript       "1.10.439"]
+                             [adzerk/bootlaces                "0.1.10"    :scope "test"]
+                             [adzerk/boot-cljs                "1.7.228-2" :scope "test"]
+                             [degree9/boot-semver             "1.8.0"     :scope "test"]
+                             [tailrecursion/cljs-priority-map "1.0.3"]
+                             [org.clojure/data.priority-map   "0.0.2"]
+                             [riddley                         "0.1.6"]])
   :resource-paths #{"src"})
 
 (require
   '[clojure.java.io  :as io]
-  '[adzerk.bootlaces :refer :all]
-  '[adzerk.boot-cljs :refer :all])
-
-(def +version+ "3.9.0")
-
-(bootlaces! +version+)
+  '[adzerk.boot-cljs :refer :all]
+  '[degree9.boot-semver :refer :all])
 
 (task-options!
   pom  {:project     'hoplon/javelin
-        :version     +version+
         :description "Spreadsheet-like dataflow programming in ClojureScript"
         :url         "https://github.com/hoplon/javelin"
         :scm         {:url "https://github.com/hoplon/javelin"}
         :license     {"Eclipse Public License" "http://www.eclipse.org/legal/epl-v10.html"}})
+
+(deftask develop []
+  (comp
+    (version :develop true :minor 'inc :patch 'zero :pre-release 'snapshot)
+    (watch) (target) (build-jar) (speak)))
 
 (deftask test-runner
   []
