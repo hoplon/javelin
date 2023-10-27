@@ -8,8 +8,7 @@
 
 (ns javelin.core
   (:require-macros [javelin.core])
-  (:require [goog.array :as garray]
-            [goog.object :as gobj]))
+  (:require [goog.array :as garray]))
 
 ;; helpers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -145,26 +144,26 @@
 (defn cell?
   "Returns c if c is a Cell, nil otherwise."
   [c]
-  (when (= (type c) Cell) c))
+  (instance? Cell c))
 
 (defn formula?
-  [c]
   "Returns c if c is a formula cell, nil otherwise."
+  [c]
   (when (and (cell? c) (.-thunk c)) c))
 
 (defn lens?
-  [c]
   "Returns c if c is a lens, nil otherwise."
+  [c]
   (when (and (cell? c) (.-update c)) c))
 
 (defn input?
-  [c]
   "Returns c if c is an input cell, nil otherwise."
+  [c]
   (when (and (cell? c) (not (formula? c))) c))
 
 (defn constant?
-  [c]
   "Returns c if c is a constant formula cell, nil otherwise."
+  [c]
   (when (and (cell? c) (.-constant c)) c))
 
 (defn set-cell!

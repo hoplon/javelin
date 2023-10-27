@@ -1,7 +1,6 @@
 (ns javelin.core-clj
   (:refer-clojure :exclude [accessor])
   (:require
-    [riddley.compiler           :refer [locals]]
     [riddley.walk               :refer [walk-exprs]]
     [clojure.data.priority-map  :refer [priority-map]]))
 
@@ -84,11 +83,11 @@
   (let [hoist   (atom [])
         local   #(symbol (name %))
         core?   #(= "clojure.core" (namespace %))
-        skip?   #(or 
-                   (not (contains? &env %)) 
-                   (contains? specials %) 
+        skip?   #(or
+                   (not (contains? &env %))
+                   (contains? specials %)
                    (core? %))
-        walk!   #(do (if-not (skip? %) 
+        walk!   #(do (if-not (skip? %)
                        (do (swap! hoist conj %) (local %))
                        %))
         walked  (walk-exprs symbol? walk! expr)

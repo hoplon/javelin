@@ -13,8 +13,7 @@
     [clojure.walk    :refer [prewalk]]
     [clojure.pprint  :as p]
     [cljs.analyzer   :as a]
-    [clojure.java.io :as io]
-    [clojure.string  :as s]))
+    [clojure.set :as set]))
 
 (declare walk)
 
@@ -48,7 +47,7 @@
   [bindings]
   (let [syms1 (set (extract-syms bindings))
         syms2 (set (extract-syms bindings))]
-    (seq (clojure.set/intersection syms1 syms2))))
+    (seq (set/intersection syms1 syms2))))
 
 (defn bind-syms
   "Given a binding form, returns a seq of the symbols that will be bound.
@@ -108,7 +107,6 @@
       empty?*   #(= 0 (count %))
       dot?      #(= '. (first %))
       try?      #(= 'try (first %))
-      catch?    #(= 'catch (first %))
       finally?  #(= 'finally (first %))
       binding1? #(contains? '#{let* loop*} (first %))
       binding2? #(= 'letfn* (first %))
@@ -170,14 +168,14 @@
     (let [fname   (when (symbol? (first arities)) [(first arities)])
           arities (if fname (rest arities) arities)
           arities (if (vector? (first arities)) [arities] arities)
-          local   (if fname (conj local (first fname)) local)]
-      (let [mkarity (fn [[bindings & body]]
-                      (let [local (into local (remove #(= '& %) bindings))]
-                        (to-list `([~@bindings] ~@(map #(walk % local) body)))))
-            arities (map mkarity arities)]
-        (to-list `(~sym ~@fname ~@arities)))))
+          local   (if fname (conj local (first fname)) local)
+          mkarity (fn [[bindings & body]]
+                    (let [local (into local (remove #(= '& %) bindings))]
+                      (to-list `([~@bindings] ~@(map #(walk % local) body)))))
+          arities (map mkarity arities)]
+      (to-list `(~sym ~@fname ~@arities))))
 
-  (defn walk-passthru [x local]
+  (defn walk-passthru [x _local]
     (with-let* [s (gensym)] (swap! *pass* assoc s x)))
 
   (defn walk-dot [[sym obj meth & more] local]
