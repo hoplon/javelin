@@ -1,5 +1,85 @@
 # javelin
 
+## 3.9.1
+
+* Move from boot to tools-deps
+* Setup ci using github actions
+* Add clj-kondo config
+* Improve performance of `javelin.core/cell?` (thanks @borkdude)
+
+## 3.9.0
+
+* Add formula-of, formulet macros
+* Formula cells that cannot change will be tagged as constant
+* Better support for lenses:
+  - Added arity to formula function to accept lens update function.
+  - Added arity to set-formula! function to accept lens update function.
+  - Added arity to set-cell!= macro to accept lens update function.
+
+* Various performance improvements:
+  - Cell type fields are now native JS arrays, not CLJS collections.
+  - Replace CLJS priority map used in propagation  with a sorted JS array.
+  - Eliminate seqs wherever possible by looping instead.
+  - Remove redundant operations during cell creation.
+  - Add simpler, more efficient impl. for simple cell-doseq use case.
+
+* Misc:
+  - Add docstrings for everything.
+  - Use clojure.core/destructure instead of cljs.core/destructure when
+    compiling in an older version of CLJS that does not have it.
+
+## 3.8.5
+
+* cell-let binds map destructuring
+* Add formula to API overview in README
+
+## 3.8.4
+
+* Correct handling of catch, finally
+
+## 3.8.3
+
+* Add missing special forms, fix tests
+
+## 3.8.2
+
+* Update README with namepace changes
+* Change deploy group from javelin to hoplon
+
+## 3.8.1
+
+* introduce formula function earlier on README
+* Rename namespaces (BREAKING)
+
+## 3.8.0
+
+* Add meta to cells
+* Move from lein to boot
+
+## 3.7.2
+
+* Improve javelin-clj, add tests
+
+## 3.7.1
+
+* Remove debug print, fix clojars deploy
+
+## 3.7.0
+
+* Accept "for" style bindings in cell-doseq 
+
+## 3.6.3
+
+* Fix issue with ::none appearing in formulas in dosync 
+
+## 3.6.2
+
+* Improve lenses examples and tests
+
+## 3.6.1
+
+* Update clojurescript version
+
 ## 3.6.0
 
 *Fri Aug  8 13:15:23 EDT 2014*
