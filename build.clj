@@ -12,6 +12,24 @@
 (def version (format "1.0.%s" (b/git-count-revs nil)))
 (def class-dir "target/classes")
 
+(defn- pom-template [version]
+  [[:description "Spreadsheet-like dataflow programming in ClojureScript."]
+   [:url "https://github.com/hoplon/javelin"]
+   [:licenses
+    [:license
+     [:name "Eclipse Public License"]
+     [:url "http://www.eclipse.org/legal/epl-v10.html"]]]
+   [:developers
+    [:developer
+     [:name "Alan Dipert"]]
+    [:developer
+     [:name "Micha Niskin"]]]
+   [:scm
+    [:url "https://github.com/hoplon/javelin"]
+    [:connection "scm:git:https://github.com/hoplon/javelin.git"]
+    [:developerConnection "scm:git:ssh:git@github.com:hoplon/javelin.git"]
+    [:tag (str "v" version)]]])
+
 (defn- run-task [aliases]
   (println "\nRunning task for" (str/join "," (map name aliases)))
   (let [basis    (b/create-basis {:aliases aliases})
@@ -55,12 +73,11 @@
     (assoc opts
       :lib lib :version version
       :jar-file (format "target/%s-%s.jar" lib version)
-      :scm {:tag (str "v" version)
-            :url "git@github.com:hoplon/javelin.git"}
       :basis (b/create-basis {})
       :class-dir class-dir
       :target "target"
-      :src-dirs ["src" "clj-kondo"])))
+      :src-dirs ["src" "clj-kondo"]
+      :pom-data (pom-template version))))
 
 (defn ci "Run the CI pipeline of tests (and build the JAR)." [opts]
   (test opts)
