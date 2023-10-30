@@ -144,7 +144,7 @@
 (defn cell?
   "Returns c if c is a Cell, nil otherwise."
   [c]
-  (instance? Cell c))
+  (when (instance? Cell c) c))
 
 (defn formula?
   "Returns c if c is a formula cell, nil otherwise."
