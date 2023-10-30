@@ -1,0 +1,6 @@
+{:lint-as {javelin.core/cell-let   clojure.core/let
+           javelin.core/cell-doseq clojure.core/doseq
+           javelin.core/defc       clojure.core/def
+           javelin.core/defc=      clojure.core/def
+           javelin.core/formulet   clojure.core/let
+           javelin.core/with-let   clojure.core/let}}

@@ -3,7 +3,9 @@ alt="tailrecursion/javelin logo" title="tailrecursion/javelin logo"
 align="right" width="152"/>
 
 # Javelin
-[![clojars][10]][3]  [![snapshot status][11]][3]
+[![clojars](https://img.shields.io/clojars/v/hoplon/javelin.svg)](https://clojars.org/hoplon/javelin)
+[![snapshot status](https://img.shields.io/clojars/vpre/hoplon/javelin.svg)](https://clojars.org/hoplon/javelin)
+[![cljdoc badge](https://cljdoc.org/badge/hoplon/javelin)](https://cljdoc.org/d/hoplon/javelin)
 
 Spreadsheet-like dataflow programming in ClojureScript.
 
@@ -346,18 +348,25 @@ API functions and macros:
 ;; the setter-cell.
 ```
 
-## Building and Running Tests
+### Testing
 
-To build Javelin with advanced optimizations and run tests in PhantomJS:
+This setup will run tests using clojure, node and chrome-webdriver.
 
+#### Setup
 ```
-boot test-javelin --advanced
+npm install
+npm install -g karma-cli
+```
+#### Run
+```
+clojure -T:build test
 ```
 
-For development you may want to forgo optimizations and test continuously:
-
+#### You may run only one type of test
 ```
-boot watch speak test-javelin
+clojure -T:build node-test
+clojure -T:build chrome-test
+clojure -T:build clojure-test
 ```
 
 ## License
@@ -371,15 +380,9 @@ boot watch speak test-javelin
     agreeing to be bound by the terms of this license. You must not
     remove this notice, or any other, from this software.
 
-[1]: https://travis-ci.org/hoplon/javelin.png?branch=master
-[2]: https://travis-ci.org/hoplon/javelin
-[3]: http://clojars.org/hoplon/javelin
 [4]: https://github.com/tailrecursion/javelin-demos
-[5]: https://dl.dropboxusercontent.com/u/12379861/javelin_demos/index.html
 [7]: https://github.com/lynaghk/todoFRP/tree/master/todo/javelin
 [8]: https://github.com/hoplon/demos/tree/master/todoFRP
 [9]: https://github.com/hoplon/javelin#formulas
 [12]: https://github.com/hoplon/javelin/blob/master/test/javelin/core_test.cljs
 [14]: https://www.thoughtworks.com/talks/journey-through-the-looking-glass-and-what-i-found-there
-[10]: https://img.shields.io/clojars/v/hoplon/javelin.svg
-[11]: https://img.shields.io/clojars/v/hoplon/javelin.svg?include_prereleases
