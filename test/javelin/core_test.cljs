@@ -8,38 +8,20 @@
 
 (ns javelin.core-test
   (:require
-    [clojure.string :as s]
     [cljs.test :as t]
     [javelin.core :refer [cell? input? cell set-cell! lens alts! destroy-cell! constant? formula?]])
   (:require-macros
-    [cljs.test :refer [deftest testing run-tests is]]
+    [cljs.test :refer [deftest testing is]]
     [javelin.core :refer [cell= defc defc= set-cell!= dosync cell-doseq cell-let mx mx2 formula-of formulet]]))
 
-;;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(set! cljs.core/*print-fn*
-      (if (undefined? (aget js/window "dump"))
-        ;; phantomjs
-        (fn [arg]
-          (let [arg (s/trim-newline (str arg))]
-            (.call (.-log js/console) (.-console js/window) arg)))
-        ;; firefox
-        (fn [arg]
-          (.call (aget js/window "dump") js/window arg))))
-
-(defmethod t/report [:cljs.test/default :end-run-tests] [m]
-  (if (t/successful? m)
-    (println "\nDone")
-    (throw (js/Error. "some test(s) failed"))))
-
-;;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def a (cell 0))
+(defc p 0)
+(defc= q (inc a))
 
 (deftest test-1
   (let [a (cell 0)
         b (cell= (inc a))
         u (atom [])]
-    (defc p 0)
-    (defc= q (inc a))
     (testing
       "initial values are correct"
       (is (= @a 0))
@@ -296,7 +278,7 @@
       (is (= @c '(201 100))))
     (let [a (cell 100)
           b (cell 200)
-          c (cell= (when (odd? b) (reset! ~(cell a) (* b 2))))]
+          _c (cell= (when (odd? b) (reset! ~(cell a) (* b 2))))]
       (is (= @a 100))
       (swap! b inc)
       (is (= @a 402)))) 
@@ -407,7 +389,7 @@
     "doseq works correctly"
     (let [u (atom [])
           a (cell [1 2 3 4])
-          b (cell= (doseq [x (filter odd? a)] (swap! u conj x)))]
+          _b (cell= (doseq [x (filter odd? a)] (swap! u conj x)))]
       (is (= @u [1 3]))
       (swap! a conj 5)
       (is (= @u [1 3 1 3 5]))))
@@ -561,11 +543,11 @@
           a  (cell 100)
           b  (cell 200)
           d  (cell= (+ a b) (partial reset! a))
-          e  (cell= (swap! u conj d))
+          _e  (cell= (swap! u conj d))
           u' (atom [])
           a' (cell 100)
           d' (cell= (+ a' b) (partial reset! a'))
-          e' (cell= (swap! u' conj d'))]
+          _e' (cell= (swap! u' conj d'))]
       (dosync
         (is (= @d (swap! d inc)))
         (is (= @d (swap! d inc)))
@@ -891,5 +873,3 @@
         (is (nil? (meta y)))
         (is (= {:bar :baz} (meta (with-meta y {:bar :baz}))))
         (is (= {:a :b} (meta (vary-meta y assoc :a :b))))))))
-
-(time (run-tests))

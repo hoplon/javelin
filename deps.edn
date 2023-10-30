@@ -1,0 +1,19 @@
+{:deps {org.clojure/clojurescript {:mvn/version "1.11.60"}
+        org.clojure/clojure {:mvn/version "1.11.1"}
+        tailrecursion/cljs-priority-map {:mvn/version "1.0.3"}
+        org.clojure/data.priority-map {:mvn/version "0.0.2"}
+        riddley/riddley {:mvn/version "0.1.6"}}
+ :paths ["src" "clj-kondo"]
+ :aliases {:cljs-node {:extra-deps {olical/cljs-test-runner {:mvn/version "3.8.0"}}
+                       :extra-paths ["test"]
+                       :main-opts ["-m" "cljs-test-runner.main"]}
+           :cljs-chrome {:extra-deps {olical/cljs-test-runner {:mvn/version "3.8.0"}}
+                         :extra-paths ["test"]
+                         :main-opts ["-m" "cljs-test-runner.main" "-x" "chrome-headless"]}
+           :test {:extra-paths ["test"]
+                  :extra-deps  {io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+                  :exec-fn     cognitect.test-runner.api/test}
+           :runner {:main-opts   ["-m" "cognitect.test-runner"]}
+           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.9.2" :git/sha "fe6b140"}
+                          slipset/deps-deploy {:mvn/version "0.2.0"}}
+                   :ns-default build}}}
