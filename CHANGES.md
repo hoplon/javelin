@@ -1,8 +1,12 @@
 # javelin
 
+## 3.9.3
+
+* Update dependencies
+
 ## 3.9.2
 
-* Remove unused dependency tailrecursion/cljs-priority-map
+* Remove unused dependency tailrecursion/cljs-priority-map (thanks @alandipert)
 
 ## 3.9.1
 

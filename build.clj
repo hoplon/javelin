@@ -64,8 +64,7 @@
   [opts]
   (clojure-test opts)
   (node-test opts)
-  (chrome-test opts)
-  opts)
+  (chrome-test opts))
 
 (defn- jar-opts [opts]
   (let [version (if (:snapshot opts) snapshot version)]
