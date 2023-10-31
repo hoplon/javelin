@@ -1,5 +1,9 @@
 # javelin
 
+## 3.9.2
+
+* Remove unused dependency tailrecursion/cljs-priority-map
+
 ## 3.9.1
 
 * Move from boot to tools-deps
