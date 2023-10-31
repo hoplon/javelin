@@ -4,7 +4,7 @@ align="right" width="152"/>
 
 # Javelin
 [![clojars](https://img.shields.io/clojars/v/hoplon/javelin.svg)](https://clojars.org/hoplon/javelin)
-[![snapshot status](https://img.shields.io/clojars/vpre/hoplon/javelin.svg)](https://clojars.org/hoplon/javelin)
+[![snapshot status](https://img.shields.io/clojars/v/hoplon/javelin.svg?include_prereleases)](https://clojars.org/hoplon/javelin)
 [![cljdoc badge](https://cljdoc.org/badge/hoplon/javelin)](https://cljdoc.org/d/hoplon/javelin)
 
 Spreadsheet-like dataflow programming in ClojureScript.
