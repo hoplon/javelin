@@ -1,6 +1,5 @@
 {:deps {org.clojure/clojurescript {:mvn/version "1.11.60"}
         org.clojure/clojure {:mvn/version "1.11.1"}
-        tailrecursion/cljs-priority-map {:mvn/version "1.0.3"}
         org.clojure/data.priority-map {:mvn/version "0.0.2"}
         riddley/riddley {:mvn/version "0.1.6"}}
  :paths ["src" "clj-kondo"]
