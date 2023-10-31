@@ -6,7 +6,7 @@
             [deps-deploy.deps-deploy :as dd]))
 
 (def lib 'hoplon/javelin)
-(def version "3.9.2")
+(def version "3.9.3")
 (def snapshot (format "%s-SNAPSHOT" version))
 #_ ; alternatively, use MAJOR.MINOR.COMMITS:
 (def version (format "1.0.%s" (b/git-count-revs nil)))
